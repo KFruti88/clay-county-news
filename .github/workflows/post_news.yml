@@ -2,14 +2,31 @@ name: Push News to WordPress
 on:
   push:
     branches: [ main ]
+  workflow_dispatch: # Allows you to test manually
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Dependencies
+        run: pip install feedparser
+
+      - name: Run Scraper
+        run: python fetch_news.py  # This creates news.json
+
       - name: Post to WP API
         run: |
+          # This reads the news.json file and sends it to your site
+          NEWS_DATA=$(cat news.json)
           curl -X POST https://your-site.com/wp-json/wp/v2/posts \
           -u "your_username:${{ secrets.WP_APP_PASSWORD }}" \
           -H "Content-Type: application/json" \
-          -d '{"title":"New Clay County Update", "content":"Local news content...", "status":"publish"}'
+          -d "{\"title\":\"Clay County News Update\", \"content\":\"$NEWS_DATA\", \"status\":\"publish\"}"
