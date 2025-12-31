@@ -9,25 +9,21 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      # STEP 1: Copy your files from GitHub into the runner
+      # This copies your files into the runner so it can find fetch_news.py
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      # STEP 2: Set up the Python environment
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      # STEP 3: Install the feedparser library
       - name: Install Dependencies
         run: pip install feedparser
 
-      # STEP 4: Run your scraper (This creates news.json)
       - name: Run Scraper
         run: python fetch_news.py
 
-      # STEP 5: Push the data to WordPress
       - name: Post to WP API
         run: |
           NEWS_DATA=$(cat news.json)
