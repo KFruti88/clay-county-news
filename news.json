@@ -1,0 +1,24 @@
+import feedparser
+import json
+
+# Define specific feeds for different Clay County needs
+SOURCES = {
+    "General News": "https://news.google.com/rss/search?q=Clay+County+IL+news",
+    "Sports": "https://news.google.com/rss/search?q=Flora+High+School+sports+OR+North+Clay+sports",
+    "Obituaries": "https://www.legacy.com/rss/obituaries/local/illinois/clay-county",
+}
+
+def fetch_all_local_data():
+    all_data = []
+    for category, url in SOURCES.items():
+        feed = feedparser.parse(url)
+        for entry in feed.entries[:5]:
+            all_data.append({
+                "title": entry.title,
+                "link": entry.link,
+                "category": category,
+                "published": entry.published
+            })
+    
+    with open("news.json", "w") as f:
+        json.dump(all_data, f, indent=4)
