@@ -1,17 +1,15 @@
 name: Push News to WordPress
-
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:  # This adds the manual "Run workflow" button
+  workflow_dispatch: 
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      # This copies your files into the runner so it can find fetch_news.py
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # THIS FIXES THE "NO SUCH FILE" ERROR
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -30,4 +28,4 @@ jobs:
           curl -X POST https://your-site.com/wp-json/wp/v2/posts \
           -u "your_username:${{ secrets.WP_APP_PASSWORD }}" \
           -H "Content-Type: application/json" \
-          -d "{\"title\":\"Clay County News Update\", \"content\":\"$NEWS_DATA\", \"status\":\"publish\"}"
+          -d "{\"title\":\"Clay County Update\", \"content\":\"$NEWS_DATA\", \"status\":\"publish\"}"
