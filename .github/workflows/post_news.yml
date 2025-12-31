@@ -9,25 +9,25 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      # 1. Copy your files into the runner
+      # 1. Copies your files into the runner (FIXES "NO SUCH FILE" ERROR)
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      # 2. Set up Python
+      # 2. Set up the Python environment
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      # 3. Install the news reader library
+      # 3. Install the library needed to read news feeds
       - name: Install Dependencies
         run: pip install feedparser
 
-      # 4. Run your scraper (creates news.json)
+      # 4. Run your scraper (This creates news.json)
       - name: Run Scraper
         run: python fetch_news.py
 
-      # 5. Push the data to WordPress
+      # 5. Push the data to your WordPress site
       - name: Post to WP API
         run: |
           NEWS_DATA=$(cat news.json)
