@@ -1,27 +1,33 @@
 name: Push News to WordPress
+
 on:
   push:
     branches: [ main ]
-  workflow_dispatch: 
+  workflow_dispatch:  # This adds the manual "Run workflow" button
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
+      # 1. Copy your files into the runner
       - name: Checkout Repo
-        uses: actions/checkout@v4 # THIS FIXES THE "NO SUCH FILE" ERROR
+        uses: actions/checkout@v4
 
+      # 2. Set up Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
+      # 3. Install the news reader library
       - name: Install Dependencies
         run: pip install feedparser
 
+      # 4. Run your scraper (creates news.json)
       - name: Run Scraper
         run: python fetch_news.py
 
+      # 5. Push the data to WordPress
       - name: Post to WP API
         run: |
           NEWS_DATA=$(cat news.json)
