@@ -28,7 +28,7 @@ jobs:
       - name: Post to WP API
         run: |
           NEWS_DATA=$(cat news.json)
-          curl -X POST https://your-site.com/wp-json/wp/v2/posts \
-          -u "your_username:${{ secrets.WP_APP_PASSWORD }}" \
+          curl -X POST https://supportmylocalcommunity.com/wp-json/wp/v2/posts \
+          -u "Kfrutiger88:${{ secrets.WP_APP_PASSWORD }}" \
           -H "Content-Type: application/json" \
           -d "{\"title\":\"Clay County Update\", \"content\":\"$NEWS_DATA\", \"status\":\"publish\"}"
