@@ -4,11 +4,11 @@ from datetime import datetime, timedelta
 import time
 
 # 1. THE STRICT FILTER LIST
-# Any news from Effingham, Mt. Vernon, etc., MUST mention one of these to be saved.
+# Every news story MUST mention one of these keywords to be saved.
 CLAY_COUNTY_TOWNS = ['flora', 'clay city', 'louisville', 'sailor springs', 'xenia', 'iola', 'clay county']
 
 # 2. THE BROAD SEARCH QUERY
-# This tells Google News where to look.
+# This tells Google News where to look, including regional hubs.
 SEARCH_QUERY = (
     "site:newsbreak.com/louisville-il OR site:newsbreak.com/flora-il OR "
     "site:newsbreak.com/clay-city-il OR site:newsbreak.com/sailor-springs-il OR "
@@ -23,7 +23,7 @@ def fetch_news():
     feed = feedparser.parse(RSS_URL)
     news_items = []
     
-    # Looking back 7 days (168 hours) to ensure a full feed
+    # Looking back 7 days (168 hours)
     cutoff = datetime.now() - timedelta(hours=168)
 
     for entry in feed.entries:
@@ -35,11 +35,11 @@ def fetch_news():
         if published_dt > cutoff:
             title = entry.title
             summary = entry.summary if hasattr(entry, 'summary') else ""
-            # We check both the title and summary for Clay County keywords
+            # Check both title and summary for our Clay County keywords
             content_to_check = (title + " " + summary).lower()
 
             # --- THE GATEKEEPER ---
-            # This ensures only Clay County related news gets through
+            # This ensures only Clay County related news from those hubs gets through
             if any(town in content_to_check for town in CLAY_COUNTY_TOWNS):
                 
                 source_name = entry.source.title if hasattr(entry, 'source') else "Local News"
