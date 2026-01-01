@@ -8,7 +8,7 @@ import time
 CLAY_COUNTY_TOWNS = ['flora', 'clay city', 'louisville', 'sailor springs', 'xenia', 'iola', 'clay county']
 
 # 2. THE BROAD SEARCH QUERY
-# This tells Google News where to look, including regional hubs.
+# This tells Google News where to look, including regional hubs and NewsBreak.
 SEARCH_QUERY = (
     "site:newsbreak.com/louisville-il OR site:newsbreak.com/flora-il OR "
     "site:newsbreak.com/clay-city-il OR site:newsbreak.com/sailor-springs-il OR "
@@ -23,7 +23,7 @@ def fetch_news():
     feed = feedparser.parse(RSS_URL)
     news_items = []
     
-    # Looking back 7 days (168 hours)
+    # Looking back 7 days (168 hours) to ensure we have content
     cutoff = datetime.now() - timedelta(hours=168)
 
     for entry in feed.entries:
