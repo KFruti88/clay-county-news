@@ -8,7 +8,7 @@ RSS_URL = "https://news.google.com/rss/search?q=Clay+County+IL+news"
 def fetch_news():
     feed = feedparser.parse(RSS_URL)
     news_items = []
-    cutoff = datetime.now() - timedelta(hours=32)
+    cutoff = datetime.now() - timedelta(hours=72)
     
     for entry in feed.entries:
         published_struct = entry.published_parsed
