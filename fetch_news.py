@@ -3,16 +3,15 @@ import json
 from datetime import datetime, timedelta
 import time
 
-# This query tells Google to specifically find articles from NewsBreak's 
-# location pages for your towns.
+# 1. The Strict Filter List
+CLAY_COUNTY_TOWNS = ['flora', 'clay city', 'louisville', 'sailor springs', 'xenia', 'iola', 'clay county']
+
+# 2. Broad Search to catch mentions in regional hubs
 SEARCH_QUERY = (
-    "site:newsbreak.com/louisville-il OR "
-    "site:newsbreak.com/flora-il OR "
-    "site:newsbreak.com/clay-city-il OR "
-    "site:newsbreak.com/sailor-springs-il OR "
-    "site:newsbreak.com/xenia-il OR "
-    "site:newsbreak.com/iola-il OR "
-    "Clay County IL news"
+    "site:newsbreak.com/louisville-il OR site:newsbreak.com/flora-il OR "
+    "site:newsbreak.com/clay-city-il OR site:newsbreak.com/sailor-springs-il OR "
+    "site:newsbreak.com/xenia-il OR site:newsbreak.com/iola-il OR "
+    "\"Effingham\" OR \"Fairfield\" OR \"Salem\" OR \"Mt. Vernon\" OR \"Clay County\""
 )
 
 RSS_URL = f"https://news.google.com/rss/search?q={SEARCH_QUERY}"
@@ -20,9 +19,7 @@ RSS_URL = f"https://news.google.com/rss/search?q={SEARCH_QUERY}"
 def fetch_news():
     feed = feedparser.parse(RSS_URL)
     news_items = []
-    
-    # Keeping the 7-day window to ensure the feed stays full
-    cutoff = datetime.now() - timedelta(hours=168)
+    cutoff = datetime.now() - timedelta(hours=168) # 7-day window
 
     for entry in feed.entries:
         if not hasattr(entry, 'published_parsed'):
@@ -31,21 +28,28 @@ def fetch_news():
         published_dt = datetime.fromtimestamp(time.mktime(entry.published_parsed))
         
         if published_dt > cutoff:
-            # Clean up source names
-            source_name = entry.source.title if hasattr(entry, 'source') else "Local News"
-            if "newsbreak" in source_name.lower():
-                source_name = "NewsBreak"
+            title = entry.title
+            summary = entry.summary if hasattr(entry, 'summary') else ""
+            content_to_check = (title + " " + summary).lower()
 
-            news_items.append({
-                "title": entry.title,
-                "link": entry.link,
-                "published_dt": published_dt.isoformat(),
-                "published": entry.published,
-                "source": source_name,
-                "summary": entry.summary if hasattr(entry, 'summary') else ""
-            })
+            # --- THE STRICT FILTER ---
+            # Only proceed if one of YOUR towns is actually mentioned in the text
+            if any(town in content_to_check for town in CLAY_COUNTY_TOWNS):
+                
+                source_name = entry.source.title if hasattr(entry, 'source') else "Local News"
+                if "newsbreak" in source_name.lower():
+                    source_name = "NewsBreak"
+
+                news_items.append({
+                    "title": title,
+                    "link": entry.link,
+                    "published_dt": published_dt.isoformat(),
+                    "published": entry.published,
+                    "source": source_name,
+                    "summary": summary
+                })
     
-    # Remove duplicates (sometimes Google finds the same story twice)
+    # Deduplicate and Sort
     seen_titles = set()
     unique_items = []
     for item in news_items:
