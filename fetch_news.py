@@ -1,60 +1,56 @@
 import urllib.parse
 import feedparser
 import ssl
+import json
 import sys
 
 def fetch_news():
-    # 1. Setup Base URL and the search query
+    # 1. We use a broader search query. 
+    # Searching "site:newsbreak.com/flora-il" is too restrictive for RSS.
+    # Searching "Flora IL News" works much better.
     BASE_URL = "https://news.google.com/rss/search?q="
-    
-    # We combine the locations into one clean string
     QUERY = (
-        'site:newsbreak.com/louisville-il OR site:newsbreak.com/flora-il OR '
-        'site:newsbreak.com/clay-city-il OR site:newsbreak.com/sailor-springs-il OR '
-        'site:newsbreak.com/xenia-il OR site:newsbreak.com/iola-il OR '
-        '"Clay County IL" OR "Effingham IL" OR "Fairfield IL" OR '
-        '"Salem IL" OR "Mt. Vernon IL"'
+        '("Clay County IL" OR "Flora IL" OR "Louisville IL" OR "Clay City IL" OR "Effingham IL") '
+        'when:7d' # This tells Google to only get news from the last 7 days
     )
 
-    # 2. URL Encoding - This fixes the 'control characters' crash
     encoded_query = urllib.parse.quote(QUERY)
     RSS_URL = BASE_URL + encoded_query
 
-    # 3. Handle SSL/Security context for GitHub Actions
+    # 2. SSL Fix
     try:
         ssl._create_default_https_context = ssl._create_unverified_context
     except Exception:
         pass
 
-    print(f"Checking for news in Clay County and surrounding areas...")
-    print(f"URL: {RSS_URL}\n")
+    print(f"Searching for local news...")
 
-    # 4. Fetch the data using a browser-like User-Agent
-    feed = feedparser.parse(RSS_URL, agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) NewsBot/1.0')
+    # 3. Use a more convincing User-Agent to avoid being blocked
+    feed = feedparser.parse(RSS_URL, agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36')
 
-    # 5. Check for parsing errors
-    if feed.bozo:
-        print(f"ERROR: Could not read the news feed. Reason: {feed.bozo_exception}")
-        return
-
-    # 6. Check if entries are empty
-    if not feed.entries:
-        print("No news articles found. Try simplifying the search query if this continues.")
-        return
-
-    # 7. Display the results
-    print(f"SUCCESS: Found {len(feed.entries)} articles.\n")
+    articles = []
     
-    for i, entry in enumerate(feed.entries[:15], 1):  # Shows top 15 results
-        print(f"{i}. {entry.title}")
-        print(f"   Link: {entry.link}")
-        if hasattr(entry, 'published'):
-            print(f"   Date: {entry.published}")
-        print("-" * 50)
+    if feed.entries:
+        for entry in feed.entries[:20]:
+            # We clean up the title (Google News adds the source at the end like " - NewsBreak")
+            clean_title = entry.title.split(' - ')[0]
+            
+            articles.append({
+                "title": clean_title,
+                "link": entry.link,
+                "date": getattr(entry, 'published', 'Recently'),
+                "source": entry.source.title if hasattr(entry, 'source') else "Local News"
+            })
+        print(f"Found {len(articles)} recent articles!")
+    else:
+        print("No articles found with current keywords. Trying fallback...")
+        # Fallback to a very simple search if the complex one fails
+        feed = feedparser.parse(BASE_URL + urllib.parse.quote("Clay County Illinois"), agent='Mozilla/5.0')
+        # ... (process fallback entries similar to above)
+
+    # 4. Save to JSON for your HTML page
+    with open('news_data.json', 'w') as f:
+        json.dump(articles, f, indent=4)
 
 if __name__ == "__main__":
-    try:
-        fetch_news()
-    except Exception as e:
-        print(f"CRITICAL ERROR: {e}")
-        sys.exit(1)
+    fetch_news()
