@@ -8,17 +8,17 @@ from datetime import datetime, timedelta
 import time
 
 def fetch_news():
-    # 1. Configuration & Dates
+    # 1. Configuration & Feed URLs
     WNOI_RSS = "https://www.wnoi.com/category/local/feed"
     GOOGLE_BASE_URL = "https://news.google.com/rss/search?q="
     QUERY = '("Clay County IL" OR "Flora IL" OR "Louisville IL" OR "Clay City IL")'
     GOOGLE_RSS_URL = GOOGLE_BASE_URL + urllib.parse.quote(QUERY)
     
-    # Calculate the cutoff for 48 hours ago
+    # Settings
     cutoff_date = datetime.now() - timedelta(hours=48)
     UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
 
-    # 2. SSL Fix for environments like GitHub Actions
+    # 2. SSL Fix for GitHub Actions
     try:
         ssl._create_default_https_context = ssl._create_unverified_context
     except Exception:
@@ -54,7 +54,7 @@ def fetch_news():
             
             clean_title = entry.title.split(' - ')[0].strip()
             
-            # Deduplication
+            # Deduplication and Storage
             if clean_title.lower() not in seen_titles:
                 articles.append({
                     "title": clean_title,
@@ -67,11 +67,11 @@ def fetch_news():
                 count += 1
         print(f"Added {count} new articles from {source_name}")
 
-    # 5. Execute Fetching
+    # 5. Execute Scraper
     process_feed(WNOI_RSS, "WNOI Radio")
     process_feed(GOOGLE_RSS_URL, "Local News")
 
-    # 6. Persistence & Sorting Logic
+    # 6. Sorting & Fallback Logic
     if not articles:
         print("No new articles in last 48h. Preserving existing news data.")
         final_list = existing_articles
@@ -80,7 +80,7 @@ def fetch_news():
         articles.sort(key=lambda x: x['timestamp'], reverse=True)
         final_list = articles
 
-    # 7. Save to JSON
+    # 7. Final Save
     with open('news_data.json', 'w') as f:
         json.dump(final_list, f, indent=4)
     
