@@ -1,52 +1,57 @@
 import urllib.parse
 import feedparser
 import ssl
+import sys
 
 def fetch_news():
-    # 1. The Base URL for the RSS service (likely Google News based on your query)
+    # 1. Setup Base URL and Query
     BASE_URL = "https://news.google.com/rss/search?q="
-    
-    # 2. Your specific search query
     QUERY = (
         'site:newsbreak.com/louisville-il OR '
         'site:newsbreak.com/flora-il OR '
-        'site:newsbreak.com/clay-city-il OR '
-        'site:newsbreak.com/sailor-springs-il OR '
-        'site:newsbreak.com/xenia-il OR '
-        'site:newsbreak.com/iola-il OR '
-        '"Clay County IL" OR "Effingham IL" OR "Fairfield IL" OR '
-        '"Salem IL" OR "Mt. Vernon IL"'
+        '"Clay County IL" OR "Effingham IL"'
     )
 
-    # 3. FIX: Encode the query to handle spaces and quotes
-    # This turns "Clay County" into "Clay%20County"
+    # 2. URL Encoding (Fixes your specific crash)
     encoded_query = urllib.parse.quote(QUERY)
     RSS_URL = BASE_URL + encoded_query
 
-    # 4. Fix for SSL certificate issues (common in GitHub Actions/Docker)
-    if hasattr(ssl, '_create_unverified_context'):
+    # 3. Handle SSL/Security (Prevents "loading" forever or SSL errors)
+    try:
         ssl._create_default_https_context = ssl._create_unverified_context
+    except AttributeError:
+        pass
 
-    print(f"Connecting to: {RSS_URL}")
+    print(f"--- Starting News Fetch ---")
+    print(f"Target URL: {RSS_URL}\n")
 
-    # 5. Fetch the feed
-    # We add an agent because some servers block the default python-urllib agent
-    feed = feedparser.parse(RSS_URL, agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64)')
+    # 4. Fetch the data with a User-Agent (Prevents being blocked)
+    # If the script stays "blank," it's usually because the server is ignoring the request.
+    feed = feedparser.parse(RSS_URL, agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) NewsBot/1.0')
 
-    # 6. Error Handling for the feed itself
-    if not feed.entries:
-        print("No news items found or the feed is unreachable.")
+    # 5. Output Results or Detailed Errors
+    if feed.bozo:
+        print(f"CRITICAL ERROR: The feed could not be parsed.")
+        print(f"Reason: {feed.bozo_exception}")
         return
 
-    # 7. Process the results
-    for entry in feed.entries:
-        print(f"Title: {entry.title}")
-        print(f"Link:  {entry.link}")
-        print("-" * 20)
+    if not feed.entries:
+        print("!!! WARNING: Connection successful, but NO ARTICLES were found.")
+        print("Try simplifying your QUERY string.")
+        return
+
+    # 6. Display the News
+    print(f"SUCCESS: Found {len(feed.entries)} articles.\n")
+    
+    for i, entry in enumerate(feed.entries[:10], 1):  # Show top 10
+        print(f"{i}. {entry.title}")
+        print(f"   Link: {entry.link}")
+        print(f"   Date: {entry.published}")
+        print("-" * 40)
 
 if __name__ == "__main__":
     try:
         fetch_news()
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-        exit(1) # Ensures the GitHub Action registers a failure if it crashes
+        print(f"APPLICATION CRASHED: {str(e)}")
+        sys.exit(1)
