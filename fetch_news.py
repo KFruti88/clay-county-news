@@ -13,7 +13,7 @@ RSS_URL = "https://www.wnoi.com/category/local/feed"
 NEWS_CENTER_URL = "https://supportmylocalcommunity.com/clay-county-news-center/"
 
 def clean_text(text):
-    """Scrub branding, frequencies, reporter names, and HTML."""
+    """Scrub branding, frequencies, reporter names, and HTML tags."""
     if not text: return ""
     patterns = [
         r'(?i)wnoi', r'(?i)103\.9/99\.3', r'(?i)local\s*--', 
@@ -28,7 +28,7 @@ def clean_text(text):
 def contains_clay_county_keywords(text):
     """
     The 'Smart Scanner': Returns True if a Clay County town is mentioned.
-    Allows news from nearby hubs to pass IF they mention your towns.
+    Allows news from nearby hubs to pass IF they mention your specific towns.
     """
     if not text: return False
     keywords = [
@@ -40,7 +40,7 @@ def contains_clay_county_keywords(text):
 async def fetch_rss():
     """Fetches regional news and filters for relevance to your towns."""
     stories = []
-    # Key to unlocking the full story tag in the RSS XML
+    # Required to unlock the full story tag in the RSS XML
     namespaces = {'content': 'http://purl.org/rss/1.0/modules/content/'}
     
     async with httpx.AsyncClient() as client:
@@ -57,7 +57,7 @@ async def fetch_rss():
                     content_tag = item.find("content:encoded", namespaces)
                     full_story_raw = content_tag.text if content_tag is not None else brief
 
-                    # SCANNER LOGIC: Keep if any of your towns are mentioned
+                    # SCANNER LOGIC: Keep if any of your towns are mentioned anywhere
                     if (contains_clay_county_keywords(title) or 
                         contains_clay_county_keywords(brief) or 
                         contains_clay_county_keywords(full_story_raw)):
@@ -88,7 +88,7 @@ async def scrape_town(town):
                         stories.append({
                             "title": clean_text(title_node.get_text()),
                             "brief": f"Community update for {town}.",
-                            "full_story": f"Detailed update for {town}.",
+                            "full_story": f"Check our News Center for full details on {town} community updates.",
                             "link": NEWS_CENTER_URL
                         })
         except Exception as e:
