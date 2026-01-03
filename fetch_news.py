@@ -13,7 +13,7 @@ RSS_URL = "https://www.wnoi.com/category/local/feed"
 NEWS_CENTER_URL = "https://supportmylocalcommunity.com/clay-county-news-center/"
 
 def clean_text(text):
-    """Scrub branding, frequencies, and HTML tags."""
+    """Scrub branding, frequencies, reporter names, and HTML tags."""
     if not text: return ""
     patterns = [
         r'(?i)wnoi', r'(?i)103\.9/99\.3', r'(?i)local\s*--', 
@@ -21,6 +21,7 @@ def clean_text(text):
     ]
     for p in patterns:
         text = re.sub(p, '', text)
+    # Remove HTML tags for clean storage
     text = re.sub('<[^<]+?>', '', text)
     return text.strip()
 
@@ -58,7 +59,7 @@ async def fetch_rss():
                     content_tag = item.find("content:encoded", namespaces)
                     full_text = content_tag.text if content_tag is not None else brief
 
-                    # Only keep if a local town is actually mentioned
+                    # Only keep if a local town or Clay County is mentioned
                     tags = get_mentioned_towns(title + " " + full_text)
                     if tags or re.search(r'(?i)clay\s*county', title + " " + full_text):
                         stories.append({
@@ -66,7 +67,7 @@ async def fetch_rss():
                             "brief": clean_text(brief)[:180] + "...",
                             "full_story": clean_text(full_text),
                             "link": NEWS_CENTER_URL,
-                            "tags": tags if tags else ["General"] # Tag specific town or mark general
+                            "tags": tags if tags else ["General"]
                         })
         except Exception as e:
             print(f"RSS Error: {e}")
@@ -90,43 +91,43 @@ async def scrape_town(town):
                             "brief": f"Community update for {town}.",
                             "full_story": f"Community updates for {town}. Check News Center for more.",
                             "link": NEWS_CENTER_URL,
-                            "tags": [town] # Explicitly tag this town
+                            "tags": [town]
                         })
         except Exception as e:
             print(f"Scrape Error for {town}: {e}")
     return stories
 
 async def run():
-    final_news = []
-    seen_titles = {} # Dictionary to store title: story_object
+    # This dictionary uses the Title as a Key to stop duplicates
+    seen_stories = {} 
 
-    print("Gathering news...")
+    print("Gathering news and deduplicating...")
     
     # 1. Process RSS (Regional)
     regional = await fetch_rss()
     for story in regional:
-        seen_titles[story['title']] = story
+        seen_stories[story['title']] = story
 
     # 2. Process Town Scrapes
     for town in TOWNS:
         print(f"Checking {town}...")
         town_stories = await scrape_town(town)
         for story in town_stories:
-            if story['title'] in seen_titles:
-                # If story exists, just add this town to its tags
-                if town not in seen_titles[story['title']]['tags']:
-                    seen_titles[story['title']]['tags'].append(town)
+            if story['title'] in seen_stories:
+                # If story exists, just add this town to its tags list
+                if town not in seen_stories[story['title']]['tags']:
+                    seen_stories[story['title']]['tags'].append(town)
             else:
-                # New story found
-                seen_titles[story['title']] = story
+                # It's a brand new story
+                seen_stories[story['title']] = story
 
-    # Convert dictionary back to list
-    final_news = list(seen_titles.values())
+    # Convert our unique dictionary back into a simple list for JSON
+    final_list = list(seen_stories.values())
 
     with open(DATA_EXPORT_FILE, "w") as f:
-        json.dump(final_news, f, indent=4)
+        json.dump(final_list, f, indent=4)
         
-    print(f"Done! {len(final_news)} unique stories tagged and saved.")
+    print(f"Update complete! Saved {len(final_list)} unique, tagged stories.")
 
 if __name__ == "__main__":
     asyncio.run(run())
