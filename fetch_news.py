@@ -27,26 +27,32 @@ MAIN_HUB = "https://supportmylocalcommunity.com"
 HISTORY_FILE = "posted_links.json"
 DATA_EXPORT_FILE = "news_data.json"
 
-# --- 2. CREDENTIALS ---
-WP_USER = os.getenv("WP_USER", "your_username")
-WP_APP_PASSWORD = os.getenv("WP_PWD", "your_app_password")
+# --- 2. CREDENTIALS (Loaded from GitHub Secrets) ---
+WP_USER = os.getenv("WP_USER")
+WP_APP_PASSWORD = os.getenv("WP_PWD")
 
-# --- 3. CORE FUNCTIONS ---
+# --- 3. HELPER FUNCTIONS ---
 
 def load_history():
     if os.path.exists(HISTORY_FILE):
         try:
             with open(HISTORY_FILE, "r") as f:
                 return json.load(f)
-        except:
+        except Exception:
             return []
     return []
 
 def save_history(links):
     with open(HISTORY_FILE, "w") as f:
+        # Keep only last 500 links to manage file size
         json.dump(links[-500:], f, indent=4)
 
 async def post_to_wordpress(site_url, title, brief, full_news_link):
+    """Pushes news to WordPress REST API."""
+    if not WP_USER or not WP_APP_PASSWORD:
+        print("!!! WordPress credentials missing. Skipping post.")
+        return False
+
     api_url = f"{site_url.rstrip('/')}/wp-json/wp/v2/posts"
     content = (
         f"{brief}<br><br>"
@@ -68,13 +74,15 @@ async def post_to_wordpress(site_url, title, brief, full_news_link):
             print(f"    [Error] WP Connection ({site_url}): {e}")
             return False
 
+# --- 4. MAIN ENGINE ---
+
 async def run_pipeline():
     history = load_history()
     all_results = {}
 
     async with async_playwright() as p:
+        # Launch browser with stealth
         browser = await p.chromium.launch(headless=True)
-        # Use a consistent user agent
         context = await browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
         )
@@ -86,7 +94,8 @@ async def run_pipeline():
             town_stories = []
             
             try:
-                await page.goto(url, wait_until="networkidle")
+                await page.goto(url, wait_until="networkidle", timeout=60000)
+                # Scroll slightly to trigger lazy loading
                 await page.mouse.wheel(0, 800)
                 await asyncio.sleep(random.uniform(2, 4))
                 
@@ -94,7 +103,7 @@ async def run_pipeline():
                 processed_count = 0
 
                 for article in articles:
-                    if processed_count >= 3:
+                    if processed_count >= 3: # Limit to 3 stories per town per run
                         break
                     
                     try:
@@ -109,7 +118,7 @@ async def run_pipeline():
                         full_link = href if href.startswith("http") else f"https://www.newsbreak.com{href}"
 
                         if full_link in history:
-                            print(f"  - Skipping duplicate: {title[:40]}...")
+                            print(f"  - Skipping: {title[:40]}...")
                             continue
 
                         summary_node = article.locator("p, .description, .summary").first
@@ -131,25 +140,24 @@ async def run_pipeline():
                             processed_count += 1
                             print(f"    [OK] Distributed: {title[:40]}")
                         
-                    except Exception as e:
+                    except Exception:
                         continue
 
                 all_results[town] = town_stories
-                await asyncio.sleep(random.uniform(3, 5))
+                # Politeness delay
+                await asyncio.sleep(random.uniform(3, 6))
 
             except Exception as e:
                 print(f" [Critical] {town} failed: {e}")
 
         await browser.close()
-        save_history(history)
         
-        # Export data for the workflow to see
+        # Finalize data
+        save_history(history)
         with open(DATA_EXPORT_FILE, "w") as f:
             json.dump(all_results, f, indent=4)
 
-    return all_results
-
 if __name__ == "__main__":
-    print("Starting News Pipeline...")
+    print("--- Starting News Pipeline ---")
     asyncio.run(run_pipeline())
-    print("Done. Exported to news_data.json")
+    print("--- Pipeline Finished ---")
