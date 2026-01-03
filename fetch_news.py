@@ -34,6 +34,7 @@ WP_APP_PASSWORD = os.getenv("WP_PWD", "your_app_password")
 # --- 3. CORE FUNCTIONS ---
 
 def load_history():
+    """Loads previously posted links to avoid duplicates."""
     if os.path.exists(HISTORY_FILE):
         try:
             with open(HISTORY_FILE, "r") as f:
@@ -43,10 +44,12 @@ def load_history():
     return []
 
 def save_history(links):
+    """Saves the last 500 posted links with formatting."""
     with open(HISTORY_FILE, "w") as f:
         json.dump(links[-500:], f, indent=4)
 
 async def post_to_wordpress(site_url, title, brief, full_news_link):
+    """Pushes news to WordPress via REST API using httpx."""
     api_url = f"{site_url.rstrip('/')}/wp-json/wp/v2/posts"
     content = (
         f"{brief}<br><br>"
@@ -69,6 +72,7 @@ async def post_to_wordpress(site_url, title, brief, full_news_link):
             return False
 
 async def scrape_towns():
+    """Main engine: Scrapes NewsBreak and distributes content."""
     all_results = {}
     history = load_history()
 
@@ -117,10 +121,9 @@ async def scrape_towns():
 
                         target_site = SITE_MAPPING.get(town, MAIN_HUB)
                         
-                        # Step 1: Specific Site
+                        # Distribution Step
                         posted = await post_to_wordpress(target_site, title, brief, full_link)
 
-                        # Step 2: Hub Mirror
                         if posted:
                             if target_site != MAIN_HUB:
                                 await post_to_wordpress(MAIN_HUB, title, brief, full_link)
@@ -130,7 +133,7 @@ async def scrape_towns():
                             processed_count += 1
                             print(f"    [OK] Distributed: {title[:40]}")
 
-                    except Exception as e:
+                    except Exception:
                         continue
 
                 all_results[town] = town_stories
