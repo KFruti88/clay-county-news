@@ -3,14 +3,14 @@ name: News Distribution Pipeline
 on:
   schedule:
     - cron: '0 */4 * * *' # Runs every 4 hours
-  workflow_dispatch:      # Allows manual trigger from the "Actions" tab
+  workflow_dispatch: # Allows manual trigger from the "Actions" tab
 
 jobs:
   scrape-and-publish:
     runs-on: ubuntu-latest
     
     permissions:
-      contents: write     # Required to push changes back to the repo
+      contents: write # Crucial: Allows the bot to push JSON updates
 
     steps:
       - name: Checkout code
