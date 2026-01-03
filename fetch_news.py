@@ -1,6 +1,7 @@
 import asyncio
 import random
 import requests
+import os
 from requests.auth import HTTPBasicAuth
 from playwright.async_api import async_playwright
 from playwright_stealth import stealth_async
@@ -26,8 +27,7 @@ SITE_MAPPING = {
 MAIN_HUB = "https://supportmylocalcommunity.com"
 
 # --- CREDENTIALS ---
-# When using GitHub Actions, it is safer to use: 
-# os.environ.get("WP_USER") etc.
+# Replace with your actual details or use GitHub Secrets (os.environ.get)
 WP_USER = "your_username"
 WP_APP_PASSWORD = "your_application_password"
 
@@ -50,7 +50,7 @@ async def post_to_wordpress(site_url, title, link):
         if response.status_code == 201:
             print(f" [OK] Posted to {site_url}")
         else:
-            print(f" [Error {response.status_code}] on {site_url}")
+            print(f" [Error {response.status_code}] on {site_url}: {response.text}")
     except Exception as e:
         print(f" [Conn Error] {site_url}: {e}")
 
@@ -64,12 +64,12 @@ async def scrape_town_news(page, town_name, url):
         await page.mouse.wheel(0, random.randint(500, 1000))
         await asyncio.sleep(random.uniform(3, 6))
 
-        # NewsBreak uses 'article' tags; we find all within the list view
+        # Select all article blocks
         articles = await page.locator("article").all()
         
         processed_count = 0
         for article in articles:
-            if processed_count >= 3: break # Keep it light, only top 3 stories
+            if processed_count >= 3: break # Limit to top 3 stories per town
             
             title_node = article.locator("h3")
             link_node = article.locator("a").first
@@ -78,7 +78,7 @@ async def scrape_town_news(page, town_name, url):
                 title = await title_node.inner_text()
                 href = await link_node.get_attribute("href")
                 
-                # Full link reconstruction if NewsBreak uses relative paths
+                # Ensure the link is a full URL
                 link = href if href.startswith("http") else f"https://www.newsbreak.com{href}"
 
                 print(f"Found: {title[:50]}...")
@@ -86,10 +86,8 @@ async def scrape_town_news(page, town_name, url):
                 # Determine destination
                 target_site = SITE_MAPPING.get(town_name, MAIN_HUB)
                 
-                # Post to specific town site
+                # Post to specific site and the main hub
                 await post_to_wordpress(target_site, title, link)
-                
-                # ALSO post to the main hub (if it wasn't already the target)
                 if target_site != MAIN_HUB:
                     await post_to_wordpress(MAIN_HUB, title, link)
                 
@@ -100,7 +98,6 @@ async def scrape_town_news(page, town_name, url):
 
 async def run_hub():
     async with async_playwright() as p:
-        # Launch browser with human-like fingerprint
         browser = await p.chromium.launch(headless=True)
         context = await browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
@@ -109,11 +106,9 @@ async def run_hub():
         page = await context.new_page()
         await stealth_async(page)
 
-        # Loop through the sources
         for town, url in TOWN_SOURCES.items():
             await scrape_town_news(page, town, url)
-            # Human-like delay between different town requests
-            await asyncio.sleep(random.uniform(5, 12))
+            await asyncio.sleep(random.uniform(5, 12)) # Human-like delay
 
         await browser.close()
 
