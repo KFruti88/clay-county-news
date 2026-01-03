@@ -1,0 +1,142 @@
+<div id="newspaper-container" class="news-center-mode">
+    <div class="newspaper-header">
+        <h1 id="town-banner">Clay County News Center</h1>
+        <div class="newspaper-meta" id="meta-bar">
+            <span id="current-date"></span>
+            <span id="chicago-time"></span>
+            <span id="town-location">County-Wide Full Edition</span>
+        </div>
+    </div>
+    <div id="anchor-nav" class="glossy-nav"></div>
+    
+    <div id="news-grid" class="newspaper-grid full-width">
+        <div class="loading">Loading the latest headlines...</div>
+    </div>
+</div>
+
+<style>
+    /* Glossy Glassmorphism Theme */
+    #newspaper-container { 
+        padding: 40px 20px; 
+        border-radius: 15px; 
+        font-family: 'Times New Roman', Times, serif !important; 
+        max-width: 1200px; 
+        margin: 20px auto; 
+        box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+        color: #000;
+    }
+
+    /* Glossy Header */
+    .newspaper-header h1 { 
+        font-size: 3.5rem !important; 
+        text-transform: uppercase; 
+        font-weight: 900 !important; 
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        margin: 0 !important;
+    }
+
+    .newspaper-meta { 
+        border-top: 2px solid #000; 
+        border-bottom: 5px solid #000; 
+        padding: 10px 0; 
+        display: flex; 
+        justify-content: space-between;
+        font-weight: bold;
+    }
+
+    /* Full Story Layout */
+    .newspaper-grid.full-width { 
+        display: block; /* Stacked for full stories */
+        margin-top: 30px; 
+    }
+
+    .article { 
+        background: rgba(255, 255, 255, 0.8) !important; 
+        padding: 40px; 
+        border-radius: 12px;
+        border: 1px solid rgba(0,0,0,0.1);
+        margin-bottom: 40px;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+        scroll-margin-top: 100px; /* Important: prevents header from covering title */
+    }
+
+    .article h3 { 
+        font-size: 2.2rem !important; 
+        border-bottom: 2px solid #000; 
+        padding-bottom: 10px; 
+        margin-bottom: 20px !important;
+        text-transform: uppercase;
+    }
+
+    .town-badge {
+        display: inline-block;
+        background: #000;
+        color: #fff;
+        padding: 2px 10px;
+        font-size: 0.8rem;
+        border-radius: 3px;
+        margin-bottom: 10px;
+    }
+
+    .story-body { 
+        font-size: 1.2rem !important; 
+        line-height: 1.6 !important; 
+        color: #222; 
+    }
+
+    #chicago-time { border-left: 1px solid #000; border-right: 1px solid #000; padding: 0 20px; }
+
+    @media (max-width: 800px) { .newspaper-header h1 { font-size: 2rem !important; } }
+</style>
+
+<script>
+(async () => {
+    const DATA_URL = "https://raw.githubusercontent.com/KFruti88/clay-county-news/main/news_data.json";
+
+    // Set Date
+    document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    // Live Clock
+    function updateClock() {
+        const options = { timeZone: 'America/Chicago', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+        document.getElementById('chicago-time').innerText = new Intl.DateTimeFormat([], options).format(new Date());
+    }
+    updateClock(); setInterval(updateClock, 1000);
+
+    try {
+        const res = await fetch(DATA_URL);
+        const data = await res.json();
+        const grid = document.getElementById('news-grid');
+        grid.innerHTML = "";
+        
+        // Loop through all news items
+        data.forEach(story => {
+            // Generate ID for anchors (e.g. "CISNE CLINIC REOPENS" becomes "cisne-clinic-reopens")
+            const articleId = story.title.toLowerCase().replace(/[^a-z0-9]/g, '-');
+            
+            const article = document.createElement('div');
+            article.className = 'article glossy-card';
+            article.id = articleId; // SET ANCHOR
+
+            article.innerHTML = `
+                <span class="town-badge">${story.town_tag} Edition</span>
+                <h3>${story.title}</h3>
+                <div class="story-body">${story.full_story.replace(/\n/g, '<br>')}</div>
+            `;
+            grid.appendChild(article);
+        });
+
+        // AUTO-SCROLL LOGIC: If a user comes here via a #link, scroll to it
+        if (window.location.hash) {
+            setTimeout(() => {
+                const target = document.querySelector(window.location.hash);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 500); // Small delay to ensure content is rendered
+        }
+
+    } catch (e) { console.error("Error loading News Center:", e); }
+})();
+</script>
