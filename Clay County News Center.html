@@ -7,7 +7,6 @@
             <span id="town-location">County-Wide Full Edition</span>
         </div>
     </div>
-    <div id="anchor-nav" class="glossy-nav"></div>
     
     <div id="news-grid" class="newspaper-grid full-width">
         <div class="loading">Loading the latest headlines...</div>
@@ -15,7 +14,7 @@
 </div>
 
 <style>
-    /* Glossy Glassmorphism Theme */
+    /* Glossy Theme Base */
     #newspaper-container { 
         padding: 40px 20px; 
         border-radius: 15px; 
@@ -27,12 +26,10 @@
         color: #000;
     }
 
-    /* Glossy Header */
     .newspaper-header h1 { 
         font-size: 3.5rem !important; 
         text-transform: uppercase; 
         font-weight: 900 !important; 
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
         margin: 0 !important;
     }
 
@@ -45,25 +42,23 @@
         font-weight: bold;
     }
 
-    /* Full Story Layout */
-    .newspaper-grid.full-width { 
-        display: block; /* Stacked for full stories */
-        margin-top: 30px; 
-    }
+    .newspaper-grid.full-width { display: block; margin-top: 30px; }
 
+    /* Article Card Base */
     .article { 
-        background: rgba(255, 255, 255, 0.8) !important; 
+        background: rgba(255, 255, 255, 0.9) !important; 
         padding: 40px; 
         border-radius: 12px;
-        border: 1px solid rgba(0,0,0,0.1);
         margin-bottom: 40px;
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
-        scroll-margin-top: 100px; /* Important: prevents header from covering title */
+        scroll-margin-top: 100px;
+        border-left: 15px solid #ccc; /* Default border color */
+        transition: transform 0.3s ease;
     }
 
     .article h3 { 
         font-size: 2.2rem !important; 
-        border-bottom: 2px solid #000; 
+        border-bottom: 2px solid #eee; 
         padding-bottom: 10px; 
         margin-bottom: 20px !important;
         text-transform: uppercase;
@@ -71,23 +66,28 @@
 
     .town-badge {
         display: inline-block;
-        background: #000;
         color: #fff;
-        padding: 2px 10px;
-        font-size: 0.8rem;
-        border-radius: 3px;
-        margin-bottom: 10px;
+        padding: 4px 12px;
+        font-size: 0.9rem;
+        border-radius: 4px;
+        margin-bottom: 15px;
+        font-weight: bold;
+        text-transform: uppercase;
     }
 
-    .story-body { 
-        font-size: 1.2rem !important; 
-        line-height: 1.6 !important; 
-        color: #222; 
-    }
+    .story-body { font-size: 1.2rem !important; line-height: 1.6 !important; color: #222; }
 
     #chicago-time { border-left: 1px solid #000; border-right: 1px solid #000; padding: 0 20px; }
 
-    @media (max-width: 800px) { .newspaper-header h1 { font-size: 2rem !important; } }
+    /* Town Specific Colors */
+    .border-flora { border-left-color: #ff5f05 !important; }
+    .badge-flora { background-color: #ff5f05 !important; color: #000 !important; }
+
+    .border-louisville { border-left-color: #cc0000 !important; }
+    .badge-louisville { background-color: #cc0000 !important; }
+
+    .border-general { border-left-color: #666 !important; }
+    .badge-general { background-color: #666 !important; }
 </style>
 
 <script>
@@ -110,31 +110,32 @@
         const grid = document.getElementById('news-grid');
         grid.innerHTML = "";
         
-        // Loop through all news items
         data.forEach(story => {
-            // Generate ID for anchors (e.g. "CISNE CLINIC REOPENS" becomes "cisne-clinic-reopens")
             const articleId = story.title.toLowerCase().replace(/[^a-z0-9]/g, '-');
+            const town = story.town_tag ? story.town_tag.toLowerCase().replace(/\s/g, '') : 'general';
             
+            // Map the town tag to our CSS classes
+            let colorClass = 'general';
+            if (town.includes('flora')) colorClass = 'flora';
+            else if (town.includes('louisville')) colorClass = 'louisville';
+
             const article = document.createElement('div');
-            article.className = 'article glossy-card';
-            article.id = articleId; // SET ANCHOR
+            article.className = `article border-${colorClass}`;
+            article.id = articleId;
 
             article.innerHTML = `
-                <span class="town-badge">${story.town_tag} Edition</span>
+                <span class="town-badge badge-${colorClass}">${story.town_tag} EDITION</span>
                 <h3>${story.title}</h3>
                 <div class="story-body">${story.full_story.replace(/\n/g, '<br>')}</div>
             `;
             grid.appendChild(article);
         });
 
-        // AUTO-SCROLL LOGIC: If a user comes here via a #link, scroll to it
         if (window.location.hash) {
             setTimeout(() => {
                 const target = document.querySelector(window.location.hash);
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
-                }
-            }, 500); // Small delay to ensure content is rendered
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
+            }, 500);
         }
 
     } catch (e) { console.error("Error loading News Center:", e); }
