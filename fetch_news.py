@@ -2,19 +2,21 @@ import asyncio
 import random
 import os
 import json
-import httpx  # Better for async than 'requests'
+import httpx
 from playwright.async_api import async_playwright
 from playwright_stealth import stealth_async
 
 # --- 1. CONFIGURATION ---
 SITE_MAPPING = {
+    "Flora": "https://ourflora.com",
     "Clay City": "https://supportmylocalcommunity.com/clay-city/",
     "Xenia": "https://supportmylocalcommunity.com/xenia/",
     "Louisville": "https://supportmylocalcommunity.com/louisville/",
-    "Sailor Springs": "https://supportmylocalcommunity.com/louisville/", 
+    "Sailor Springs": "https://supportmylocalcommunity.com/louisville/",
 }
 
 TOWN_SOURCES = {
+    "Flora": "https://www.newsbreak.com/flora-il",
     "Clay City": "https://www.newsbreak.com/clay-city-il",
     "Xenia": "https://www.newsbreak.com/xenia-il",
     "Louisville": "https://www.newsbreak.com/louisville-il",
@@ -22,27 +24,39 @@ TOWN_SOURCES = {
 }
 
 MAIN_HUB = "https://supportmylocalcommunity.com"
-WP_USER = "your_username"
-WP_APP_PASSWORD = "your_app_password" # Generated in WP > Users > Profile
 HISTORY_FILE = "posted_links.json"
 
-# --- 2. CORE FUNCTIONS ---
+# --- 2. CREDENTIALS ---
+# Set these in your environment variables or replace here (not recommended for public repos)
+WP_USER = os.getenv("WP_USER", "your_username")
+WP_APP_PASSWORD = os.getenv("WP_PWD", "your_app_password")
+
+# --- 3. CORE FUNCTIONS ---
 
 def load_history():
     if os.path.exists(HISTORY_FILE):
-        with open(HISTORY_FILE, "r") as f:
-            return json.load(f)
+        try:
+            with open(HISTORY_FILE, "r") as f:
+                return json.load(f)
+        except:
+            return []
     return []
 
 def save_history(links):
     with open(HISTORY_FILE, "w") as f:
-        json.dump(links[-500:], f) # Keep last 500 links
+        # Keep only the last 500 links to keep the file small
+        json.dump(links[-500:], f, indent=4)
 
 async def post_to_wordpress(site_url, title, brief, full_news_link):
-    """Pushes a brief summary and 'Read More' link to WordPress sites via REST API."""
+    """Pushes news to WordPress via REST API using httpx."""
     api_url = f"{site_url.rstrip('/')}/wp-json/wp/v2/posts"
     
-    content = f"{brief}<br><br><strong><a href='{full_news_link}'>Read Full Story &raquo;</a></strong>"
+    content = (
+        f"{brief}<br><br>"
+        f"<strong><a href='{full_news_link}' target='_blank' rel='noopener'>"
+        f"Read Full Story &raquo;</a></strong>"
+    )
+    
     payload = {
         "title": title,
         "content": content,
@@ -58,59 +72,68 @@ async def post_to_wordpress(site_url, title, brief, full_news_link):
                 timeout=20
             )
             if response.status_code == 201:
-                print(f"  [OK] Posted to {site_url}")
+                print(f"    [OK] Posted to {site_url}")
                 return True
             else:
-                print(f"  [Fail] {site_url} returned {response.status_code}")
+                print(f"    [Fail] {site_url} status: {response.status_code}")
+                return False
         except Exception as e:
-            print(f"  [Error] WordPress API error for {site_url}: {e}")
-    return False
+            print(f"    [Error] Connection failed for {site_url}: {e}")
+            return False
 
 async def scrape_towns():
-    """Main scraping engine using Playwright Stealth."""
+    """Scrapes NewsBreak and distributes content to WP sites."""
     all_news_data = {}
     history = load_history()
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
-        context = await browser.new_context(user_agent="Mozilla/5.0 ...")
+        # Professional User Agent to avoid detection
+        context = await browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+        )
         page = await context.new_page()
         await stealth_async(page)
 
         for town, url in TOWN_SOURCES.items():
-            print(f"\n--- Scraping {town} ---")
+            print(f"\n--- Processing {town} ---")
+            town_stories = []
+            
             try:
                 await page.goto(url, wait_until="networkidle")
-                await page.mouse.wheel(0, 1000) # Scroll to trigger lazy loading
-                await asyncio.sleep(2)
-
+                # Natural scrolling behavior
+                await page.mouse.wheel(0, 800)
+                await asyncio.sleep(random.uniform(2, 4))
+                
                 articles = await page.locator("article").all()
-                town_stories = []
-
-                for article in articles[:3]: # Limit to top 3 fresh stories
+                
+                count = 0
+                for article in articles:
+                    if count >= 3: break # Limit to top 3 new stories per town
+                    
                     try:
                         title = await article.locator("h3").inner_text()
                         
-                        # Handle Link Extraction
+                        # Link Extraction
                         link_node = article.locator("a").first
                         href = await link_node.get_attribute("href")
                         full_link = href if href.startswith("http") else f"https://www.newsbreak.com{href}"
 
-                        # Skip if already posted
+                        # 1. Skip if already in history
                         if full_link in history:
                             continue
 
-                        # Extract Summary
+                        # 2. Extract Summary
                         summary_node = article.locator("p, .description, .summary").first
-                        raw_summary = await summary_node.inner_text() if await summary_node.count() > 0 else "Local news update for the community."
+                        raw_summary = await summary_node.inner_text() if await summary_node.count() > 0 else "Latest community update."
                         brief = (raw_summary[:180] + "...") if len(raw_summary) > 180 else raw_summary
 
                         target_site = SITE_MAPPING.get(town, MAIN_HUB)
 
-                        # Post to specific town site
+                        # 3. Distribute to Local Site
                         success = await post_to_wordpress(target_site, title, brief, full_link)
                         
-                        # Post to the main hub
+                        # 4. Distribute to Main Hub
                         if success and target_site != MAIN_HUB:
                             await post_to_wordpress(MAIN_HUB, title, brief, full_link)
 
@@ -121,16 +144,18 @@ async def scrape_towns():
                                 "brief": brief,
                                 "target_site": target_site
                             })
+                            count += 1
 
-                    except Exception as inner_e:
-                        continue # Skip individual article if it fails
+                    except Exception as article_err:
+                        continue
 
                 all_news_data[town] = town_stories
 
             except Exception as e:
-                print(f"Failed to scrape {town}: {e}")
+                print(f"  [Critical] Failed to scrape {town}: {e}")
 
-            await asyncio.sleep(random.uniform(5, 10)) # Anti-bot delay
+            # Random delay between towns to mimic human browsing
+            await asyncio.sleep(random.uniform(5, 10))
 
         await browser.close()
     
@@ -141,8 +166,8 @@ if __name__ == "__main__":
     print("Starting News Distribution Pipeline...")
     news_results = asyncio.run(scrape_towns())
     
-    # Save for local newspaper dashboard
+    # Save results to JSON for your newspaper-style frontend
     with open("news_data.json", "w") as f:
         json.dump(news_results, f, indent=4)
         
-    print("\nMission Accomplished: All sites updated and news_data.json generated.")
+    print("\nMission Accomplished: All sites updated and news_data.json sync'd.")
