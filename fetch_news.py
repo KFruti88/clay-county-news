@@ -76,11 +76,11 @@ async def post_to_wordpress(site_url, title, brief, full_news_link):
 
 async def scrape_towns():
     """Main engine: Scrapes NewsBreak and distributes content."""
-    all_news_data = {}
+    all_results = {}
     history = load_history()
 
     async with async_playwright() as p:
-        # Launch browser - headless=True for production
+        # Launch browser - headless=True for production use
         browser = await p.chromium.launch(headless=True)
         context = await browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
@@ -98,10 +98,10 @@ async def scrape_towns():
                 await asyncio.sleep(random.uniform(2, 4))
 
                 articles = await page.locator("article").all()
-                count = 0
+                processed_count = 0
 
                 for article in articles:
-                    if count >= 3: 
+                    if processed_count >= 3: 
                         break
 
                     try:
@@ -118,22 +118,23 @@ async def scrape_towns():
                             
                         full_link = href if href.startswith("http") else f"https://www.newsbreak.com{href}"
 
+                        # Duplicate Check
                         if full_link in history:
-                            print(f"  - Skipping (already processed): {title[:50]}...")
+                            print(f"  - Skipping: {title[:50]}...")
                             continue
 
-                        # Extract summary
+                        # Extract Summary
                         summary_node = article.locator("p, .description, .summary").first
                         raw_summary = await summary_node.inner_text() if await summary_node.count() > 0 else "Latest community update."
                         brief = (raw_summary[:180] + "...") if len(raw_summary) > 180 else raw_summary
 
-                        # Distribution Logic
+                        # Distribution
                         target_site = SITE_MAPPING.get(town, MAIN_HUB)
                         
-                        # Post to specific town site
+                        # Step 1: Post to Town Site
                         success = await post_to_wordpress(target_site, title, brief, full_link)
 
-                        # Mirror to Main Hub if successful
+                        # Step 2: Mirror to Main Hub if successful
                         if success:
                             if target_site != MAIN_HUB:
                                 await post_to_wordpress(MAIN_HUB, title, brief, full_link)
@@ -145,23 +146,25 @@ async def scrape_towns():
                                 "link": full_link,
                                 "target_site": target_site
                             })
-                            count += 1
+                            processed_count += 1
 
-                    except Exception as article_err:
-                        print(f"  [Error] Processing article: {article_err}")
+                    except Exception as e:
+                        print(f"  [Error] Article skip: {e}")
                         continue
 
-                all_news_data[town] = town_stories
-                await asyncio.sleep(random.uniform(5, 10)) # Anti-bot delay
+                all_results[town] = town_stories
+                # Anti-bot delay between towns
+                await asyncio.sleep(random.uniform(5, 10))
 
             except Exception as e:
-                print(f"  [Critical] Failed to scrape {town}: {e}")
+                print(f"  [Critical] Failed {town}: {e}")
 
         await browser.close()
     
     save_history(history)
-    return all_news_data
+    return all_results
 
+# --- 4. EXECUTION ---
 if __name__ == "__main__":
     print("Starting News Distribution Pipeline...")
     results = asyncio.run(scrape_towns())
