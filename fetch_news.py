@@ -5,13 +5,18 @@ import os
 import httpx
 from playwright.async_api import async_playwright
 
-# Resilient import for Playwright Stealth
+# --- 1. RESILIENT STEALTH IMPORT ---
 try:
     from playwright_stealth import stealth_async
 except ImportError:
-    from playwright_stealth import stealth_page_async as stealth_async
+    # Some environments name the async function differently
+    try:
+        from playwright_stealth import stealth_page_async as stealth_async
+    except ImportError:
+        print("!!! Warning: Playwright Stealth not found. Continuing without it.")
+        stealth_async = None
 
-# --- CONFIGURATION ---
+# --- 2. CONFIGURATION ---
 SITE_MAPPING = {
     "Flora": "https://ourflora.com",
     "Clay City": "https://supportmylocalcommunity.com/clay-city/",
@@ -32,16 +37,18 @@ MAIN_HUB = "https://supportmylocalcommunity.com"
 HISTORY_FILE = "posted_links.json"
 DATA_EXPORT_FILE = "news_data.json"
 
+# --- 3. CREDENTIALS ---
 WP_USER = os.getenv("WP_USER")
 WP_APP_PASSWORD = os.getenv("WP_PWD")
 
-# --- HELPERS ---
+# --- 4. HELPERS ---
 def load_history():
     if os.path.exists(HISTORY_FILE):
         try:
             with open(HISTORY_FILE, "r") as f:
                 return json.load(f)
-        except: return []
+        except:
+            return []
     return []
 
 def save_history(links):
@@ -50,7 +57,7 @@ def save_history(links):
 
 async def post_to_wordpress(site_url, title, brief, full_news_link):
     if not WP_USER or not WP_APP_PASSWORD:
-        print(f"!!! Credentials missing for {site_url}")
+        print(f"!!! Credentials missing for {site_url}. Skipping post.")
         return False
     
     api_url = f"{site_url.rstrip('/')}/wp-json/wp/v2/posts"
@@ -62,10 +69,10 @@ async def post_to_wordpress(site_url, title, brief, full_news_link):
             r = await client.post(api_url, auth=(WP_USER, WP_APP_PASSWORD), json=payload, timeout=25)
             return r.status_code == 201
         except Exception as e:
-            print(f"Error posting: {e}")
+            print(f"    [Error] WP Connection: {e}")
             return False
 
-# --- ENGINE ---
+# --- 5. MAIN ENGINE ---
 async def run_pipeline():
     history = load_history()
     all_results = {}
@@ -77,8 +84,9 @@ async def run_pipeline():
         )
         page = await context.new_page()
         
-        # Apply stealth using the resilient import
-        await stealth_async(page)
+        # Apply stealth if available
+        if stealth_async:
+            await stealth_async(page)
 
         for town, url in TOWN_SOURCES.items():
             print(f"[*] Checking {town}...")
@@ -90,6 +98,7 @@ async def run_pipeline():
                 
                 articles = await page.locator("article").all()
                 processed = 0
+                
                 for article in articles:
                     if processed >= 3: break
                     
@@ -109,9 +118,13 @@ async def run_pipeline():
                     brief = (raw_text[:180] + "...") if len(raw_text) > 180 else raw_text
 
                     target = SITE_MAPPING.get(town, MAIN_HUB)
+                    
+                    # Post to specific site
                     if await post_to_wordpress(target, title, brief, full_link):
+                        # Mirror to main hub
                         if target != MAIN_HUB:
                             await post_to_wordpress(MAIN_HUB, title, brief, full_link)
+                        
                         history.append(full_link)
                         town_stories.append({"title": title, "link": full_link})
                         processed += 1
@@ -119,6 +132,7 @@ async def run_pipeline():
 
                 all_results[town] = town_stories
                 await asyncio.sleep(random.uniform(2, 5))
+                
             except Exception as e:
                 print(f" [!] {town} failed: {e}")
 
@@ -128,4 +142,6 @@ async def run_pipeline():
             json.dump(all_results, f, indent=4)
 
 if __name__ == "__main__":
+    print("--- Starting News Pipeline ---")
     asyncio.run(run_pipeline())
+    print("--- Pipeline Finished ---")
