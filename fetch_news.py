@@ -6,7 +6,6 @@ from playwright.async_api import async_playwright
 from playwright_stealth import stealth_async
 
 # --- CONFIGURATION ---
-# The NewsBreak URLs you want to monitor
 TOWN_SOURCES = {
     "Flora": "https://www.newsbreak.com/flora-il",
     "Sailor Springs": "https://www.newsbreak.com/sailor-springs-il",
@@ -16,7 +15,6 @@ TOWN_SOURCES = {
     "Louisville": "https://www.newsbreak.com/louisville-il"
 }
 
-# Where the news should be sent
 SITE_MAPPING = {
     "Flora": "https://ourflora.com",
     "Clay City": "https://supportmylocalcommunity.com/clay-city/",
@@ -27,92 +25,97 @@ SITE_MAPPING = {
 
 MAIN_HUB = "https://supportmylocalcommunity.com"
 
-# Your WordPress Credentials (Best used as Environment Variables)
+# --- CREDENTIALS ---
+# When using GitHub Actions, it is safer to use: 
+# os.environ.get("WP_USER") etc.
 WP_USER = "your_username"
 WP_APP_PASSWORD = "your_application_password"
 
-# --- FUNCTIONS ---
+# --- CORE FUNCTIONS ---
 
 async def post_to_wordpress(site_url, title, link):
-    """Sends the scraped news to the WordPress REST API."""
+    """Sends the news to the specific WordPress REST API."""
     api_url = f"{site_url.rstrip('/')}/wp-json/wp/v2/posts"
+    content = f"Latest local news update. <br><br> <a href='{link}'>Read full story on NewsBreak</a>"
     
-    # Simple content body with a link to the original story
-    content = f"Latest local news update. <br><br> <a href='{link}'>Read the full story on NewsBreak</a>"
-    
-    payload = {
-        "title": title,
-        "content": content,
-        "status": "publish"
-    }
+    payload = {"title": title, "content": content, "status": "publish"}
     
     try:
         response = requests.post(
             api_url,
             auth=HTTPBasicAuth(WP_USER, WP_APP_PASSWORD),
-            json=payload
+            json=payload,
+            timeout=10
         )
         if response.status_code == 201:
-            print(f"Successfully posted to {site_url}")
+            print(f" [OK] Posted to {site_url}")
         else:
-            print(f"Failed to post to {site_url}: {response.status_code}")
+            print(f" [Error {response.status_code}] on {site_url}")
     except Exception as e:
-        print(f"Connection error to {site_url}: {e}")
+        print(f" [Conn Error] {site_url}: {e}")
 
 async def scrape_town_news(page, town_name, url):
-    """Scrapes a specific NewsBreak town page."""
-    print(f"Scraping {town_name}...")
-    await page.goto(url, wait_until="networkidle")
-    
-    # Mimic human scrolling
-    await page.mouse.wheel(0, random.randint(400, 800))
-    await asyncio.sleep(random.uniform(2, 5))
-
-    # Select articles (NewsBreak structure can change, usually looks for 'article' tags)
-    articles = await page.locator("article").all()
-    
-    count = 0
-    for article in articles:
-        if count >= 3: break # Limit to top 3 articles per town to avoid spam
+    """Navigates to NewsBreak and pulls the titles and links."""
+    print(f"\n--- Processing {town_name} ---")
+    try:
+        await page.goto(url, wait_until="networkidle")
         
-        try:
-            # Extract title and link
-            title_element = article.locator("h3")
-            link_element = article.locator("a").first
-            
-            title = await title_element.inner_text()
-            link = await link_element.get_attribute("href")
+        # Mimic human interaction
+        await page.mouse.wheel(0, random.randint(500, 1000))
+        await asyncio.sleep(random.uniform(3, 6))
 
-            if title and link:
-                # 1. Post to the specific town site
+        # NewsBreak uses 'article' tags; we find all within the list view
+        articles = await page.locator("article").all()
+        
+        processed_count = 0
+        for article in articles:
+            if processed_count >= 3: break # Keep it light, only top 3 stories
+            
+            title_node = article.locator("h3")
+            link_node = article.locator("a").first
+            
+            if await title_node.count() > 0:
+                title = await title_node.inner_text()
+                href = await link_node.get_attribute("href")
+                
+                # Full link reconstruction if NewsBreak uses relative paths
+                link = href if href.startswith("http") else f"https://www.newsbreak.com{href}"
+
+                print(f"Found: {title[:50]}...")
+                
+                # Determine destination
                 target_site = SITE_MAPPING.get(town_name, MAIN_HUB)
+                
+                # Post to specific town site
                 await post_to_wordpress(target_site, title, link)
                 
-                # 2. ALSO post to the main hub
+                # ALSO post to the main hub (if it wasn't already the target)
                 if target_site != MAIN_HUB:
                     await post_to_wordpress(MAIN_HUB, title, link)
                 
-                count += 1
-        except Exception:
-            continue
+                processed_count += 1
+                
+    except Exception as e:
+        print(f"Failed to scrape {town_name}: {e}")
 
-async def main():
+async def run_hub():
     async with async_playwright() as p:
-        # Launch Stealth Browser
+        # Launch browser with human-like fingerprint
         browser = await p.chromium.launch(headless=True)
         context = await browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            viewport={'width': 1280, 'height': 800}
         )
         page = await context.new_page()
         await stealth_async(page)
 
-        # Loop through all towns
+        # Loop through the sources
         for town, url in TOWN_SOURCES.items():
             await scrape_town_news(page, town, url)
-            # Short rest between towns to look human
-            await asyncio.sleep(random.uniform(5, 10))
+            # Human-like delay between different town requests
+            await asyncio.sleep(random.uniform(5, 12))
 
         await browser.close()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(run_hub())
