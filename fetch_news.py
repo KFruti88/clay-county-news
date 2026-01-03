@@ -58,7 +58,6 @@ async def fetch_rss():
                     content_tag = item.find("content:encoded", namespaces)
                     full_text = content_tag.text if content_tag is not None else brief
 
-                    # Only keep if a local town or Clay County is mentioned
                     tags = get_mentioned_towns(title + " " + full_text)
                     if tags or re.search(r'(?i)clay\s*county', title + " " + full_text):
                         stories.append({
@@ -97,7 +96,7 @@ async def scrape_town(town):
     return stories
 
 async def run():
-    # Key = Title, Value = Story object. This prevents duplicates.
+    # Key = Title, Value = Story object. This forces uniqueness across all towns.
     seen_stories = {} 
 
     print("Gathering news and deduplicating...")
@@ -114,7 +113,7 @@ async def run():
         for story in town_stories:
             title = story['title']
             if title in seen_stories:
-                # If story exists, add town to tags list if not already there
+                # Update existing story with new town tag if not already there
                 if town not in seen_stories[title]['tags']:
                     seen_stories[title]['tags'].append(town)
             else:
