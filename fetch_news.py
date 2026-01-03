@@ -43,7 +43,7 @@ def load_history():
     return []
 
 def save_history(links):
-    """Saves the last 500 posted links to prevent database bloat."""
+    """Saves the last 500 posted links with formatting."""
     with open(HISTORY_FILE, "w") as f:
         json.dump(links[-500:], f, indent=4)
 
@@ -118,7 +118,7 @@ async def scrape_towns():
 
                         target_site = SITE_MAPPING.get(town, MAIN_HUB)
 
-                        # Distribute content
+                        # Distribution Logic
                         success = await post_to_wordpress(target_site, title, brief, full_link)
                         if success and target_site != MAIN_HUB:
                             await post_to_wordpress(MAIN_HUB, title, brief, full_link)
