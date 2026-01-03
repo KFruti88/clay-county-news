@@ -1,6 +1,7 @@
 import httpx
 import asyncio
 import json
+import os
 import re
 import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
@@ -12,7 +13,7 @@ RSS_URL = "https://www.wnoi.com/category/local/feed"
 NEWS_CENTER_URL = "https://supportmylocalcommunity.com/clay-county-news-center/"
 
 def clean_text(text):
-    """Scrub branding, frequencies, and reporter names."""
+    """Removes branding, frequencies, and reporter names."""
     if not text: return ""
     patterns = [
         r'(?i)wnoi', r'(?i)103\.9/99\.3', r'(?i)local\s*--', 
@@ -20,13 +21,14 @@ def clean_text(text):
     ]
     for p in patterns:
         text = re.sub(p, '', text)
-    text = re.sub('<[^<]+?>', '', text) # Remove HTML tags
+    # Remove HTML tags to keep the JSON clean
+    text = re.sub('<[^<]+?>', '', text)
     return text.strip()
 
 async def fetch_rss():
-    """Fetches news and extracts full content from 'content:encoded'."""
+    """Fetches news and extracts FULL content using namespaces."""
     stories = []
-    # This namespace is critical for reading the 'content:encoded' tag
+    # This namespace is the 'key' to unlocking the full story tag
     namespaces = {'content': 'http://purl.org/rss/1.0/modules/content/'}
     
     async with httpx.AsyncClient() as client:
@@ -34,18 +36,19 @@ async def fetch_rss():
             resp = await client.get(RSS_URL, timeout=15)
             if resp.status_code == 200:
                 root = ET.fromstring(resp.content)
-                for item in root.findall("./channel/item")[:8]:
+                for item in root.findall("./channel/item")[:10]:
                     title = item.find("title").text
+                    # 'description' is the short teaser
                     brief = item.find("description").text or ""
                     
-                    # --- NEW: Grab the FULL STORY ---
-                    full_content_node = item.find("content:encoded", namespaces)
-                    full_story = full_content_node.text if full_content_node is not None else brief
+                    # 'content:encoded' is the full article text
+                    content_tag = item.find("content:encoded", namespaces)
+                    full_story_raw = content_tag.text if content_tag is not None else brief
                     
                     stories.append({
                         "title": clean_text(title),
                         "brief": clean_text(brief)[:180] + "...",
-                        "full_story": clean_text(full_story), # The full unbranded article
+                        "full_story": clean_text(full_story_raw), 
                         "link": NEWS_CENTER_URL
                     })
         except Exception as e:
@@ -53,7 +56,7 @@ async def fetch_rss():
     return stories
 
 async def scrape_town(town):
-    """NewsBreak scraper logic (Briefs only as per site layout)."""
+    """Scrapes NewsBreak for town-specific headlines."""
     stories = []
     url = f"https://www.newsbreak.com/search?q={town}+IL+news"
     async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -68,7 +71,7 @@ async def scrape_town(town):
                         stories.append({
                             "title": clean_text(title_node.get_text()),
                             "brief": f"Community update for {town}.",
-                            "full_story": f"Check our News Center for more details on {town}.",
+                            "full_story": f"Check our News Center for full details on {town} community updates.",
                             "link": NEWS_CENTER_URL
                         })
         except Exception as e:
@@ -82,6 +85,7 @@ async def run():
     for town in TOWNS:
         print(f"Processing {town}...")
         town_specific = await scrape_town(town)
+        # Combine town news with regional news
         all_news[town] = town_specific + regional
         
     with open(DATA_EXPORT_FILE, "w") as f:
