@@ -7,6 +7,7 @@ from playwright.async_api import async_playwright
 from playwright_stealth import stealth_async
 
 # --- 1. CONFIGURATION ---
+# Mapping of Town Name -> Local WordPress Site URL
 SITE_MAPPING = {
     "Flora": "https://ourflora.com",
     "Clay City": "https://supportmylocalcommunity.com/clay-city/",
@@ -15,6 +16,7 @@ SITE_MAPPING = {
     "Sailor Springs": "https://supportmylocalcommunity.com/louisville/",
 }
 
+# Source URLs for scraping
 TOWN_SOURCES = {
     "Flora": "https://www.newsbreak.com/flora-il",
     "Clay City": "https://www.newsbreak.com/clay-city-il",
@@ -27,30 +29,32 @@ MAIN_HUB = "https://supportmylocalcommunity.com"
 HISTORY_FILE = "posted_links.json"
 
 # --- 2. CREDENTIALS ---
-# Set these in your environment variables or replace here (not recommended for public repos)
+# Uses environment variables for security (falls back to strings for testing)
 WP_USER = os.getenv("WP_USER", "your_username")
 WP_APP_PASSWORD = os.getenv("WP_PWD", "your_app_password")
 
 # --- 3. CORE FUNCTIONS ---
 
 def load_history():
+    """Loads previously posted links to avoid duplicates."""
     if os.path.exists(HISTORY_FILE):
         try:
             with open(HISTORY_FILE, "r") as f:
                 return json.load(f)
-        except:
+        except Exception:
             return []
     return []
 
 def save_history(links):
+    """Saves the last 500 posted links to prevent database bloat."""
     with open(HISTORY_FILE, "w") as f:
-        # Keep only the last 500 links to keep the file small
         json.dump(links[-500:], f, indent=4)
 
 async def post_to_wordpress(site_url, title, brief, full_news_link):
-    """Pushes news to WordPress via REST API using httpx."""
+    """Pushes news to WordPress via REST API using non-blocking httpx."""
     api_url = f"{site_url.rstrip('/')}/wp-json/wp/v2/posts"
     
+    # HTML content for the WordPress post
     content = (
         f"{brief}<br><br>"
         f"<strong><a href='{full_news_link}' target='_blank' rel='noopener'>"
@@ -82,13 +86,15 @@ async def post_to_wordpress(site_url, title, brief, full_news_link):
             return False
 
 async def scrape_towns():
-    """Scrapes NewsBreak and distributes content to WP sites."""
+    """Main engine: Scrapes NewsBreak and distributes content."""
     all_news_data = {}
     history = load_history()
 
     async with async_playwright() as p:
+        # Launch browser in headless mode
         browser = await p.chromium.launch(headless=True)
-        # Professional User Agent to avoid detection
+        
+        # Professional User Agent to minimize detection
         context = await browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
         )
@@ -101,39 +107,40 @@ async def scrape_towns():
             
             try:
                 await page.goto(url, wait_until="networkidle")
-                # Natural scrolling behavior
+                
+                # Mimic human behavior with scrolling
                 await page.mouse.wheel(0, 800)
                 await asyncio.sleep(random.uniform(2, 4))
                 
                 articles = await page.locator("article").all()
-                
                 count = 0
+
                 for article in articles:
-                    if count >= 3: break # Limit to top 3 new stories per town
+                    if count >= 3: break # Limit to top 3 NEW stories per town
                     
                     try:
                         title = await article.locator("h3").inner_text()
                         
-                        # Link Extraction
+                        # Link Extraction and Normalization
                         link_node = article.locator("a").first
                         href = await link_node.get_attribute("href")
                         full_link = href if href.startswith("http") else f"https://www.newsbreak.com{href}"
 
-                        # 1. Skip if already in history
+                        # Skip if story was already processed in a previous run
                         if full_link in history:
                             continue
 
-                        # 2. Extract Summary
+                        # Extract and trim summary
                         summary_node = article.locator("p, .description, .summary").first
                         raw_summary = await summary_node.inner_text() if await summary_node.count() > 0 else "Latest community update."
                         brief = (raw_summary[:180] + "...") if len(raw_summary) > 180 else raw_summary
 
                         target_site = SITE_MAPPING.get(town, MAIN_HUB)
 
-                        # 3. Distribute to Local Site
+                        # Distribute: 1. Local Site
                         success = await post_to_wordpress(target_site, title, brief, full_link)
                         
-                        # 4. Distribute to Main Hub
+                        # Distribute: 2. Main Hub (if local post succeeded)
                         if success and target_site != MAIN_HUB:
                             await post_to_wordpress(MAIN_HUB, title, brief, full_link)
 
@@ -146,15 +153,15 @@ async def scrape_towns():
                             })
                             count += 1
 
-                    except Exception as article_err:
-                        continue
+                    except Exception:
+                        continue # Skip individual problematic articles
 
                 all_news_data[town] = town_stories
 
             except Exception as e:
                 print(f"  [Critical] Failed to scrape {town}: {e}")
 
-            # Random delay between towns to mimic human browsing
+            # Anti-bot delay between town requests
             await asyncio.sleep(random.uniform(5, 10))
 
         await browser.close()
@@ -166,7 +173,7 @@ if __name__ == "__main__":
     print("Starting News Distribution Pipeline...")
     news_results = asyncio.run(scrape_towns())
     
-    # Save results to JSON for your newspaper-style frontend
+    # Final export for the frontend newspaper layout
     with open("news_data.json", "w") as f:
         json.dump(news_results, f, indent=4)
         
