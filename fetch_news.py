@@ -34,7 +34,6 @@ WP_APP_PASSWORD = os.getenv("WP_PWD", "your_app_password")
 # --- 3. CORE FUNCTIONS ---
 
 def load_history():
-    """Loads previously posted links to avoid duplicates."""
     if os.path.exists(HISTORY_FILE):
         try:
             with open(HISTORY_FILE, "r") as f:
@@ -44,12 +43,10 @@ def load_history():
     return []
 
 def save_history(links):
-    """Saves the last 500 posted links with formatting."""
     with open(HISTORY_FILE, "w") as f:
         json.dump(links[-500:], f, indent=4)
 
 async def post_to_wordpress(site_url, title, brief, full_news_link):
-    """Pushes news to WordPress via REST API using httpx."""
     api_url = f"{site_url.rstrip('/')}/wp-json/wp/v2/posts"
     content = (
         f"{brief}<br><br>"
@@ -66,16 +63,12 @@ async def post_to_wordpress(site_url, title, brief, full_news_link):
                 json=payload,
                 timeout=20
             )
-            if response.status_code == 201:
-                print(f"    [OK] Posted to {site_url}")
-                return True
-            print(f"    [Fail] {site_url} status: {response.status_code}")
+            return response.status_code == 201
         except Exception as e:
-            print(f"    [Error] Connection failed for {site_url}: {e}")
-    return False
+            print(f"    [Error] WP Connection: {e}")
+            return False
 
 async def scrape_towns():
-    """Main engine: Scrapes NewsBreak and distributes content."""
     all_results = {}
     history = load_history()
 
@@ -87,10 +80,8 @@ async def scrape_towns():
         page = await context.new_page()
         await stealth_async(page)
 
-        
-
         for town, url in TOWN_SOURCES.items():
-            print(f"\n--- Processing {town} ---")
+            print(f"[*] Processing {town}...")
             town_stories = []
             
             try:
@@ -107,54 +98,46 @@ async def scrape_towns():
 
                     try:
                         title_node = article.locator("h3")
-                        if await title_node.count() == 0:
-                            continue
-                            
+                        if await title_node.count() == 0: continue
+                        
                         title = await title_node.inner_text()
                         link_node = article.locator("a").first
                         href = await link_node.get_attribute("href")
-                        
-                        if not href:
-                            continue
+                        if not href: continue
                             
                         full_link = href if href.startswith("http") else f"https://www.newsbreak.com{href}"
 
                         if full_link in history:
-                            print(f"  - Skipping: {title[:50]}...")
+                            print(f"  - Skipping: {title[:40]}...")
                             continue
 
                         summary_node = article.locator("p, .description, .summary").first
-                        raw_summary = await summary_node.inner_text() if await summary_node.count() > 0 else "Latest community update."
+                        raw_summary = await summary_node.inner_text() if await summary_node.count() > 0 else "Local news update."
                         brief = (raw_summary[:180] + "...") if len(raw_summary) > 180 else raw_summary
 
                         target_site = SITE_MAPPING.get(town, MAIN_HUB)
                         
-                        # Step 1: Post to Town Site
-                        success = await post_to_wordpress(target_site, title, brief, full_link)
+                        # Step 1: Specific Site
+                        posted = await post_to_wordpress(target_site, title, brief, full_link)
 
-                        # Step 2: Mirror to Main Hub
-                        if success:
+                        # Step 2: Hub Mirror
+                        if posted:
                             if target_site != MAIN_HUB:
                                 await post_to_wordpress(MAIN_HUB, title, brief, full_link)
                             
                             history.append(full_link)
-                            town_stories.append({
-                                "title": title, 
-                                "brief": brief, 
-                                "link": full_link,
-                                "target_site": target_site
-                            })
+                            town_stories.append({"title": title, "link": full_link})
                             processed_count += 1
+                            print(f"    [OK] Distributed: {title[:40]}")
 
                     except Exception as e:
-                        print(f"  [Error] Article skip: {e}")
                         continue
 
                 all_results[town] = town_stories
-                await asyncio.sleep(random.uniform(5, 10))
+                await asyncio.sleep(random.uniform(3, 7))
 
             except Exception as e:
-                print(f"  [Critical] Failed {town}: {e}")
+                print(f" [Critical] {town} failed: {e}")
 
         await browser.close()
     
@@ -163,10 +146,11 @@ async def scrape_towns():
 
 # --- 4. EXECUTION ---
 if __name__ == "__main__":
-    print("Starting News Distribution Pipeline...")
-    results = asyncio.run(scrape_towns())
-
-    with open(DATA_EXPORT_FILE, "w") as f:
-        json.dump(results, f, indent=4)
-
-    print("\nMission Accomplished: All sites updated and news_data.json sync'd.")
+    print("Starting News Pipeline...")
+    try:
+        final_data = asyncio.run(scrape_towns())
+        with open(DATA_EXPORT_FILE, "w") as f:
+            json.dump(final_data, f, indent=4)
+        print("Done. Exported to news_data.json")
+    except Exception as e:
+        print(f"Pipeline crashed: {e}")
