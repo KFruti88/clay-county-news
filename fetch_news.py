@@ -33,6 +33,7 @@ WP_APP_PASSWORD = os.getenv("WP_PWD", "your_app_password")
 # --- 3. CORE FUNCTIONS ---
 
 def load_history():
+    """Loads previously posted links to avoid duplicates."""
     if os.path.exists(HISTORY_FILE):
         try:
             with open(HISTORY_FILE, "r") as f:
@@ -42,6 +43,7 @@ def load_history():
     return []
 
 def save_history(links):
+    """Saves the last 500 posted links to prevent database bloat."""
     with open(HISTORY_FILE, "w") as f:
         json.dump(links[-500:], f, indent=4)
 
