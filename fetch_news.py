@@ -9,7 +9,6 @@ from playwright.async_api import async_playwright
 try:
     from playwright_stealth import stealth_async
 except ImportError:
-    # Some environments name the async function differently
     try:
         from playwright_stealth import stealth_page_async as stealth_async
     except ImportError:
@@ -59,7 +58,7 @@ async def post_to_wordpress(site_url, title, brief, full_news_link):
     if not WP_USER or not WP_APP_PASSWORD:
         print(f"!!! Credentials missing for {site_url}. Skipping post.")
         return False
-    
+
     api_url = f"{site_url.rstrip('/')}/wp-json/wp/v2/posts"
     content = f"{brief}<br><br><strong><a href='{full_news_link}' target='_blank'>Read Full Story &raquo;</a></strong>"
     payload = {"title": title, "content": content, "status": "publish"}
@@ -83,7 +82,7 @@ async def run_pipeline():
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
         )
         page = await context.new_page()
-        
+
         # Apply stealth if available
         if stealth_async:
             await stealth_async(page)
@@ -119,9 +118,7 @@ async def run_pipeline():
 
                     target = SITE_MAPPING.get(town, MAIN_HUB)
                     
-                    # Post to specific site
                     if await post_to_wordpress(target, title, brief, full_link):
-                        # Mirror to main hub
                         if target != MAIN_HUB:
                             await post_to_wordpress(MAIN_HUB, title, brief, full_link)
                         
