@@ -98,8 +98,7 @@ async def scrape_town(town):
     return stories
 
 async def run():
-    # This dictionary uses the Title as a Key to stop duplicates
-    # If a story title exists, we just update its tags list.
+    # Using the Title as a Key stops duplicates automatically
     seen_stories = {} 
 
     print("Gathering news and deduplicating...")
@@ -116,11 +115,11 @@ async def run():
         for story in town_stories:
             title = story['title']
             if title in seen_stories:
-                # Story exists! Update existing story with new town tag if not already there
+                # If story exists, update tags list if the town isn't already in it
                 if town not in seen_stories[title]['tags']:
                     seen_stories[title]['tags'].append(town)
             else:
-                # Brand new story found, add to dictionary
+                # Brand new story found
                 seen_stories[title] = story
 
     # 3. Export to JSON (Flat List)
