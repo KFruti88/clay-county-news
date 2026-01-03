@@ -28,6 +28,7 @@ def get_mentioned_towns(text):
     """Identifies which specific towns are mentioned in a story text."""
     mentioned = []
     if not text: return mentioned
+    
     town_map = {
         "Flora": r'(?i)flora',
         "Xenia": r'(?i)xenia',
@@ -35,6 +36,7 @@ def get_mentioned_towns(text):
         "Clay City": r'(?i)clay\s*city',
         "Sailor Springs": r'(?i)sailor\s*springs'
     }
+    
     for town, pattern in town_map.items():
         if re.search(pattern, text):
             mentioned.append(town)
@@ -44,6 +46,7 @@ async def fetch_rss():
     """Fetches regional news and tags them by town mentions."""
     stories = []
     namespaces = {'content': 'http://purl.org/rss/1.0/modules/content/'}
+    
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.get(RSS_URL, timeout=15)
@@ -55,6 +58,7 @@ async def fetch_rss():
                     content_tag = item.find("content:encoded", namespaces)
                     full_text = content_tag.text if content_tag is not None else brief
 
+                    # Only keep if a local town or Clay County is mentioned
                     tags = get_mentioned_towns(title + " " + full_text)
                     if tags or re.search(r'(?i)clay\s*county', title + " " + full_text):
                         stories.append({
@@ -94,16 +98,17 @@ async def scrape_town(town):
 
 async def run():
     # Use a dictionary to stop duplicate titles
+    # If a story title exists, we just update its tags list
     seen_stories = {} 
 
     print("Gathering news and deduplicating...")
     
-    # 1. Process RSS (Regional)
+    # 1. Process RSS (Regional News)
     regional = await fetch_rss()
     for story in regional:
         seen_stories[story['title']] = story
 
-    # 2. Process Town Scrapes
+    # 2. Process Town Scrapes (Specific Local News)
     for town in TOWNS:
         print(f"Checking {town}...")
         town_stories = await scrape_town(town)
@@ -114,7 +119,7 @@ async def run():
                 if town not in seen_stories[title]['tags']:
                     seen_stories[title]['tags'].append(town)
             else:
-                # New story found, add to dictionary
+                # Brand new story found
                 seen_stories[title] = story
 
     # 3. Export to JSON
@@ -126,4 +131,3 @@ async def run():
 
 if __name__ == "__main__":
     asyncio.run(run())
-    
