@@ -25,8 +25,8 @@ def clean_text(text):
 
 def get_primary_town(text):
     """
-    Identifies the primary town. To prevent a story from appearing on 5 pages,
-    it returns only the FIRST town found in the text.
+    Identifies the primary town. To prevent a story from appearing on multiple 
+    town pages, it returns only the FIRST town match found in the text.
     """
     if not text: return "General"
 
@@ -40,7 +40,7 @@ def get_primary_town(text):
 
     for town, pattern in town_map.items():
         if re.search(pattern, text):
-            return town  # Stops at the first match and returns it
+            return town  # Return and exit immediately on first match
     return "General"
 
 async def fetch_rss():
@@ -59,7 +59,7 @@ async def fetch_rss():
                     content_tag = item.find("content:encoded", namespaces)
                     full_text = content_tag.text if content_tag is not None else brief
 
-                    # Assign to exactly ONE town or General
+                    # Assign to exactly ONE town or 'General'
                     town_tag = get_primary_town(title + " " + full_text)
 
                     stories.append({
@@ -74,7 +74,7 @@ async def fetch_rss():
     return stories
 
 async def scrape_town(town):
-    """Scrapes NewsBreak for a specific town."""
+    """Scrapes NewsBreak for town-specific updates."""
     stories = []
     url = f"https://www.newsbreak.com/search?q={town}+IL+news"
     async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -98,23 +98,23 @@ async def scrape_town(town):
     return stories
 
 async def run():
-    # Using title as key ensures a story only exists ONCE in the JSON
+    # Using title as key ensures a story only exists ONCE in the final JSON
     seen_stories = {} 
 
     print("Gathering news...")
 
-    # 1. Process RSS
+    # 1. Process RSS (Regional News)
     regional = await fetch_rss()
     for story in regional:
         seen_stories[story['title']] = story
 
-    # 2. Process Town Scrapes
+    # 2. Process Town Scrapes (Local News)
     for town in TOWNS:
         print(f"Checking {town}...")
         town_stories = await scrape_town(town)
         for story in town_stories:
             title = story['title']
-            # Only add if the title hasn't been captured yet
+            # Only add if the title hasn't been captured yet (Deduplication)
             if title not in seen_stories:
                 seen_stories[title] = story
 
@@ -127,5 +127,4 @@ async def run():
     print(f"Individual town pages should now filter by 'town_tag'.")
 
 if __name__ == "__main__":
-    # Clean asyncio execution
     asyncio.run(run())
