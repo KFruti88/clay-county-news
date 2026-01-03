@@ -21,7 +21,6 @@ def clean_text(text):
     ]
     for p in patterns:
         text = re.sub(p, '', text)
-    # Remove HTML tags for clean storage
     text = re.sub('<[^<]+?>', '', text)
     return text.strip()
 
@@ -59,7 +58,6 @@ async def fetch_rss():
                     content_tag = item.find("content:encoded", namespaces)
                     full_text = content_tag.text if content_tag is not None else brief
 
-                    # Only keep if a local town or Clay County is mentioned
                     tags = get_mentioned_towns(title + " " + full_text)
                     if tags or re.search(r'(?i)clay\s*county', title + " " + full_text):
                         stories.append({
@@ -98,8 +96,8 @@ async def scrape_town(town):
     return stories
 
 async def run():
-    # This dictionary uses the Title as a Key to stop duplicates
-    # If a story title already exists, we just update its tags.
+    # Use a dictionary to stop duplicate titles.
+    # If a story title exists, we just update its tags list.
     seen_stories = {} 
 
     print("Gathering news and deduplicating...")
@@ -114,15 +112,16 @@ async def run():
         print(f"Checking {town}...")
         town_stories = await scrape_town(town)
         for story in town_stories:
-            if story['title'] in seen_stories:
+            title = story['title']
+            if title in seen_stories:
                 # Story exists! Check if the town is already in the tags
-                if town not in seen_stories[story['title']]['tags']:
-                    seen_stories[story['title']]['tags'].append(town)
+                if town not in seen_stories[title]['tags']:
+                    seen_stories[title]['tags'].append(town)
             else:
                 # Brand new story found
-                seen_stories[story['title']] = story
+                seen_stories[title] = story
 
-    # Convert our unique dictionary back into a simple list for JSON
+    # Convert dictionary back into a list for JSON export
     final_list = list(seen_stories.values())
 
     with open(DATA_EXPORT_FILE, "w") as f:
