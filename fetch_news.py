@@ -33,7 +33,6 @@ WP_APP_PASSWORD = os.getenv("WP_PWD", "your_app_password")
 # --- 3. CORE FUNCTIONS ---
 
 def load_history():
-    """Loads previously posted links to avoid duplicates."""
     if os.path.exists(HISTORY_FILE):
         try:
             with open(HISTORY_FILE, "r") as f:
@@ -43,7 +42,6 @@ def load_history():
     return []
 
 def save_history(links):
-    """Saves the last 500 posted links to prevent database bloat."""
     with open(HISTORY_FILE, "w") as f:
         json.dump(links[-500:], f, indent=4)
 
@@ -57,11 +55,7 @@ async def post_to_wordpress(site_url, title, brief, full_news_link):
         f"Read Full Story &raquo;</a></strong>"
     )
     
-    payload = {
-        "title": title,
-        "content": content,
-        "status": "publish"
-    }
+    payload = {"title": title, "content": content, "status": "publish"}
 
     async with httpx.AsyncClient() as client:
         try:
@@ -74,12 +68,10 @@ async def post_to_wordpress(site_url, title, brief, full_news_link):
             if response.status_code == 201:
                 print(f"    [OK] Posted to {site_url}")
                 return True
-            else:
-                print(f"    [Fail] {site_url} status: {response.status_code}")
-                return False
+            print(f"    [Fail] {site_url} status: {response.status_code}")
         except Exception as e:
             print(f"    [Error] Connection failed for {site_url}: {e}")
-            return False
+    return False
 
 async def scrape_towns():
     """Main engine: Scrapes NewsBreak and distributes content."""
@@ -88,8 +80,6 @@ async def scrape_towns():
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
-        
-        # Professional User Agent to minimize detection
         context = await browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
         )
@@ -102,8 +92,6 @@ async def scrape_towns():
             
             try:
                 await page.goto(url, wait_until="networkidle")
-                
-                # Mimic human behavior with scrolling
                 await page.mouse.wheel(0, 800)
                 await asyncio.sleep(random.uniform(2, 4))
                 
@@ -111,41 +99,31 @@ async def scrape_towns():
                 count = 0
 
                 for article in articles:
-                    if count >= 3: break # Limit to top 3 NEW stories per town
+                    if count >= 3: break 
                     
                     try:
                         title = await article.locator("h3").inner_text()
-                        
-                        # Link Extraction and Normalization
                         link_node = article.locator("a").first
                         href = await link_node.get_attribute("href")
                         full_link = href if href.startswith("http") else f"https://www.newsbreak.com{href}"
 
-                        # Skip if story was already processed
                         if full_link in history:
                             continue
 
-                        # Extract and trim summary
                         summary_node = article.locator("p, .description, .summary").first
                         raw_summary = await summary_node.inner_text() if await summary_node.count() > 0 else "Latest community update."
                         brief = (raw_summary[:180] + "...") if len(raw_summary) > 180 else raw_summary
 
                         target_site = SITE_MAPPING.get(town, MAIN_HUB)
 
-                        # Distribute: 1. Local Site
+                        # Distribute content
                         success = await post_to_wordpress(target_site, title, brief, full_link)
-                        
-                        # Distribute: 2. Main Hub (if local post succeeded)
                         if success and target_site != MAIN_HUB:
                             await post_to_wordpress(MAIN_HUB, title, brief, full_link)
 
                         if success:
                             history.append(full_link)
-                            town_stories.append({
-                                "title": title,
-                                "brief": brief,
-                                "target_site": target_site
-                            })
+                            town_stories.append({"title": title, "brief": brief, "target_site": target_site})
                             count += 1
 
                     except Exception:
@@ -156,8 +134,7 @@ async def scrape_towns():
             except Exception as e:
                 print(f"  [Critical] Failed to scrape {town}: {e}")
 
-            # Anti-bot delay
-            await asyncio.sleep(random.uniform(5, 10))
+            await asyncio.sleep(random.uniform(5, 10)) # Anti-bot delay
 
         await browser.close()
     
@@ -166,10 +143,9 @@ async def scrape_towns():
 
 if __name__ == "__main__":
     print("Starting News Distribution Pipeline...")
-    news_results = asyncio.run(scrape_towns())
+    results = asyncio.run(scrape_towns())
     
-    # Final export for the frontend newspaper layout
     with open("news_data.json", "w") as f:
-        json.dump(news_results, f, indent=4)
+        json.dump(results, f, indent=4)
         
     print("\nMission Accomplished: All sites updated and news_data.json sync'd.")
