@@ -27,7 +27,7 @@ MAIN_HUB = "https://supportmylocalcommunity.com"
 HISTORY_FILE = "posted_links.json"
 
 # --- 2. CREDENTIALS ---
-# It is best to set these as Environment Variables on your system
+# Set these as environment variables on your machine/server
 WP_USER = os.getenv("WP_USER", "your_username")
 WP_APP_PASSWORD = os.getenv("WP_PWD", "your_app_password")
 
@@ -84,6 +84,7 @@ async def scrape_towns():
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
+        # Use a real browser fingerprint to avoid bot detection
         context = await browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
         )
@@ -96,6 +97,7 @@ async def scrape_towns():
             
             try:
                 await page.goto(url, wait_until="networkidle")
+                # Human-like scroll to trigger lazy loading
                 await page.mouse.wheel(0, 800)
                 await asyncio.sleep(random.uniform(2, 4))
                 
@@ -103,7 +105,7 @@ async def scrape_towns():
                 count = 0
 
                 for article in articles:
-                    if count >= 3: break 
+                    if count >= 3: break # Limit to top 3 NEW stories per town
                     
                     try:
                         title = await article.locator("h3").inner_text()
@@ -111,7 +113,7 @@ async def scrape_towns():
                         href = await link_node.get_attribute("href")
                         full_link = href if href.startswith("http") else f"https://www.newsbreak.com{href}"
 
-                        # Skip if story was already processed
+                        # Skip if story was already processed in a previous run
                         if full_link in history:
                             continue
 
