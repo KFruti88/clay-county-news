@@ -34,7 +34,7 @@ def clean_text(text):
     return text.strip()
 
 async def fetch_rss():
-    """Regional news from WNOI."""
+    """Regional news from WNOI RSS."""
     stories = []
     async with httpx.AsyncClient() as client:
         try:
@@ -60,7 +60,7 @@ async def scrape_town(town):
     url = f"https://www.newsbreak.com/search?q={town}+IL+news"
     async with httpx.AsyncClient(follow_redirects=True) as client:
         try:
-            # Use a standard browser header to avoid being blocked
+            # Use standard browser header to avoid being blocked
             headers = {"User-Agent": "Mozilla/5.0"}
             resp = await client.get(url, headers=headers)
             if resp.status_code == 200:
