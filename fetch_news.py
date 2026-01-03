@@ -26,7 +26,7 @@ def clean_text(text):
     return text.strip()
 
 def get_mentioned_towns(text):
-    """Identifies which specific towns are mentioned in a story."""
+    """Identifies which specific towns are mentioned in a story text."""
     mentioned = []
     if not text: return mentioned
     
@@ -44,7 +44,7 @@ def get_mentioned_towns(text):
     return mentioned
 
 async def fetch_rss():
-    """Fetches regional news and tags them by town."""
+    """Fetches regional news and tags them by town mentions."""
     stories = []
     namespaces = {'content': 'http://purl.org/rss/1.0/modules/content/'}
     
@@ -99,6 +99,7 @@ async def scrape_town(town):
 
 async def run():
     # This dictionary uses the Title as a Key to stop duplicates
+    # If a story title already exists, we just update its tags.
     seen_stories = {} 
 
     print("Gathering news and deduplicating...")
@@ -114,11 +115,11 @@ async def run():
         town_stories = await scrape_town(town)
         for story in town_stories:
             if story['title'] in seen_stories:
-                # If story exists, just add this town to its tags list
+                # Story exists! Check if the town is already in the tags
                 if town not in seen_stories[story['title']]['tags']:
                     seen_stories[story['title']]['tags'].append(town)
             else:
-                # It's a brand new story
+                # Brand new story found
                 seen_stories[story['title']] = story
 
     # Convert our unique dictionary back into a simple list for JSON
@@ -127,7 +128,7 @@ async def run():
     with open(DATA_EXPORT_FILE, "w") as f:
         json.dump(final_list, f, indent=4)
         
-    print(f"Update complete! Saved {len(final_list)} unique, tagged stories.")
+    print(f"Update complete! Saved {len(final_list)} unique, tagged stories to {DATA_EXPORT_FILE}")
 
 if __name__ == "__main__":
     asyncio.run(run())
