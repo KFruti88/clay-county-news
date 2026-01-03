@@ -1,19 +1,35 @@
 import json
 from datetime import datetime
+import os
 
 # Load your JSON data
-with open('news_data.json', 'r') as f:
-    data = json.load(f)
+try:
+    with open('news_data.json', 'r') as f:
+        data = json.load(f)
+except FileNotFoundError:
+    print("Error: news_data.json not found")
+    exit(1)
 
 rss_items = ""
 
-# Loop through your JSON entries (assuming it's a list)
+# Handle if the JSON is a single list of strings or a list of dictionaries
 for item in data:
+    if isinstance(item, dict):
+        # If it's a dictionary like {"title": "...", "link": "..."}
+        title = item.get('title', 'No Title')
+        link = item.get('link', 'https://github.com/KFruti88/clay-county-news')
+        desc = item.get('description', '')
+    else:
+        # If it's just a string ["News 1", "News 2"]
+        title = str(item)
+        link = 'https://github.com/KFruti88/clay-county-news'
+        desc = 'New update in news_data.json'
+
     rss_items += f"""
         <item>
-            <title>{item.get('title', 'No Title')}</title>
-            <link>{item.get('link', '')}</link>
-            <description>{item.get('description', '')}</description>
+            <title>{title}</title>
+            <link>{link}</link>
+            <description>{desc}</description>
             <pubDate>{datetime.now().strftime("%a, %d %b %Y %H:%M:%S +0000")}</pubDate>
         </item>"""
 
@@ -30,3 +46,4 @@ rss_feed = f"""<?xml version="1.0" encoding="UTF-8" ?>
 
 with open('feed.xml', 'w') as f:
     f.write(rss_feed)
+    print("Successfully generated feed.xml")
