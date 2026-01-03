@@ -9,6 +9,9 @@ try:
 except FileNotFoundError:
     print("Error: news_data.json not found")
     exit(1)
+except json.JSONDecodeError:
+    print("Error: news_data.json is not valid JSON")
+    exit(1)
 
 rss_items = ""
 
