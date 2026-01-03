@@ -1,111 +1,173 @@
 <div id="newspaper-container">
     <div class="newspaper-header">
-        <h1 id="town-banner">Loading News...</h1>
+        <h1 id="town-banner">Loading...</h1>
         <div class="newspaper-meta" id="meta-bar">
-            <span id="current-date" style="flex: 1; text-align: left;"></span>
-            <span id="chicago-time" style="flex: 1; text-align: center; border-left: 1px solid #000; border-right: 1px solid #000; font-size: 1.1rem;"></span>
-            <span id="town-location" style="flex: 1; text-align: right;"></span>
+            <span id="current-date"></span>
+            <span id="chicago-time"></span>
+            <span id="town-location"></span>
         </div>
     </div>
     <div id="news-grid" class="newspaper-grid">
-        <div class="loading" style="grid-column: 1/-1; text-align: center; padding: 50px;">Ink is drying... loading headlines...</div>
+        <div class="loading">Ink is drying... loading headlines...</div>
     </div>
 </div>
 
-<style id="dynamic-newspaper-styles">
-    /* Base Styles */
-    #newspaper-container { padding: 40px 20px; border-radius: 4px; font-family: 'Times New Roman', Times, serif !important; max-width: 1200px; margin: 20px auto; box-shadow: 0 15px 35px rgba(0,0,0,0.4); transition: all 0.3s ease; }
-    .newspaper-header { text-align: center; border-bottom: 5px solid currentColor; margin-bottom: 30px; padding-bottom: 5px; }
-    .newspaper-header h1 { font-size: 4.5rem !important; margin: 0 !important; text-transform: uppercase; font-weight: 900 !important; color: inherit !important; }
-    .newspaper-meta { border-top: 2px solid currentColor; margin-top: 10px; padding: 10px 0; font-weight: bold; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; border-color: currentColor; }
-    .newspaper-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
-    .article { background: #ffffff !important; padding: 20px; border: 1px solid #999; box-shadow: 6px 6px 0px rgba(0,0,0,0.2); display: flex; flex-direction: column; color: #000 !important; }
-    .article h3 { font-size: 1.6rem !important; line-height: 1.1 !important; color: #000 !important; border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-top:0 !important; }
-    .article p { font-size: 1rem !important; line-height: 1.4 !important; color: #333 !important; }
-    .read-more { display: block; border: 2px solid #000; padding: 8px; text-align: center; text-decoration: none !important; color: #000 !important; font-weight: bold; text-transform: uppercase; font-size: 0.8rem; margin-top: auto; }
-    .read-more:hover { background: #000; color: #fff !important; }
+<style>
+    /* Glossy Background & Container */
+    #newspaper-container { 
+        padding: 40px 20px; 
+        border-radius: 15px; 
+        font-family: 'Times New Roman', Times, serif !important; 
+        max-width: 1200px; 
+        margin: 20px auto; 
+        box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.18);
+        transition: all 0.5s ease;
+    }
+
+    /* Glossy Font Effect */
+    .newspaper-header h1 { 
+        font-size: 4.5rem !important; 
+        margin: 0 !important; 
+        text-transform: uppercase; 
+        font-weight: 900 !important; 
+        color: inherit !important;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3), 0 0 0px rgba(255,255,255,0.5);
+        letter-spacing: -2px;
+    }
+
+    .newspaper-meta { 
+        border-top: 2px solid currentColor; 
+        border-bottom: 5px solid currentColor; 
+        margin-top: 10px; 
+        padding: 10px 0; 
+        font-weight: bold; 
+        display: flex; 
+        justify-content: space-between;
+    }
+
+    .newspaper-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 30px; margin-top: 30px; }
+
+    /* Glossy Article Cards */
+    .article { 
+        background: rgba(255, 255, 255, 0.9) !important; 
+        padding: 25px; 
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.4);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+        display: flex; 
+        flex-direction: column; 
+        color: #000 !important;
+        transition: transform 0.3s ease;
+        scroll-margin-top: 100px; /* Offset for smooth scrolling anchors */
+    }
     
-    /* Responsive */
+    .article:hover { transform: translateY(-5px); }
+
+    .article h3 { 
+        font-size: 1.8rem !important; 
+        line-height: 1.1 !important; 
+        border-bottom: 2px solid #eee; 
+        padding-bottom: 10px; 
+        margin: 0 0 15px 0 !important;
+        background: linear-gradient(to bottom, #333 0%, #000 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .read-more { 
+        display: block; 
+        background: linear-gradient(to bottom, #444, #000);
+        padding: 12px; 
+        text-align: center; 
+        color: #fff !important; 
+        font-weight: bold; 
+        text-transform: uppercase; 
+        border-radius: 5px;
+        text-decoration: none;
+        margin-top: auto;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    #chicago-time { border-left: 1px solid currentColor; border-right: 1px solid currentColor; padding: 0 20px; }
+
     @media (max-width: 800px) { 
-        .newspaper-meta { flex-direction: column; text-align: center !important; } 
-        .newspaper-meta span { border: none !important; text-align: center !important; width: 100%; margin: 2px 0; } 
-        .newspaper-header h1 { font-size: 2.5rem !important; } 
+        .newspaper-header h1 { font-size: 2.5rem !important; }
+        .newspaper-meta { flex-direction: column; gap: 10px; }
+        #chicago-time { border: none; }
     }
 </style>
 
 <script>
 (async () => {
-    // 1. CONFIGURATION: Styles for each town
-    const townStyles = {
-        "Flora": { bg: "#ff5f05", text: "#000000" },      // Solid Orange, Black Font
-        "Louisville": { bg: "#cc0000", text: "#ffffff" }, // Solid Red, White Font
-        "Default": { bg: "#e0e0e0", text: "#000000" }     // Light Gray, Black Font (Xenia, Clay City, Sailor Springs)
+    const townConfigs = {
+        "flora": { name: "Flora", bg: "linear-gradient(135deg, #ff8c00 0%, #ff5f05 100%)", text: "#000" },
+        "louisville": { name: "Louisville", bg: "linear-gradient(135deg, #ff0000 0%, #800000 100%)", text: "#fff" },
+        "default": { name: "Clay County", bg: "linear-gradient(135deg, #ffffff 0%, #dcdcdc 100%)", text: "#000" }
     };
 
-    const towns = ["Flora", "Clay City", "Xenia", "Louisville", "Sailor Springs"];
-    
-    // 2. DETECT TOWN FROM URL
-    const currentUrl = window.location.href.toLowerCase();
-    let detectedTown = "General"; // Default if nothing matches
+    const url = window.location.href.toLowerCase();
+    const isNewsCenter = url.includes("news-center");
 
-    for (const town of towns) {
-        if (currentUrl.includes(town.toLowerCase().replace(/\s/g, ''))) {
-            detectedTown = town;
-            break;
-        }
+    let detected = "default";
+    for (const key in townConfigs) {
+        if (url.includes(key)) { detected = key; break; }
     }
 
-    // 3. APPLY COLORS BASED ON DETECTED TOWN
+    const config = townConfigs[detected];
     const container = document.getElementById('newspaper-container');
-    const metaBar = document.getElementById('meta-bar');
-    const styleConfig = townStyles[detectedTown] || townStyles["Default"];
+    container.style.background = config.bg;
+    container.style.color = config.text;
 
-    container.style.backgroundColor = styleConfig.bg;
-    container.style.color = styleConfig.text;
-    metaBar.style.borderColor = styleConfig.text;
-
-    // Update Banner/Meta
-    document.getElementById('town-banner').innerText = `${detectedTown.toUpperCase()} C. C. NEWS`;
-    document.getElementById('town-location').innerText = `${detectedTown.toUpperCase()}, ILLINOIS`;
+    document.getElementById('town-banner').innerText = isNewsCenter ? "COUNTY NEWS CENTER" : `${config.name.toUpperCase()} NEWS`;
+    document.getElementById('town-location').innerText = isNewsCenter ? "FULL COUNTY EDITION" : `${config.name.toUpperCase()}, ILLINOIS`;
     document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-    // Live Clock
     function updateClock() {
         const options = { timeZone: 'America/Chicago', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
-        const el = document.getElementById('chicago-time');
-        if(el) el.innerText = new Intl.DateTimeFormat([], options).format(new Date());
+        document.getElementById('chicago-time').innerText = new Intl.DateTimeFormat([], options).format(new Date());
     }
     updateClock(); setInterval(updateClock, 1000);
 
-    // 4. FETCH AND FILTER DATA
-    const DATA_URL = "https://raw.githubusercontent.com/KFruti88/clay-county-news/main/news_data.json";
-
     try {
-        const res = await fetch(DATA_URL);
-        const allNews = await res.json();
+        const res = await fetch("https://raw.githubusercontent.com/KFruti88/clay-county-news/main/news_data.json");
+        const data = await res.json();
         const grid = document.getElementById('news-grid');
         grid.innerHTML = "";
         
-        // Show detected town news OR General news
-        const stories = allNews.filter(s => s.town_tag === detectedTown || s.town_tag === "General");
-
-        if (stories.length === 0) {
-            grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 50px;">No headlines found for this edition.</div>`;
-            return;
-        }
+        // Ensure stories show only once: Filter logic
+        const stories = isNewsCenter ? data : data.filter(s => s.town_tag === config.name || s.town_tag === "General");
 
         stories.forEach(story => {
+            // Create a URL-friendly ID from the title to use as an anchor
+            const articleId = story.title.toLowerCase().replace(/[^a-z0-9]/g, '-');
+            
             const article = document.createElement('div');
             article.className = 'article';
+            article.id = articleId; // SET THE ANCHOR ID HERE
+
+            const content = isNewsCenter ? story.full_story.replace(/\n/g, '<br>') : story.brief;
+            
+            // Update the link to include the anchor hash (#article-id)
+            const linkHTML = isNewsCenter ? '' : `<a href="${story.link}#${articleId}" class="read-more">Read Full Story »</a>`;
+
             article.innerHTML = `
                 <h3>${story.title}</h3>
-                <p>${story.brief}</p>
-                <a href="${story.link}" class="read-more" target="_blank">Read Full Story »</a>
+                <p>${content}</p>
+                ${linkHTML}
             `;
             grid.appendChild(article);
         });
-    } catch (e) {
-        document.getElementById('news-grid').innerHTML = "Error loading news data.";
-    }
+
+        // If a user clicked "Read More", scroll them to the specific article after loading
+        if (window.location.hash) {
+            const target = document.querySelector(window.location.hash);
+            if (target) target.scrollIntoView({ behavior: 'smooth' });
+        }
+
+    } catch (e) { console.error(e); }
 })();
 </script>
