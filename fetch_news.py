@@ -1,7 +1,6 @@
 import httpx
 import asyncio
 import json
-import os
 import re
 import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
@@ -13,50 +12,57 @@ RSS_URL = "https://www.wnoi.com/category/local/feed"
 NEWS_CENTER_URL = "https://supportmylocalcommunity.com/clay-county-news-center/"
 
 def clean_text(text):
-    """Removes branding, frequencies, and reporter names."""
+    """Scrub branding and HTML."""
     if not text: return ""
-    patterns = [
-        r'(?i)wnoi', r'(?i)103\.9/99\.3', r'(?i)local\s*--', 
-        r'(?i)by\s+tom\s+lavine', r'^\d{1,2}/\d{1,2}/\d{2,4}\s*'
-    ]
+    patterns = [r'(?i)wnoi', r'(?i)103\.9/99\.3', r'(?i)local\s*--', r'(?i)by\s+tom\s+lavine', r'^\d{1,2}/\d{1,2}/\d{2,4}\s*']
     for p in patterns:
         text = re.sub(p, '', text)
-    # Remove HTML tags to keep the JSON clean
-    text = re.sub('<[^<]+?>', '', text)
-    return text.strip()
+    return re.sub('<[^<]+?>', '', text).strip()
+
+def contains_clay_county_keywords(text):
+    """
+    The 'Smart Scanner': Only returns True if a Clay County town is mentioned.
+    This allows news from Salem or Effingham to pass IF they mention your towns.
+    """
+    if not text: return False
+    # This list ensures we only keep stories relevant to your area
+    keywords = [r'(?i)flora', r'(?i)xenia', r'(?i)louisville', r'(?i)clay\s*city', r'(?i)sailor\s*springs', r'(?i)clay\s*county']
+    return any(re.search(k, text) for k in keywords)
 
 async def fetch_rss():
-    """Fetches news and extracts FULL content using namespaces."""
+    """Fetches regional news and filters for relevance to your specific towns."""
     stories = []
-    # This namespace is the 'key' to unlocking the full story tag
     namespaces = {'content': 'http://purl.org/rss/1.0/modules/content/'}
-    
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.get(RSS_URL, timeout=15)
             if resp.status_code == 200:
                 root = ET.fromstring(resp.content)
-                for item in root.findall("./channel/item")[:10]:
+                # Scan a larger batch (30) to find hidden mentions of your towns
+                for item in root.findall("./channel/item")[:30]:
                     title = item.find("title").text
-                    # 'description' is the short teaser
                     brief = item.find("description").text or ""
                     
-                    # 'content:encoded' is the full article text
                     content_tag = item.find("content:encoded", namespaces)
                     full_story_raw = content_tag.text if content_tag is not None else brief
                     
-                    stories.append({
-                        "title": clean_text(title),
-                        "brief": clean_text(brief)[:180] + "...",
-                        "full_story": clean_text(full_story_raw), 
-                        "link": NEWS_CENTER_URL
-                    })
-        except Exception as e:
-            print(f"RSS Error: {e}")
+                    # SCANNER LOGIC:
+                    # Keep the story if the Title, Brief, OR Full Story mentions your towns
+                    if (contains_clay_county_keywords(title) or 
+                        contains_clay_county_keywords(brief) or 
+                        contains_clay_county_keywords(full_story_raw)):
+                        
+                        stories.append({
+                            "title": clean_text(title),
+                            "brief": clean_text(brief)[:180] + "...",
+                            "full_story": clean_text(full_story_raw),
+                            "link": NEWS_CENTER_URL
+                        })
+        except Exception as e: print(f"RSS Error: {e}")
     return stories
 
 async def scrape_town(town):
-    """Scrapes NewsBreak for town-specific headlines."""
+    """Hits NewsBreak specifically for each town."""
     stories = []
     url = f"https://www.newsbreak.com/search?q={town}+IL+news"
     async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -71,26 +77,23 @@ async def scrape_town(town):
                         stories.append({
                             "title": clean_text(title_node.get_text()),
                             "brief": f"Community update for {town}.",
-                            "full_story": f"Check our News Center for full details on {town} community updates.",
+                            "full_story": f"Detailed update for {town}.",
                             "link": NEWS_CENTER_URL
                         })
-        except Exception as e:
-            print(f"Scrape Error for {town}: {e}")
+        except Exception as e: print(f"Scrape Error: {e}")
     return stories
 
 async def run():
     all_news = {}
-    print("Gathering regional news...")
+    print("Scanning regional feeds for Clay County mentions...")
     regional = await fetch_rss()
     for town in TOWNS:
         print(f"Processing {town}...")
         town_specific = await scrape_town(town)
-        # Combine town news with regional news
         all_news[town] = town_specific + regional
-        
     with open(DATA_EXPORT_FILE, "w") as f:
         json.dump(all_news, f, indent=4)
-    print(f"Successfully updated {DATA_EXPORT_FILE}")
+    print(f"Update complete: {DATA_EXPORT_FILE}")
 
 if __name__ == "__main__":
     asyncio.run(run())
