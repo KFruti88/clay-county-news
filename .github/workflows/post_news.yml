@@ -2,9 +2,9 @@ name: News Distribution Pipeline
 
 on:
   schedule:
-    # Runs every 6 hours (Adjust as needed)
-    - cron: '0 */6 * * *'
-  workflow_dispatch: # Allows you to run it manually from the "Actions" tab
+    # Runs every 4 hours. You can change this to '0 */6 * * *' for 6 hours.
+    - cron: '0 */4 * * *'
+  workflow_dispatch: # Allows you to trigger it manually from the Actions tab
 
 jobs:
   scrape-and-publish:
@@ -18,19 +18,19 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          cache: 'pip' # Speeds up subsequent runs
+          cache: 'pip'
 
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install httpx playwright playwright-stealth
-          # Install browser system dependencies
+          # Install Linux system libraries needed for Chromium
           playwright install-deps chromium
           playwright install chromium
 
       - name: Run Scraper
         env:
-          # These must be set in your GitHub Repository Secrets
+          # Ensure these are set in your GitHub Settings > Secrets > Actions
           WP_USER: ${{ secrets.WP_USER }}
           WP_PWD: ${{ secrets.WP_PWD }}
         run: python fetch_news.py
@@ -39,6 +39,14 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
+          
+          # Add the history file and the export file
           git add posted_links.json news_data.json
-          # Only commit if there are changes to avoid erroring out
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Update news history and data" && git push)
+          
+          # Check if there are changes before committing
+          if git diff --staged --quiet; then
+            echo "No new news found. Skipping commit."
+          else
+            git commit -m "Update news history and data [skip ci]"
+            git push
+          fi
