@@ -28,7 +28,6 @@ def get_mentioned_towns(text):
     """Identifies which specific towns are mentioned in a story text."""
     mentioned = []
     if not text: return mentioned
-    
     town_map = {
         "Flora": r'(?i)flora',
         "Xenia": r'(?i)xenia',
@@ -36,7 +35,6 @@ def get_mentioned_towns(text):
         "Clay City": r'(?i)clay\s*city',
         "Sailor Springs": r'(?i)sailor\s*springs'
     }
-    
     for town, pattern in town_map.items():
         if re.search(pattern, text):
             mentioned.append(town)
@@ -46,7 +44,6 @@ async def fetch_rss():
     """Fetches regional news and tags them by town mentions."""
     stories = []
     namespaces = {'content': 'http://purl.org/rss/1.0/modules/content/'}
-    
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.get(RSS_URL, timeout=15)
@@ -96,8 +93,7 @@ async def scrape_town(town):
     return stories
 
 async def run():
-    # Use a dictionary to stop duplicate titles.
-    # If a story title exists, we just update its tags list.
+    # Use a dictionary to stop duplicate titles
     seen_stories = {} 
 
     print("Gathering news and deduplicating...")
@@ -114,16 +110,15 @@ async def run():
         for story in town_stories:
             title = story['title']
             if title in seen_stories:
-                # Story exists! Check if the town is already in the tags
+                # Update existing story with the new town tag if not already present
                 if town not in seen_stories[title]['tags']:
                     seen_stories[title]['tags'].append(town)
             else:
-                # Brand new story found
+                # New story found, add to dictionary
                 seen_stories[title] = story
 
-    # Convert dictionary back into a list for JSON export
+    # 3. Export to JSON
     final_list = list(seen_stories.values())
-
     with open(DATA_EXPORT_FILE, "w") as f:
         json.dump(final_list, f, indent=4)
         
@@ -131,3 +126,4 @@ async def run():
 
 if __name__ == "__main__":
     asyncio.run(run())
+    
