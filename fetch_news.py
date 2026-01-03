@@ -1,7 +1,6 @@
 import httpx
 import asyncio
 import json
-import os
 import re
 import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
@@ -24,26 +23,28 @@ def clean_text(text):
     text = re.sub('<[^<]+?>', '', text)
     return text.strip()
 
-def get_mentioned_towns(text):
-    """Identifies which specific towns are mentioned in a story text."""
-    mentioned = []
-    if not text: return mentioned
+def get_primary_town(text):
+    """
+    Identifies the primary town mentioned. 
+    To prevent one story showing up in 5 places, we only return the FIRST town found.
+    """
+    if not text: return "General"
     
     town_map = {
-        "Flora": r'(?i)flora',
-        "Xenia": r'(?i)xenia',
-        "Louisville": r'(?i)louisville',
+        "Flora": r'(?i)\bflora\b',
+        "Xenia": r'(?i)\bxenia\b',
+        "Louisville": r'(?i)\blouisville\b',
         "Clay City": r'(?i)clay\s*city',
         "Sailor Springs": r'(?i)sailor\s*springs'
     }
     
     for town, pattern in town_map.items():
         if re.search(pattern, text):
-            mentioned.append(town)
-    return mentioned
+            return town  # Return the first match found
+    return "General"
 
 async def fetch_rss():
-    """Fetches regional news and tags them by town mentions."""
+    """Fetches regional news and assigns a single specific town tag."""
     stories = []
     namespaces = {'content': 'http://purl.org/rss/1.0/modules/content/'}
     
@@ -58,15 +59,16 @@ async def fetch_rss():
                     content_tag = item.find("content:encoded", namespaces)
                     full_text = content_tag.text if content_tag is not None else brief
 
-                    tags = get_mentioned_towns(title + " " + full_text)
-                    if tags or re.search(r'(?i)clay\s*county', title + " " + full_text):
-                        stories.append({
-                            "title": clean_text(title),
-                            "brief": clean_text(brief)[:180] + "...",
-                            "full_story": clean_text(full_text),
-                            "link": NEWS_CENTER_URL,
-                            "tags": tags if tags else ["General"]
-                        })
+                    # Assign to exactly ONE town or General
+                    town_tag = get_primary_town(title + " " + full_text)
+                    
+                    stories.append({
+                        "title": clean_text(title),
+                        "brief": clean_text(brief)[:180] + "...",
+                        "full_story": clean_text(full_text),
+                        "link": NEWS_CENTER_URL,
+                        "town_tag": town_tag # Single tag for strict filtering
+                    })
         except Exception as e:
             print(f"RSS Error: {e}")
     return stories
@@ -87,37 +89,33 @@ async def scrape_town(town):
                         stories.append({
                             "title": clean_text(title_node.get_text()),
                             "brief": f"Community update for {town}.",
-                            "full_story": f"Community updates for {town}. Check News Center for more.",
+                            "full_story": f"Detailed community updates for {town}. Visit the News Center for the full report.",
                             "link": NEWS_CENTER_URL,
-                            "tags": [town]
+                            "town_tag": town
                         })
         except Exception as e:
             print(f"Scrape Error for {town}: {e}")
     return stories
 
 async def run():
-    # Key = Title, Value = Story object. This forces uniqueness across all towns.
+    # Using title as key ensures a story only exists ONCE in the JSON
     seen_stories = {} 
 
-    print("Gathering news and deduplicating...")
+    print("Gathering news...")
     
     # 1. Process RSS (Regional News)
     regional = await fetch_rss()
     for story in regional:
         seen_stories[story['title']] = story
 
-    # 2. Process Town Scrapes (Local News)
+    # 2. Process Town Scrapes
     for town in TOWNS:
         print(f"Checking {town}...")
         town_stories = await scrape_town(town)
         for story in town_stories:
             title = story['title']
-            if title in seen_stories:
-                # Update existing story with new town tag if not already there
-                if town not in seen_stories[title]['tags']:
-                    seen_stories[title]['tags'].append(town)
-            else:
-                # Brand new story found
+            # Only add if we haven't seen this title yet
+            if title not in seen_stories:
                 seen_stories[title] = story
 
     # 3. Export to JSON
@@ -125,7 +123,8 @@ async def run():
     with open(DATA_EXPORT_FILE, "w") as f:
         json.dump(final_list, f, indent=4)
         
-    print(f"Update complete! Saved {len(final_list)} unique stories to {DATA_EXPORT_FILE}")
+    print(f"Update complete! Saved {len(final_list)} unique stories.")
+    print(f"Individual town pages should now filter by 'town_tag'.")
 
 if __name__ == "__main__":
-    asyncio.run(run())
+    async asyncio.run(run())
