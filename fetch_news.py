@@ -92,7 +92,8 @@ async def run_pipeline():
     for town in TOWNS:
         print(f"Aggregating news for {town}...")
         town_specific = await scrape_town_news(town)
-        # Combine town news with the regional RSS feed
+        
+        # Merge town-specific news with the regional RSS feed
         all_results[town] = town_specific + regional_news
 
     # 3. Save only clean data to JSON
