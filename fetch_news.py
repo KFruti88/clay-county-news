@@ -4,6 +4,7 @@ import json
 import os
 import re
 import xml.etree.ElementTree as ET
+from datetime import datetime
 from bs4 import BeautifulSoup
 
 # --- CONFIGURATION ---
@@ -43,13 +44,14 @@ async def fetch_rss_news():
             if response.status_code == 200:
                 root = ET.fromstring(response.content)
                 items = root.findall("./channel/item")
-                for item in items[:8]: # Limit to latest 8 regional stories
+                # Get top 8 regional stories
+                for item in items[:8]:
                     title = item.find("title").text
                     brief = item.find("description").text or ""
                     stories.append({
                         "title": clean_text(title),
                         "brief": clean_text(brief)[:180] + "...",
-                        "link": NEWS_CENTER_URL # Redirects to your central page
+                        "link": NEWS_CENTER_URL 
                     })
         except Exception as e:
             print(f"RSS Fetch Error: {e}")
@@ -65,6 +67,7 @@ async def scrape_town_news(town):
             resp = await client.get(search_url, headers=headers)
             if resp.status_code == 200:
                 soup = BeautifulSoup(resp.text, 'html.parser')
+                # Limit to top 3 articles per town
                 articles = soup.find_all('article')[:3] 
                 for art in articles:
                     title_tag = art.find('h3') or art.find('a')
@@ -80,19 +83,22 @@ async def scrape_town_news(town):
 
 async def run_pipeline():
     all_results = {}
-    
+
     # 1. Fetch regional stories once
+    print("Fetching regional RSS news...")
     regional_news = await fetch_rss_news()
-    
+
     # 2. Collect town news and merge with regional news
     for town in TOWNS:
         print(f"Aggregating news for {town}...")
         town_specific = await scrape_town_news(town)
+        # Merge town-specific news with the regional RSS feed
         all_results[town] = town_specific + regional_news
 
     # 3. Save only clean data to JSON
     with open(DATA_EXPORT_FILE, "w") as f:
         json.dump(all_results, f, indent=4)
+    
     print(f"Success: {DATA_EXPORT_FILE} updated without metadata or branding.")
 
 if __name__ == "__main__":
