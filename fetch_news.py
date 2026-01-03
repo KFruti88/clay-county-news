@@ -25,11 +25,11 @@ def clean_text(text):
 
 def get_primary_town(text):
     """
-    Returns only the FIRST town found in the text.
-    If no town is found, it labels it 'General'.
+    Identifies the primary town. To prevent a story from appearing on 5 pages,
+    it returns only the FIRST town found in the text.
     """
     if not text: return "General"
-    
+
     town_map = {
         "Flora": r'(?i)\bflora\b',
         "Xenia": r'(?i)\bxenia\b',
@@ -37,14 +37,14 @@ def get_primary_town(text):
         "Clay City": r'(?i)clay\s*city',
         "Sailor Springs": r'(?i)sailor\s*springs'
     }
-    
+
     for town, pattern in town_map.items():
         if re.search(pattern, text):
-            return town  # Stops at the first match
+            return town  # Stops at the first match and returns it
     return "General"
 
 async def fetch_rss():
-    """Fetches RSS feed and assigns exactly ONE town_tag."""
+    """Fetches RSS feed and assigns exactly ONE town_tag per story."""
     stories = []
     namespaces = {'content': 'http://purl.org/rss/1.0/modules/content/'}
     
@@ -59,15 +59,15 @@ async def fetch_rss():
                     content_tag = item.find("content:encoded", namespaces)
                     full_text = content_tag.text if content_tag is not None else brief
 
-                    # Strict assignment
+                    # Assign to exactly ONE town or General
                     town_tag = get_primary_town(title + " " + full_text)
-                    
+
                     stories.append({
                         "title": clean_text(title),
                         "brief": clean_text(brief)[:180] + "...",
                         "full_story": clean_text(full_text),
                         "link": NEWS_CENTER_URL,
-                        "town_tag": town_tag
+                        "town_tag": town_tag 
                     })
         except Exception as e:
             print(f"RSS Error: {e}")
@@ -98,17 +98,17 @@ async def scrape_town(town):
     return stories
 
 async def run():
-    # Key = Title. This prevents the same story appearing twice in the News Center.
+    # Using title as key ensures a story only exists ONCE in the JSON
     seen_stories = {} 
 
     print("Gathering news...")
-    
-    # 1. RSS
+
+    # 1. Process RSS
     regional = await fetch_rss()
     for story in regional:
         seen_stories[story['title']] = story
 
-    # 2. Town Scrapes
+    # 2. Process Town Scrapes
     for town in TOWNS:
         print(f"Checking {town}...")
         town_stories = await scrape_town(town)
@@ -118,12 +118,14 @@ async def run():
             if title not in seen_stories:
                 seen_stories[title] = story
 
-    # 3. Export
+    # 3. Export to JSON
     final_list = list(seen_stories.values())
     with open(DATA_EXPORT_FILE, "w") as f:
         json.dump(final_list, f, indent=4)
-        
+
     print(f"Update complete! Saved {len(final_list)} unique stories to {DATA_EXPORT_FILE}")
+    print(f"Individual town pages should now filter by 'town_tag'.")
 
 if __name__ == "__main__":
+    # Clean asyncio execution
     asyncio.run(run())
