@@ -18,19 +18,21 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          cache: 'pip'
+          # We removed the 'cache: pip' line to avoid the "No file matched" error.
+          # If you create a requirements.txt, you can add 'cache: pip' back here.
 
-      # Playwright needs both the python package and system-level linux libraries
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
+          # Directly installing modules since we aren't using a requirements file yet
           pip install httpx playwright playwright-stealth
+          # Install Linux system libraries needed for Chromium browser
           playwright install-deps chromium
           playwright install chromium
 
       - name: Run Scraper
         env:
-          # Ensure these are configured in GitHub Repository Settings > Secrets > Actions
+          # These must be set in your GitHub Settings > Secrets > Actions
           WP_USER: ${{ secrets.WP_USER }}
           WP_PWD: ${{ secrets.WP_PWD }}
         run: python fetch_news.py
@@ -43,7 +45,7 @@ jobs:
           # Add tracking and data files updated by the scraper
           git add posted_links.json news_data.json
           
-          # Logic to commit only if news was actually found to prevent empty commits
+          # Check if there are changes before committing to avoid empty commit errors
           if git diff --staged --quiet; then
             echo "No new news found. Skipping commit."
           else
