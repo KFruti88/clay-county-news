@@ -46,7 +46,6 @@ def load_history():
 def save_history(links):
     """Saves the last 500 posted links with formatting."""
     with open(HISTORY_FILE, "w") as f:
-        # indent=4 makes the file human-readable for debugging
         json.dump(links[-500:], f, indent=4)
 
 async def post_to_wordpress(site_url, title, brief, full_news_link):
@@ -97,7 +96,6 @@ async def scrape_towns():
             
             try:
                 await page.goto(url, wait_until="networkidle")
-                # Human-like scroll to trigger lazy loading
                 await page.mouse.wheel(0, 800)
                 await asyncio.sleep(random.uniform(2, 4))
                 
@@ -105,7 +103,7 @@ async def scrape_towns():
                 count = 0
 
                 for article in articles:
-                    if count >= 3: break # Limit to top 3 NEW stories per town
+                    if count >= 3: break 
                     
                     try:
                         title = await article.locator("h3").inner_text()
@@ -113,7 +111,6 @@ async def scrape_towns():
                         href = await link_node.get_attribute("href")
                         full_link = href if href.startswith("http") else f"https://www.newsbreak.com{href}"
 
-                        # Skip if story was already processed in a previous run
                         if full_link in history:
                             continue
 
@@ -144,7 +141,7 @@ async def scrape_towns():
             except Exception as e:
                 print(f"  [Critical] Failed to scrape {town}: {e}")
 
-            await asyncio.sleep(random.uniform(5, 10)) # Anti-bot delay
+            await asyncio.sleep(random.uniform(5, 10))
 
         await browser.close()
     
@@ -155,7 +152,6 @@ if __name__ == "__main__":
     print("Starting News Distribution Pipeline...")
     results = asyncio.run(scrape_towns())
     
-    # Export for frontend index.html newspaper layout
     with open("news_data.json", "w") as f:
         json.dump(results, f, indent=4)
         
