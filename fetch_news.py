@@ -21,7 +21,6 @@ def clean_text(text):
     ]
     for p in patterns:
         text = re.sub(p, '', text)
-    # Remove HTML tags for clean storage
     text = re.sub('<[^<]+?>', '', text)
     return text.strip()
 
@@ -98,7 +97,7 @@ async def scrape_town(town):
     return stories
 
 async def run():
-    # Key = Title, Value = Story object. This forces uniqueness.
+    # Key = Title, Value = Story object. This prevents duplicates.
     seen_stories = {} 
 
     print("Gathering news and deduplicating...")
@@ -108,7 +107,7 @@ async def run():
     for story in regional:
         seen_stories[story['title']] = story
 
-    # 2. Process Town Scrapes
+    # 2. Process Town Scrapes (Local News)
     for town in TOWNS:
         print(f"Checking {town}...")
         town_stories = await scrape_town(town)
@@ -119,7 +118,7 @@ async def run():
                 if town not in seen_stories[title]['tags']:
                     seen_stories[title]['tags'].append(town)
             else:
-                # New unique story found
+                # Brand new story found
                 seen_stories[title] = story
 
     # 3. Export to JSON
