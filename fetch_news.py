@@ -27,7 +27,7 @@ MAIN_HUB = "https://supportmylocalcommunity.com"
 HISTORY_FILE = "posted_links.json"
 
 # --- 2. CREDENTIALS ---
-# Set these as environment variables on your machine/server
+# Set these as environment variables on your machine/server for security
 WP_USER = os.getenv("WP_USER", "your_username")
 WP_APP_PASSWORD = os.getenv("WP_PWD", "your_app_password")
 
@@ -84,7 +84,7 @@ async def scrape_towns():
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
-        # Use a real browser fingerprint to avoid bot detection
+        # Fingerprinting: Mimics a standard Windows Chrome user to avoid bot detection
         context = await browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
         )
@@ -123,8 +123,11 @@ async def scrape_towns():
 
                         target_site = SITE_MAPPING.get(town, MAIN_HUB)
 
-                        # Distribution Logic
+                        # --- Distribution Logic ---
+                        # 1. Post to the specific town site
                         success = await post_to_wordpress(target_site, title, brief, full_link)
+                        
+                        # 2. Mirror to the Main Hub (if it isn't already the target)
                         if success and target_site != MAIN_HUB:
                             await post_to_wordpress(MAIN_HUB, title, brief, full_link)
 
