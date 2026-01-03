@@ -27,6 +27,7 @@ MAIN_HUB = "https://supportmylocalcommunity.com"
 HISTORY_FILE = "posted_links.json"
 
 # --- 2. CREDENTIALS ---
+# It is best to set these as Environment Variables on your system
 WP_USER = os.getenv("WP_USER", "your_username")
 WP_APP_PASSWORD = os.getenv("WP_PWD", "your_app_password")
 
@@ -45,6 +46,7 @@ def load_history():
 def save_history(links):
     """Saves the last 500 posted links with formatting."""
     with open(HISTORY_FILE, "w") as f:
+        # indent=4 makes the file human-readable for debugging
         json.dump(links[-500:], f, indent=4)
 
 async def post_to_wordpress(site_url, title, brief, full_news_link):
@@ -109,6 +111,7 @@ async def scrape_towns():
                         href = await link_node.get_attribute("href")
                         full_link = href if href.startswith("http") else f"https://www.newsbreak.com{href}"
 
+                        # Skip if story was already processed
                         if full_link in history:
                             continue
 
@@ -147,6 +150,7 @@ if __name__ == "__main__":
     print("Starting News Distribution Pipeline...")
     results = asyncio.run(scrape_towns())
     
+    # Export for frontend index.html newspaper layout
     with open("news_data.json", "w") as f:
         json.dump(results, f, indent=4)
         
