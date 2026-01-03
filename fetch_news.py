@@ -7,7 +7,6 @@ from playwright.async_api import async_playwright
 from playwright_stealth import stealth_async
 
 # --- 1. CONFIGURATION ---
-# Mapping of Town Name -> Local WordPress Site URL
 SITE_MAPPING = {
     "Flora": "https://ourflora.com",
     "Clay City": "https://supportmylocalcommunity.com/clay-city/",
@@ -16,7 +15,6 @@ SITE_MAPPING = {
     "Sailor Springs": "https://supportmylocalcommunity.com/louisville/",
 }
 
-# Source URLs for scraping
 TOWN_SOURCES = {
     "Flora": "https://www.newsbreak.com/flora-il",
     "Clay City": "https://www.newsbreak.com/clay-city-il",
@@ -29,7 +27,6 @@ MAIN_HUB = "https://supportmylocalcommunity.com"
 HISTORY_FILE = "posted_links.json"
 
 # --- 2. CREDENTIALS ---
-# Uses environment variables for security (falls back to strings for testing)
 WP_USER = os.getenv("WP_USER", "your_username")
 WP_APP_PASSWORD = os.getenv("WP_PWD", "your_app_password")
 
@@ -54,7 +51,6 @@ async def post_to_wordpress(site_url, title, brief, full_news_link):
     """Pushes news to WordPress via REST API using non-blocking httpx."""
     api_url = f"{site_url.rstrip('/')}/wp-json/wp/v2/posts"
     
-    # HTML content for the WordPress post
     content = (
         f"{brief}<br><br>"
         f"<strong><a href='{full_news_link}' target='_blank' rel='noopener'>"
@@ -91,7 +87,6 @@ async def scrape_towns():
     history = load_history()
 
     async with async_playwright() as p:
-        # Launch browser in headless mode
         browser = await p.chromium.launch(headless=True)
         
         # Professional User Agent to minimize detection
@@ -126,7 +121,7 @@ async def scrape_towns():
                         href = await link_node.get_attribute("href")
                         full_link = href if href.startswith("http") else f"https://www.newsbreak.com{href}"
 
-                        # Skip if story was already processed in a previous run
+                        # Skip if story was already processed
                         if full_link in history:
                             continue
 
@@ -154,14 +149,14 @@ async def scrape_towns():
                             count += 1
 
                     except Exception:
-                        continue # Skip individual problematic articles
+                        continue 
 
                 all_news_data[town] = town_stories
 
             except Exception as e:
                 print(f"  [Critical] Failed to scrape {town}: {e}")
 
-            # Anti-bot delay between town requests
+            # Anti-bot delay
             await asyncio.sleep(random.uniform(5, 10))
 
         await browser.close()
