@@ -1,20 +1,23 @@
 name: News Distribution Pipeline
 
 on:
-  workflow_dispatch:      # Allows you to run it manually
+  workflow_dispatch:      # Allows manual trigger from the "Actions" tab
   schedule:
     - cron: '0 */4 * * *'  # Runs automatically every 4 hours
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write     # Needed to push data back to the repo
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/checkout@v3
+        uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
@@ -30,5 +33,16 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
+          
+          # Ensure files exist to prevent errors
+          touch posted_links.json news_data.json
+          
           git add news_data.json posted_links.json
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Update news data [skip ci]" && git push)
+          
+          # Only commit if there are actual changes to the files
+          if git diff --staged --quiet; then
+            echo "No new changes to commit."
+          else
+            git commit -m "Update news data [skip ci]"
+            git push
+          fi
