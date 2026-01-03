@@ -80,6 +80,7 @@ async def scrape_towns():
     history = load_history()
 
     async with async_playwright() as p:
+        # Launch browser - headless=True for production
         browser = await p.chromium.launch(headless=True)
         context = await browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
@@ -93,6 +94,8 @@ async def scrape_towns():
             
             try:
                 await page.goto(url, wait_until="networkidle")
+                
+                # Human-like interaction
                 await page.mouse.wheel(0, 800)
                 await asyncio.sleep(random.uniform(2, 4))
 
@@ -117,6 +120,7 @@ async def scrape_towns():
                             
                         full_link = href if href.startswith("http") else f"https://www.newsbreak.com{href}"
 
+                        # Duplicate Check
                         if full_link in history:
                             print(f"  - Skipping: {title[:50]}...")
                             continue
@@ -126,11 +130,13 @@ async def scrape_towns():
                         raw_summary = await summary_node.inner_text() if await summary_node.count() > 0 else "Latest community update."
                         brief = (raw_summary[:180] + "...") if len(raw_summary) > 180 else raw_summary
 
+                        # Distribution Logic
                         target_site = SITE_MAPPING.get(town, MAIN_HUB)
                         
-                        # Distribution Logic
+                        # Step 1: Post to Town Site
                         success = await post_to_wordpress(target_site, title, brief, full_link)
 
+                        # Step 2: Mirror to Main Hub if successful
                         if success:
                             if target_site != MAIN_HUB:
                                 await post_to_wordpress(MAIN_HUB, title, brief, full_link)
