@@ -21,14 +21,14 @@ def clean_text(text):
     ]
     for p in patterns:
         text = re.sub(p, '', text)
-    # Remove HTML tags
+    # Remove HTML tags for clean storage
     text = re.sub('<[^<]+?>', '', text)
     return text.strip()
 
 def contains_clay_county_keywords(text):
     """
     The 'Smart Scanner': Returns True if a Clay County town is mentioned.
-    This allows news from nearby cities to pass IF they mention your towns.
+    Allows news from nearby hubs to pass IF they mention your towns.
     """
     if not text: return False
     keywords = [
@@ -40,7 +40,7 @@ def contains_clay_county_keywords(text):
 async def fetch_rss():
     """Fetches regional news and filters for relevance to your towns."""
     stories = []
-    # Key to unlocking the full story tag
+    # Key to unlocking the full story tag in the RSS XML
     namespaces = {'content': 'http://purl.org/rss/1.0/modules/content/'}
     
     async with httpx.AsyncClient() as client:
@@ -48,16 +48,16 @@ async def fetch_rss():
             resp = await client.get(RSS_URL, timeout=15)
             if resp.status_code == 200:
                 root = ET.fromstring(resp.content)
-                # Scan top 30 to find hidden mentions of your specific towns
+                # Scan top 30 to find mentions of your towns hidden in regional news
                 for item in root.findall("./channel/item")[:30]:
                     title = item.find("title").text
                     brief = item.find("description").text or ""
-                    
-                    # Grab the FULL article text
+
+                    # Grab the FULL article text using the content namespace
                     content_tag = item.find("content:encoded", namespaces)
                     full_story_raw = content_tag.text if content_tag is not None else brief
-                    
-                    # SCANNER LOGIC: Only keep if your towns are mentioned anywhere
+
+                    # SCANNER LOGIC: Keep if any of your towns are mentioned
                     if (contains_clay_county_keywords(title) or 
                         contains_clay_county_keywords(brief) or 
                         contains_clay_county_keywords(full_story_raw)):
@@ -102,6 +102,7 @@ async def run():
     for town in TOWNS:
         print(f"Processing {town}...")
         town_specific = await scrape_town(town)
+        # Combine local town scrapes with the filtered regional news
         all_news[town] = town_specific + regional
         
     with open(DATA_EXPORT_FILE, "w") as f:
