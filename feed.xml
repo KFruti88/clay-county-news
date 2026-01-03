@@ -5,35 +5,5 @@
         <link>https://github.com/KFruti88/clay-county-news</link>
         <description>Latest updates from news_data.json</description>
         
-        <item>
-            <title>Flora</title>
-            <link>https://github.com/KFruti88/clay-county-news</link>
-            <description>Update from news_data.json</description>
-            <pubDate>Sat, 03 Jan 2026 15:06:26 +0000</pubDate>
-        </item>
-        <item>
-            <title>Clay City</title>
-            <link>https://github.com/KFruti88/clay-county-news</link>
-            <description>Update from news_data.json</description>
-            <pubDate>Sat, 03 Jan 2026 15:06:26 +0000</pubDate>
-        </item>
-        <item>
-            <title>Xenia</title>
-            <link>https://github.com/KFruti88/clay-county-news</link>
-            <description>Update from news_data.json</description>
-            <pubDate>Sat, 03 Jan 2026 15:06:26 +0000</pubDate>
-        </item>
-        <item>
-            <title>Louisville</title>
-            <link>https://github.com/KFruti88/clay-county-news</link>
-            <description>Update from news_data.json</description>
-            <pubDate>Sat, 03 Jan 2026 15:06:26 +0000</pubDate>
-        </item>
-        <item>
-            <title>Sailor Springs</title>
-            <link>https://github.com/KFruti88/clay-county-news</link>
-            <description>Update from news_data.json</description>
-            <pubDate>Sat, 03 Jan 2026 15:06:26 +0000</pubDate>
-        </item>
     </channel>
 </rss>
