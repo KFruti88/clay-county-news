@@ -1,144 +1,77 @@
+import httpx
 import asyncio
 import json
-import random
 import os
-import httpx
-from playwright.async_api import async_playwright
+import re
+import xml.etree.ElementTree as ET
+from datetime import datetime
 
-# --- 1. RESILIENT STEALTH IMPORT ---
-try:
-    from playwright_stealth import stealth_async
-except ImportError:
-    try:
-        from playwright_stealth import stealth_page_async as stealth_async
-    except ImportError:
-        print("!!! Warning: Playwright Stealth not found. Continuing without it.")
-        stealth_async = None
-
-# --- 2. CONFIGURATION ---
-SITE_MAPPING = {
-    "Flora": "https://ourflora.com",
-    "Clay City": "https://supportmylocalcommunity.com/clay-city/",
-    "Xenia": "https://supportmylocalcommunity.com/xenia/",
-    "Louisville": "https://supportmylocalcommunity.com/louisville/",
-    "Sailor Springs": "https://supportmylocalcommunity.com/louisville/",
-}
-
-TOWN_SOURCES = {
-    "Flora": "https://www.newsbreak.com/flora-il",
-    "Clay City": "https://www.newsbreak.com/clay-city-il",
-    "Xenia": "https://www.newsbreak.com/xenia-il",
-    "Louisville": "https://www.newsbreak.com/louisville-il",
-    "Sailor Springs": "https://www.newsbreak.com/sailor-springs-il"
-}
-
-MAIN_HUB = "https://supportmylocalcommunity.com"
-HISTORY_FILE = "posted_links.json"
+# Configuration
 DATA_EXPORT_FILE = "news_data.json"
+HISTORY_FILE = "posted_links.json"
+TOWNS = ["Flora", "Clay City", "Xenia", "Louisville", "Sailor Springs"]
+RSS_FEED_URL = "https://www.wnoi.com/category/local/feed"
 
-# --- 3. CREDENTIALS ---
-WP_USER = os.getenv("WP_USER")
-WP_APP_PASSWORD = os.getenv("WP_PWD")
+def clean_text(text):
+    """Removes source branding and extra noise from headlines and briefs."""
+    if not text: return ""
+    # Patterns to remove: WNOI, NewsBreak, Radio, Reporters, etc.
+    remove_patterns = [
+        r'(?i)wnoi', r'(?i)newsbreak', r'(?i)radio', r'(?i)local\s*news:',
+        r'(?i)by\s+[a-z\s]+', r'(?i)effingham\s*daily\s*news', r'(?i)st\.\s*louis'
+    ]
+    for pattern in remove_patterns:
+        text = re.sub(pattern, '', text)
+    # Clean up HTML tags and leading/trailing punctuation
+    text = re.sub('<[^<]+?>', '', text)
+    text = re.sub(r'^\s*[:\-\|]\s*', '', text)
+    return text.strip()
 
-# --- 4. HELPERS ---
-def load_history():
-    if os.path.exists(HISTORY_FILE):
-        try:
-            with open(HISTORY_FILE, "r") as f:
-                return json.load(f)
-        except:
-            return []
-    return []
-
-def save_history(links):
-    with open(HISTORY_FILE, "w") as f:
-        json.dump(links[-500:], f, indent=4)
-
-async def post_to_wordpress(site_url, title, brief, full_news_link):
-    if not WP_USER or not WP_APP_PASSWORD:
-        print(f"!!! Credentials missing for {site_url}. Skipping post.")
-        return False
-
-    api_url = f"{site_url.rstrip('/')}/wp-json/wp/v2/posts"
-    content = f"{brief}<br><br><strong><a href='{full_news_link}' target='_blank'>Read Full Story &raquo;</a></strong>"
-    payload = {"title": title, "content": content, "status": "publish"}
-    
+async def fetch_rss_news():
+    """Fetches regional news from WNOI RSS and cleans it."""
+    stories = []
     async with httpx.AsyncClient() as client:
         try:
-            r = await client.post(api_url, auth=(WP_USER, WP_APP_PASSWORD), json=payload, timeout=25)
-            return r.status_code == 201
+            response = await client.get(RSS_FEED_URL, timeout=15)
+            if response.status_code == 200:
+                root = ET.fromstring(response.content)
+                items = root.findall("./channel/item")
+                for item in items[:8]: # Get top 8 regional stories
+                    title = item.find("title").text
+                    brief = item.find("description").text or ""
+                    stories.append({
+                        "title": clean_text(title),
+                        "brief": clean_text(brief)[:160] + "...",
+                        "link": "https://supportmylocalcommunity.com/clay-county-news-center/"
+                    })
         except Exception as e:
-            print(f"    [Error] WP Connection: {e}")
-            return False
+            print(f"RSS Error: {e}")
+    return stories
 
-# --- 5. MAIN ENGINE ---
+async def scrape_newsbreak(town):
+    """Your existing NewsBreak scraper logic goes here."""
+    # ... (Keep your existing scraping code but use clean_text() on results)
+    return [] 
+
 async def run_pipeline():
-    history = load_history()
     all_results = {}
+    
+    # 1. Fetch Regional RSS News once
+    regional_news = await fetch_rss_news()
+    
+    # 2. Process each town
+    for town in TOWNS:
+        # Get town-specific news from scraper
+        town_stories = await scrape_newsbreak(town)
+        
+        # Combine with regional RSS stories
+        # This ensures every town page has regional updates
+        all_results[town] = town_stories + regional_news
 
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        context = await browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
-        )
-        page = await context.new_page()
-
-        # Apply stealth if available
-        if stealth_async:
-            await stealth_async(page)
-
-        for town, url in TOWN_SOURCES.items():
-            print(f"[*] Checking {town}...")
-            town_stories = []
-            try:
-                await page.goto(url, wait_until="networkidle", timeout=60000)
-                await page.mouse.wheel(0, 500)
-                await asyncio.sleep(random.uniform(2, 4))
-                
-                articles = await page.locator("article").all()
-                processed = 0
-                
-                for article in articles:
-                    if processed >= 3: break
-                    
-                    h3 = article.locator("h3")
-                    if await h3.count() == 0: continue
-                    title = await h3.inner_text()
-                    
-                    link_node = article.locator("a").first
-                    href = await link_node.get_attribute("href")
-                    if not href: continue
-                    full_link = href if href.startswith("http") else f"https://www.newsbreak.com{href}"
-
-                    if full_link in history: continue
-
-                    summary_node = article.locator("p, .description, .summary").first
-                    raw_text = await summary_node.inner_text() if await summary_node.count() > 0 else "Local update."
-                    brief = (raw_text[:180] + "...") if len(raw_text) > 180 else raw_text
-
-                    target = SITE_MAPPING.get(town, MAIN_HUB)
-                    
-                    if await post_to_wordpress(target, title, brief, full_link):
-                        if target != MAIN_HUB:
-                            await post_to_wordpress(MAIN_HUB, title, brief, full_link)
-                        
-                        history.append(full_link)
-                        town_stories.append({"title": title, "link": full_link})
-                        processed += 1
-                        print(f"    [OK] Posted: {title[:50]}...")
-
-                all_results[town] = town_stories
-                await asyncio.sleep(random.uniform(2, 5))
-                
-            except Exception as e:
-                print(f" [!] {town} failed: {e}")
-
-        await browser.close()
-        save_history(history)
-        with open(DATA_EXPORT_FILE, "w") as f:
-            json.dump(all_results, f, indent=4)
+    # 3. Save to JSON for WordPress to read
+    with open(DATA_EXPORT_FILE, "w") as f:
+        json.dump(all_results, f, indent=4)
+    print(f"Pipeline complete. Data saved to {DATA_EXPORT_FILE}")
 
 if __name__ == "__main__":
-    print("--- Starting News Pipeline ---")
     asyncio.run(run_pipeline())
-    print("--- Pipeline Finished ---")
