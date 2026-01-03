@@ -1,0 +1,32 @@
+import xml.etree.ElementTree as ET
+import re
+
+async def fetch_rss_sample(rss_url):
+    stories = []
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(rss_url, timeout=20)
+            if response.status_code == 200:
+                root = ET.fromstring(response.content)
+                items = root.findall("./channel/item")
+                
+                for item in items[:5]:
+                    title = item.find("title").text
+                    brief = item.find("description").text or ""
+                    
+                    # --- REMOVE "WNOI" AND SOURCE TEXT ---
+                    # This removes "WNOI", "By...", and common radio source patterns
+                    clean_title = re.sub(r'(?i)wnoi|by\s+[a-z\s]+|radio|local\snews:', '', title).strip()
+                    clean_brief = re.sub(r'(?i)wnoi|by\s+[a-z\s]+|radio', '', brief).strip()
+                    
+                    # Remove HTML tags and fix spacing
+                    clean_brief = re.sub('<[^<]+?>', '', clean_brief)
+                    
+                    stories.append({
+                        "title": clean_title,
+                        "link": "https://supportmylocalcommunity.com/clay-county-news-center/",
+                        "brief": clean_brief[:160] + "..." if len(clean_brief) > 160 else clean_brief
+                    })
+        except Exception as e:
+            print(f"Error fetching sample: {e}")
+    return stories
