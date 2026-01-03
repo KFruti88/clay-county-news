@@ -1,94 +1,54 @@
-import urllib.parse
-import feedparser
-import ssl
-import json
-import sys
-import os
-from datetime import datetime, timedelta
-import time
+import asyncio
+import random
+from playwright.async_api import async_playwright
+from playwright_stealth import stealth_async
 
-def fetch_news():
-    # 1. Configuration & Feed URLs
-    WNOI_RSS = "https://www.wnoi.com/category/local/feed"
-    GOOGLE_BASE_URL = "https://news.google.com/rss/search?q="
-    QUERY = '("Clay County IL" OR "Flora IL" OR "Louisville IL" OR "Clay City IL")'
-    GOOGLE_RSS_URL = GOOGLE_BASE_URL + urllib.parse.quote(QUERY)
-    
-    # Settings
-    cutoff_date = datetime.now() - timedelta(hours=48)
-    UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
-
-    # 2. SSL Fix for GitHub Actions
-    try:
-        ssl._create_default_https_context = ssl._create_unverified_context
-    except Exception:
-        pass
-
-    # 3. Load Existing News (Persistence)
-    existing_articles = []
-    if os.path.exists('news_data.json'):
-        with open('news_data.json', 'r') as f:
-            try:
-                existing_articles = json.load(f)
-            except Exception:
-                existing_articles = []
-
-    articles = []
-    seen_titles = set()
-
-    # 4. Define Fetching Logic
-    def process_feed(url, source_name):
-        print(f"Checking {source_name}...")
-        feed = feedparser.parse(url, agent=UA)
-        count = 0
+async def scrape_site_as_human(url):
+    async with async_playwright() as p:
+        # 1. Launch a real browser (Chromium)
+        # headless=False allows you to watch it work; set to True for background tasks
+        browser = await p.chromium.launch(headless=False)
         
-        for entry in feed.entries:
-            # Parse date and filter by 48-hour window
-            published_struct = getattr(entry, 'published_parsed', None)
-            ts = time.mktime(published_struct) if published_struct else 0
+        # 2. Create a browser context with a mobile/desktop persona
+        context = await browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+            viewport={'width': 1920, 'height': 1080}
+        )
+
+        page = await context.new_page()
+
+        # 3. Apply Stealth to hide "navigator.webdriver" and other bot flags
+        await stealth_async(page)
+
+        try:
+            # 4. Navigate with a realistic timeout and "Referer"
+            print(f"Navigating to {url}...")
+            await page.goto(url, wait_until="networkidle")
+
+            # 5. Mimic human behavior: Random scrolling
+            # This triggers lazy-loading content and fools tracking scripts
+            for _ in range(3):
+                await page.mouse.wheel(0, random.randint(500, 1000))
+                await asyncio.sleep(random.uniform(1, 3))
+
+            # 6. Extract the source or specific data
+            content = await page.content()
+            title = await page.title()
             
-            if published_struct:
-                pub_date = datetime.fromtimestamp(ts)
-                if pub_date < cutoff_date:
-                    continue
-            
-            clean_title = entry.title.split(' - ')[0].strip()
-            
-            # Deduplication and Storage
-            if clean_title.lower() not in seen_titles:
-                articles.append({
-                    "title": clean_title,
-                    "link": entry.link,
-                    "date": getattr(entry, 'published', 'Recently'),
-                    "source": source_name,
-                    "timestamp": ts
-                })
-                seen_titles.add(clean_title.lower())
-                count += 1
-        print(f"Added {count} new articles from {source_name}")
+            print(f"Successfully pulled data from: {title}")
+            return content
 
-    # 5. Execute Scraper
-    process_feed(WNOI_RSS, "WNOI Radio")
-    process_feed(GOOGLE_RSS_URL, "Local News")
+        except Exception as e:
+            print(f"Error encountered: {e}")
+        
+        finally:
+            await browser.close()
 
-    # 6. Sorting & Fallback Logic
-    if not articles:
-        print("No new articles in last 48h. Preserving existing news data.")
-        final_list = existing_articles
-    else:
-        # Sort by most recent timestamp
-        articles.sort(key=lambda x: x['timestamp'], reverse=True)
-        final_list = articles
-
-    # 7. Final Save
-    with open('news_data.json', 'w') as f:
-        json.dump(final_list, f, indent=4)
-    
-    print(f"Done. Total articles in file: {len(final_list)}")
-
+# Example Usage
 if __name__ == "__main__":
-    try:
-        fetch_news()
-    except Exception as e:
-        print(f"CRITICAL ERROR: {e}")
-        sys.exit(1)
+    target_url = "https://www.claycountynews.com/" # Replace with target
+    html_source = asyncio.run(scrape_site_as_human(target_url))
+    
+    # Save the source to a file for inspection
+    with open("source.html", "w", encoding="utf-8") as f:
+        f.write(html_source)
