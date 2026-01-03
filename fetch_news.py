@@ -28,6 +28,7 @@ HISTORY_FILE = "posted_links.json"
 DATA_EXPORT_FILE = "news_data.json"
 
 # --- 2. CREDENTIALS ---
+# Recommendation: Set these in your environment variables for security
 WP_USER = os.getenv("WP_USER", "your_username")
 WP_APP_PASSWORD = os.getenv("WP_PWD", "your_app_password")
 
@@ -44,7 +45,7 @@ def load_history():
     return []
 
 def save_history(links):
-    """Saves the last 500 posted links with formatting."""
+    """Saves the last 500 posted links to keep file size small."""
     with open(HISTORY_FILE, "w") as f:
         json.dump(links[-500:], f, indent=4)
 
@@ -121,9 +122,10 @@ async def scrape_towns():
 
                         target_site = SITE_MAPPING.get(town, MAIN_HUB)
                         
-                        # Distribution Step
+                        # Step 1: Specific Site
                         posted = await post_to_wordpress(target_site, title, brief, full_link)
 
+                        # Step 2: Hub Mirror
                         if posted:
                             if target_site != MAIN_HUB:
                                 await post_to_wordpress(MAIN_HUB, title, brief, full_link)
