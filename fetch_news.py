@@ -28,7 +28,7 @@ HISTORY_FILE = "posted_links.json"
 DATA_EXPORT_FILE = "news_data.json"
 
 # --- 2. CREDENTIALS ---
-# Recommendation: Set these in your environment variables for security
+# Set these in your environment variables for security
 WP_USER = os.getenv("WP_USER", "your_username")
 WP_APP_PASSWORD = os.getenv("WP_PWD", "your_app_password")
 
@@ -122,10 +122,10 @@ async def scrape_towns():
 
                         target_site = SITE_MAPPING.get(town, MAIN_HUB)
                         
-                        # Step 1: Specific Site
+                        # Step 1: Post to the specific Town Site
                         posted = await post_to_wordpress(target_site, title, brief, full_link)
 
-                        # Step 2: Hub Mirror
+                        # Step 2: Mirror to Main Hub if successful
                         if posted:
                             if target_site != MAIN_HUB:
                                 await post_to_wordpress(MAIN_HUB, title, brief, full_link)
