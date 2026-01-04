@@ -8,8 +8,7 @@ from copy import deepcopy
 
 # --- CONFIGURATION ---
 DATA_EXPORT_FILE = "news_data.json"
-SMALL_TOWNS = ["Clay City", "Xenia", "Sailor Springs"]
-TOWNS = ["Flora", "Louisville"] + SMALL_TOWNS
+TOWNS = ["Flora", "Louisville", "Clay City", "Xenia", "Sailor Springs"]
 RSS_URL = "https://www.wnoi.com/category/local/feed"
 NEWS_CENTER_URL = "https://supportmylocalcommunity.com/clay-county-news-center/"
 
