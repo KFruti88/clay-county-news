@@ -1,1 +1,146 @@
+<div class="news-center-wrapper">
+    <h1 class="center-title">Clay County News Center</h1>
+    <div id="full-news-archive">
+        <p class="loading-text">🗞️ Opening the full archive...</p>
+    </div>
+</div>
 
+<style>
+    /* 1. LAYOUT & GLASS STYLING */
+    .news-center-wrapper { max-width: 1100px; margin: 0 auto; padding: 40px 20px; font-family: 'Playfair Display', serif; }
+    .center-title { text-align: center; font-size: 3.2rem; margin-bottom: 50px; border-bottom: 4px solid #1a1a1a; padding-bottom: 15px; font-weight: 900; }
+    
+    .full-story-block { 
+        scroll-margin-top: 150px; /* High margin so bookmarks land below fixed headers */
+        margin-bottom: 50px; 
+        padding: 40px;
+        background: rgba(255, 255, 255, 0.65);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease;
+    }
+
+    /* Town Badge Styling */
+    .town-brand-tag {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 4px;
+        color: #fff;
+        font-weight: bold;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    }
+
+    .full-story-block h2 { 
+        font-size: 2.4rem; 
+        color: #111; 
+        margin-top: 5px;
+        margin-bottom: 15px; 
+        display: flex; 
+        align-items: center; 
+        gap: 15px; 
+        line-height: 1.2;
+    }
+
+    .meta-info { display: block; font-size: 0.85rem; color: #666; margin-bottom: 20px; font-family: sans-serif; }
+
+    .content-body { font-family: 'Georgia', serif; font-size: 1.25rem; line-height: 1.9; color: #222; text-align: justify; }
+    
+    .loading-text { text-align: center; font-style: italic; font-size: 1.5rem; color: #555; margin-top: 100px; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const jsonUrl = 'https://raw.githubusercontent.com/KFruti88/clay-county-news/refs/heads/main/news_data.json';
+    
+    // 1. UPDATED TOWN COLOR LOGIC
+    function getTownBranding(tags) {
+        const tagStr = tags ? tags.join(' ').toLowerCase() : "";
+        
+        if (tagStr.includes('flora')) {
+            return { border: '#0c0b82', badge: '#fe4f00', name: 'Flora' };
+        }
+        if (tagStr.includes('louisville')) {
+            return { border: '#990000', badge: '#131314', name: 'Louisville' };
+        }
+        if (tagStr.includes('clay city')) {
+            return { border: '#0c30f0', badge: '#0c30f0', name: 'Clay City' };
+        }
+        return { border: '#1a1a1a', badge: '#2ea3f2', name: 'Clay County' };
+    }
+
+    // 2. PERMANENT EMOJI LOGIC (Comprehensive List)
+    function getEmoji(item) {
+        const text = ((item.title || "") + " " + (item.category || "") + " " + (item.full_story || "")).toLowerCase();
+        
+        if (text.includes("tornado") || text.includes("severe") || text.includes("warning")) return "⚠️";
+        if (text.includes("fire") || text.includes("smoke")) return "🚒";
+        if (text.includes("police") || text.includes("sheriff") || text.includes("arrest")) return "🚔";
+        if (text.includes("obituary") || text.includes("funeral") || text.includes("passed away")) return "🕊️";
+        if (text.includes("tax") || text.includes("price") || text.includes("payment") || text.includes("cost")) return "💲";
+        if (text.includes("football")) return "🏈";
+        if (text.includes("basketball")) return "🏀";
+        if (text.includes("baseball")) return "⚾";
+        if (text.includes("softball")) return "🥎";
+        if (text.includes("school") || text.includes("bus") || text.includes("student")) return "🚌";
+        if (text.includes("church") || text.includes("pastor")) return "⛪";
+        if (text.includes("hospital") || text.includes("medical")) return "🏥";
+        if (text.includes("construction") || text.includes("road work")) return "🏗️";
+        if (text.includes("nasa") || text.includes("comet") || text.includes("star gazing")) return "🔭";
+        if (text.includes("gas") || text.includes("fuel")) return "⛽";
+        if (text.includes("watermelon")) return "🍉";
+        if (text.includes("veterans day") || text.includes("military")) return "🎖️";
+        if (text.includes("memorial day") || text.includes("remembrance")) return "🎗️";
+        if (text.includes("christmas")) return "🎄";
+        if (text.includes("thanksgiving")) return "🦃";
+        if (text.includes("halloween") || text.includes("pumpkin")) return "🎃";
+        if (text.includes("state news") || text.includes("illinois")) return "🏛️";
+        
+        return "📰"; 
+    }
+
+    fetch(jsonUrl).then(res => res.json()).then(data => {
+        const container = document.getElementById('full-news-archive');
+        container.innerHTML = '';
+
+        data.forEach(item => {
+            const icon = getEmoji(item);
+            const branding = getTownBranding(item.tags);
+            const storySlug = item.slug || item.title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-');
+            const dateStr = item.date_added ? item.date_added.split('T')[0] : 'Recently';
+
+            container.innerHTML += `
+                <article class="full-story-block" id="${storySlug}" style="border-top: 8px solid ${branding.border}">
+                    <div class="town-brand-tag" style="background-color: ${branding.badge}">
+                        ${branding.name} Edition
+                    </div>
+                    <span class="meta-info">Published: ${dateStr} | Tags: ${item.tags ? item.tags.join(', ') : 'General'}</span>
+                    <h2><span>${icon}</span> ${item.title}</h2>
+                    <div class="content-body">${item.full_story}</div>
+                </article>
+            `;
+        });
+
+        // 3. THE AUTO-JUMP LOGIC (Handles #slug bookmarks)
+        if (window.location.hash) {
+            setTimeout(() => {
+                const targetId = window.location.hash.substring(1);
+                const el = document.getElementById(targetId);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth' });
+                    // Visual highlight
+                    el.style.backgroundColor = "rgba(255, 255, 255, 0.9)";
+                }
+            }, 1000); 
+        }
+    }).catch(err => {
+        document.getElementById('full-news-archive').innerHTML = "<p>Archive currently offline for maintenance.</p>";
+    });
+});
+</script>
