@@ -83,7 +83,7 @@ def get_metadata(text):
     return cat, town_tags, icon
 
 async def scrape_regional_news(query):
-    """Searches regional NewsBreak and applies multi-tagging logic."""
+    """Searches regional NewsBreak and applies multi-tagging."""
     scraped_stories = []
     url = f"https://www.newsbreak.com/search?q={query.replace(' ', '+')}"
     async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -101,7 +101,6 @@ async def scrape_regional_news(query):
                         full_content = title_text + " " + body_text
                         
                         cat, tags, icon = get_metadata(full_content)
-                        
                         # RELEVANCE FILTER: Must mention a specific town OR have a special category
                         if tags != ["County News"] or cat != "General News":
                             scraped_stories.append({
