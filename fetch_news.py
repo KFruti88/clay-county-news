@@ -9,13 +9,13 @@ from bs4 import BeautifulSoup
 # --- CONFIGURATION ---
 NEWS_DATA_FILE = 'news_data.json'
 RSS_SOURCE_URL = "https://www.wnoi.com/category/local/feed"
-# This is the main page where "Read Full Story" will jump to
+# The main page where "Read Full Story" will jump to
 NEWS_CENTER_URL = "https://supportmylocalcommunity.com/clay-county-news-center/"
 
 TOWNS = ["Flora", "Louisville", "Clay City", "Xenia", "Sailor Springs"]
 
 def clean_text(text):
-    """Removes branding, extra spaces, and HTML tags for a professional look."""
+    """Removes branding, extra spaces, and HTML tags."""
     if not text: return ""
     patterns = [
         r'(?i)wnoi', 
@@ -30,13 +30,30 @@ def clean_text(text):
     return text.strip()
 
 def get_metadata(text):
-    """Categorizes the story and identifies the town for mascot logic."""
+    """Smarter categorization to prevent 'Police Report' mislabeling."""
     cat = "General News"
-    if re.search(r'(?i)\bobituary\b|\bobituaries\b|\bpassed\s*away\b', text): cat = "Obituary"
-    elif re.search(r'(?i)\bschool\b|\bunit\s*2\b|\bhigh\s*school\b', text): cat = "School News"
-    elif re.search(r'(?i)\bfire\b|\brescue\b|\bstructure\s*fire\b', text): cat = "Fire & Rescue"
-    elif re.search(r'(?i)\barrest\b|\bsheriff\b|\bpolice\b|\bblotter\b', text): cat = "Police Report"
+    text_lower = text.lower()
+    
+    # 1. Check for Arts & Entertainment (Prevents ReVue/Music mislabeling)
+    if any(word in text_lower for word in ['musical', 'music', 'concert', 'band', 'revue', 'theatre']):
+        cat = "Arts & Entertainment"
+    # 2. Obituaries
+    elif any(word in text_lower for word in ['obituary', 'obituaries', 'passed away']):
+        cat = "Obituary"
+    # 3. School News
+    elif any(word in text_lower for word in ['school', 'unit 2', 'high school', 'student', 'wolves', 'cardinals']):
+        cat = "School News"
+    # 4. Fire & Rescue
+    elif any(word in text_lower for word in ['fire', 'rescue', 'structure fire', 'ems']):
+        cat = "Fire & Rescue"
+    # 5. Police Report (Stricter matching)
+    elif any(word in text_lower for word in ['arrest', 'sheriff', 'police', 'blotter', 'deputy', 'jail', 'booked']):
+        cat = "Police Report"
+    # 6. State News
+    elif any(word in text_lower for word in ['state', 'springfield', 'idot']):
+        cat = "State News"
 
+    # Identify Town (Silo Logic)
     town_tags = [t for t in TOWNS if re.search(fr'(?i)\b{t}\b', text)]
     if not town_tags: 
         town_tags.append("County News")
@@ -44,7 +61,7 @@ def get_metadata(text):
     return cat, town_tags
 
 async def scrape_regional_news(query):
-    """Searches external sources to find high-signal local news."""
+    """Searches external sources for town-specific news."""
     scraped_stories = []
     url = f"https://www.newsbreak.com/search?q={query.replace(' ', '+')}"
     async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -60,6 +77,7 @@ async def scrape_regional_news(query):
                         t_text = title_node.get_text()
                         b_text = desc_node.get_text() if desc_node else ""
                         cat, tags = get_metadata(t_text + " " + b_text)
+                        # High-Signal Filter
                         if tags != ["County News"] or cat != "General News":
                             scraped_stories.append({
                                 "title": clean_text(t_text),
@@ -71,27 +89,26 @@ async def scrape_regional_news(query):
     return scraped_stories
 
 async def process_news():
-    """Main function to gather, clean, and deduplicate all news."""
+    """Main hub for processing all news sources."""
     final_news = []
     seen_hashes = set()
     timestamp = datetime.now().isoformat()
 
-    # 1. Fetch Local RSS
+    # 1. Fetch Local RSS (WNOI)
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.get(RSS_SOURCE_URL, timeout=15)
             if resp.status_code == 200:
                 root = ET.fromstring(resp.content)
-                for item in root.findall("./channel/item")[:30]:
+                for item in root.findall("./channel/item")[:35]:
                     raw_title = item.find("title").text
                     desc = item.find("description").text or ""
                     cat, tags = get_metadata(raw_title + " " + desc)
                     clean_title = clean_text(raw_title)
                     
-                    # Deduplication & ID Generation
                     content_hash = re.sub(r'\W+', '', clean_title).lower()
                     if content_hash not in seen_hashes:
-                        # Create unique Bookmark ID
+                        # Create unique Bookmark ID for anchoring
                         story_id = content_hash 
                         
                         final_news.append({
@@ -100,13 +117,14 @@ async def process_news():
                             "description": clean_text(desc),
                             "category": cat,
                             "tags": tags,
-                            "link": f"{NEWS_CENTER_URL}#{story_id}", # Deep Link
+                            "link": f"{NEWS_CENTER_URL}#{story_id}", 
                             "date_added": timestamp
                         })
                         seen_hashes.add(content_hash)
-        except: print("Error fetching local RSS")
+        except Exception as e: 
+            print(f"RSS Error: {e}")
 
-    # 2. Run Regional Searches
+    # 2. Run Regional Searches for each town
     tasks = [scrape_regional_news(f"{t} IL news") for t in TOWNS]
     results = await asyncio.gather(*tasks)
     for result_set in results:
@@ -124,7 +142,7 @@ async def process_news():
                 })
                 seen_hashes.add(h)
 
-    # 3. Final Output to JSON
+    # 3. Save to JSON for the Website
     with open(NEWS_DATA_FILE, "w", encoding='utf-8') as f:
         json.dump(final_news, f, indent=4, ensure_ascii=False)
 
