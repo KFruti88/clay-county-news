@@ -7,13 +7,12 @@ from datetime import datetime
 import os
 
 # --- CONFIGURATION ---
-FEED_XML_FILE = 'feed.xml'              # Output for RSS readers
-CALENDAR_JSON_FILE = "calendar_events.json"  # Output for Divi/FullCalendar
+FEED_XML_FILE = 'feed.xml'                    # Output for RSS readers
+CALENDAR_JSON_FILE = "calendar_events.json"    # Output for Divi/FullCalendar
 RSS_SOURCE_URL = "https://www.wnoi.com/category/local/feed"
 NEWS_CENTER_URL = "https://supportmylocalcommunity.com/clay-county-news-center/"
 
 # --- COLOR THEMES ---
-# These are mapped to specific towns or the general fallback
 THEMES = {
     "Clay City": {"bg": "#ADD8E6", "text": "#000000"},
     "Sailor Springs": {"bg": "#367C2B", "text": "#FFDE00"},
@@ -27,13 +26,12 @@ def clean_text(text):
     """Scrub branding, frequencies, and leading dates for a clean display."""
     if not text: return ""
     
-    # Combined and cleaned patterns from your logic
     patterns = [
         r'(?i)wnoi', 
         r'(?i)103\.9/99\.3', 
         r'(?i)local\s*--',
         r'(?i)by\s+tom\s+lavine', 
-        r'^\d{1,2}/\d{1,2}/\d{2,4}\s*' # Strips date at the very start of strings
+        r'^\d{1,2}/\d{1,2}/\d{2,4}\s*' # Strips leading dates
     ]
     
     for p in patterns:
@@ -67,8 +65,6 @@ async def process_news():
     seen_content = set()
     namespaces = {'content': 'http://purl.org/rss/1.0/modules/content/'}
     
-    # 
-    
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.get(RSS_SOURCE_URL, timeout=15)
@@ -79,7 +75,6 @@ async def process_news():
 
                 rss_items_xml = ""
 
-                # Process the top 40 items from the feed
                 for item in root.findall("./channel/item")[:40]:
                     raw_title = item.find("title").text
                     brief = item.find("description").text or ""
@@ -90,8 +85,6 @@ async def process_news():
                     clean_title = clean_text(raw_title)
                     
                     # Deduplication Logic
-                    # If it's general news, we only want one copy of that headline.
-                    # If it's town news, we allow it if the town+headline combo is unique.
                     is_general = (town_tag == "General News")
                     unique_key = clean_title if is_general else (clean_title + town_tag)
 
@@ -121,7 +114,7 @@ async def process_news():
                 # Save Calendar JSON
                 with open(CALENDAR_JSON_FILE, "w") as f:
                     json.dump(stories, f, indent=4)
-                print(f"Exported {len(stories)} unique events to {CALENDAR_JSON_FILE}")
+                print(f"Exported {len(stories)} events to {CALENDAR_JSON_FILE}")
 
                 # Save RSS XML
                 rss_feed = f"""<?xml version="1.0" encoding="UTF-8" ?>
