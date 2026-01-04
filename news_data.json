@@ -1,32 +1,37 @@
-{
-  "flora": {
-    "headline": "Flora Annual Fall Festival Dates Announced",
-    "summary": "The town council has confirmed the dates for this year's festival, featuring new local vendors.",
+[
+  {
+    "title": "Flora Annual Fall Festival Dates Announced",
+    "full_story": "The town council has confirmed the dates for this year's festival, featuring new local vendors.",
+    "tags": ["Flora"],
     "date": "2026-01-04",
     "link": "https://ourflora.com/events"
   },
-  "louisville": {
-    "headline": "Louisville High School Basketball Update",
-    "summary": "The varsity team secures a home-court victory in the regional qualifiers.",
+  {
+    "title": "Louisville High School Basketball Update",
+    "full_story": "The varsity team secures a home-court victory in the regional qualifiers.",
+    "tags": ["Louisville"],
     "date": "2026-01-03",
     "link": "https://ourflora.com/louisville-sports"
   },
-  "clay_city": {
-    "headline": "New Infrastructure Project on Main St",
-    "summary": "Construction begins next week to improve water drainage and sidewalk safety.",
+  {
+    "title": "New Infrastructure Project on Main St",
+    "full_story": "Construction begins next week to improve water drainage and sidewalk safety.",
+    "tags": ["Clay City"],
     "date": "2026-01-02",
     "link": "https://ourflora.com/clay-city-news"
   },
-  "xenia": {
-    "headline": "Xenia Community Center Reopening",
-    "summary": "After renovations, the community center is now open for public bookings and youth sports.",
+  {
+    "title": "Xenia Community Center Reopening",
+    "full_story": "After renovations, the community center is now open for public bookings and youth sports.",
+    "tags": ["Xenia"],
     "date": "2026-01-01",
     "link": "https://ourflora.com/xenia-info"
   },
-  "sailor_springs": {
-    "headline": "Sailor Springs Historical Society Meeting",
-    "summary": "Join us this Friday to discuss the preservation of local landmarks.",
+  {
+    "title": "Sailor Springs Historical Society Meeting",
+    "full_story": "Join us this Friday to discuss the preservation of local landmarks.",
+    "tags": ["Sailor Springs"],
     "date": "2026-01-04",
     "link": "https://ourflora.com/sailor-springs"
   }
-}
+]
