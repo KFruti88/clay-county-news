@@ -56,7 +56,7 @@ def get_metadata(text):
     # 3. Smart Town Tagging
     found_towns = [t for t in TOWNS if re.search(fr'(?i)\b{t}\b', text)]
     
-    # If it's state news or mentions more than 1 town, it's County-Wide
+    # Logic: If state news or multiple towns mentioned, tag as County News
     if len(found_towns) > 1 or cat == "State News" or len(found_towns) == 0:
         town_tags = ["County News"]
     else:
@@ -107,7 +107,7 @@ async def process_news():
                     desc = item.find("description").text or ""
                     
                     cat, tags = get_metadata(raw_title + " " + desc)
-                    if cat is None: continue # Skip if Blacklisted
+                    if cat is None: continue # Skip if Blacklisted (Cisne)
 
                     clean_title = clean_text(raw_title)
                     content_hash = re.sub(r'\W+', '', clean_title).lower()
