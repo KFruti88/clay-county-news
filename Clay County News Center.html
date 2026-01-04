@@ -3,39 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clay County News & Events</title>
+    <title>Clay County News & Events Hub</title>
     <style>
-        body { margin: 0; background: transparent; font-family: 'Playfair Display', serif; }
+        /* --- GLOBAL STYLING --- */
+        body { margin: 0; background: #f4f4f4; font-family: 'Playfair Display', serif; color: #1a1a1a; }
         .master-wrapper { max-width: 1100px; margin: 0 auto; padding: 20px; }
         
-        .center-title { text-align: center; font-size: clamp(2rem, 8vw, 3.2rem); margin-bottom: 20px; border-bottom: 4px solid #1a1a1a; padding-bottom: 10px; }
+        /* --- RESPONSIVE MENU BAR --- */
+        .community-nav {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 2px solid #eee;
+            position: sticky;
+            top: 0;
+            z-index: 10000;
+            font-family: sans-serif;
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+        }
+        .nav-brand { font-weight: 900; letter-spacing: 1px; color: #1a1a1a; font-size: 1.1rem; }
+        .nav-links { display: flex; list-style: none; gap: 15px; margin: 0; padding: 0; align-items: center; }
+        .nav-links a { text-decoration: none; font-weight: bold; transition: 0.3s; font-size: 0.9rem; }
 
-        /* TAB NAVIGATION */
+        /* Town Link Branding */
+        .flora-link a { color: #fe4f00 !important; background-color: #00205b; padding: 8px 12px !important; border-radius: 5px; }
+        .louisville-link a { color: #d61a21 !important; background-color: #060404; padding: 8px 12px !important; border-radius: 5px; }
+        .claycity-link a { color: #ffffff !important; background-color: #0c30f0; padding: 8px 12px !important; border-radius: 5px; }
+        .home-btn { color: #333; padding: 8px 12px; }
+
+        /* Mobile Menu */
+        .menu-toggle { display: none; flex-direction: column; cursor: pointer; background: none; border: none; }
+        .bar { width: 25px; height: 3px; background-color: #333; margin: 2px 0; transition: 0.4s; }
+
+        /* --- HUB TABS --- */
+        .center-title { text-align: center; font-size: clamp(2rem, 8vw, 3rem); margin: 40px 0 20px; font-weight: 900; }
         .hub-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 40px; }
         .tab-btn { 
-            padding: 12px 25px; cursor: pointer; border: none; background: rgba(0,0,0,0.1); 
-            font-weight: bold; font-family: sans-serif; border-radius: 5px; transition: 0.3s;
+            padding: 12px 25px; cursor: pointer; border: none; background: rgba(0,0,0,0.05); 
+            font-weight: bold; font-family: sans-serif; border-radius: 50px; transition: 0.3s;
         }
         .tab-btn.active { background: #2ea3f2; color: #fff; box-shadow: 0 4px 15px rgba(46,163,242,0.3); }
 
+        /* --- GLASS CARDS & ANIMATIONS --- */
         .content-section { display: none; }
         .content-section.active { display: block; animation: fadeIn 0.5s ease; }
-
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- GLASS CARD STYLING --- */
         .glass-card { 
-            position: relative;
-            scroll-margin-top: 100px; padding: clamp(20px, 5vw, 40px); margin-bottom: 30px;
+            position: relative; overflow: hidden;
+            scroll-margin-top: 120px; padding: clamp(20px, 5vw, 40px); margin-bottom: 30px;
             background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            overflow: hidden; /* Needed for the glossy sweep */
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
         }
-
-        .glass-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.12); }
-
-        /* --- THE GLOSSY SWEEP ANIMATION --- */
+        .glass-card:hover { transform: translateY(-5px); }
+        
+        /* Glossy Sweep */
         .glass-card::after {
             content: ""; position: absolute; top: -150%; left: -150%; width: 300%; height: 300%;
             background: linear-gradient(to bottom right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
@@ -43,32 +74,63 @@
         }
         .glass-card:hover::after { top: -50%; left: -50%; }
 
-        /* --- BOOKMARK PULSE EFFECT --- */
+        /* Town Badges */
+        .town-badge { display: inline-block; padding: 5px 12px; border-radius: 4px; color: #fff; font-weight: bold; font-size: 0.75rem; text-transform: uppercase; margin-bottom: 15px; }
+        
+        /* News & Calendar Typography */
+        h2, h3 { display: flex; align-items: center; gap: 12px; margin: 10px 0; }
+        .content-body { font-family: 'Georgia', serif; font-size: 1.2rem; line-height: 1.8; color: #222; text-align: justify; }
+
+        /* Calendar Layout */
+        .event-layout { display: flex; gap: 20px; }
+        .date-box { min-width: 75px; height: 75px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 10px; color: #fff; }
+        .date-day { font-size: 1.8rem; font-weight: 900; line-height: 1; }
+        .date-month { font-size: 0.8rem; text-transform: uppercase; font-weight: bold; }
+
+        /* Bookmark Highlight Pulse */
         @keyframes highlightPulse {
             0% { border-color: rgba(46,163,242,0.3); }
-            50% { border-color: #2ea3f2; box-shadow: 0 0 20px rgba(46,163,242,0.4); }
+            50% { border-color: #2ea3f2; box-shadow: 0 0 25px rgba(46,163,242,0.4); }
             100% { border-color: rgba(255, 255, 255, 0.3); }
         }
         .jump-highlight { animation: highlightPulse 2s ease-out; }
 
-        .town-badge { display: inline-block; padding: 5px 12px; border-radius: 4px; color: #fff; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 15px; }
-        h2, h3 { display: flex; align-items: center; gap: 10px; }
-
-        /* CALENDAR SPECIFIC */
-        .event-layout { display: flex; gap: 20px; }
-        .date-box { min-width: 70px; height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; color: #fff; }
-        .date-day { font-size: 1.6rem; font-weight: 900; }
-        .date-month { font-size: 0.7rem; text-transform: uppercase; }
-
-        .content-body { font-family: 'Georgia', serif; font-size: clamp(1rem, 3vw, 1.25rem); line-height: 1.8; color: #222; text-align: justify; }
-
-        @media (max-width: 600px) { .event-layout { flex-direction: column; } .date-box { width: 100%; height: 40px; flex-direction: row; gap: 10px; } }
+        /* --- MOBILE RESPONSIVENESS --- */
+        @media (max-width: 850px) {
+            .menu-toggle { display: flex; }
+            .nav-links {
+                display: none; flex-direction: column; width: 100%; position: absolute;
+                top: 55px; left: 0; background: white; padding: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); gap: 15px;
+            }
+            .nav-links.active { display: flex; }
+            .nav-links li { width: 100%; text-align: center; }
+            .nav-links a { display: block; width: 100%; }
+            .event-layout { flex-direction: column; }
+            .date-box { width: 100%; height: 45px; flex-direction: row; gap: 10px; }
+        }
     </style>
 </head>
 <body>
 
+    <nav class="community-nav">
+        <div class="nav-container">
+            <div class="nav-brand">CLAY COUNTY HUB</div>
+            <button class="menu-toggle" id="mobile-menu">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+            <ul class="nav-links" id="nav-list">
+                <li><a href="https://supportmylocalcommunity.com/clay-county-news-center/" class="home-btn">Home</a></li>
+                <li class="flora-link"><a href="https://ourflora.com">Flora</a></li>
+                <li class="louisville-link"><a href="https://ourlouisville.com">Louisville</a></li>
+                <li class="claycity-link"><a href="https://ourclaycity.com">Clay City</a></li>
+            </ul>
+        </div>
+    </nav>
+
     <div class="master-wrapper">
-        <h1 class="center-title">Clay County Community Hub</h1>
+        <h1 class="center-title">Community News & Events</h1>
 
         <div class="hub-tabs">
             <button class="tab-btn active" onclick="showSection('news-archive', this)">🗞️ Latest News</button>
@@ -76,11 +138,15 @@
         </div>
 
         <div id="news-archive" class="content-section active">
-            <div id="news-feed-container">Loading news...</div>
+            <div id="news-feed-container">
+                <p style="text-align:center;">🗞️ Loading the Daily Edition...</p>
+            </div>
         </div>
 
         <div id="calendar-archive" class="content-section">
-            <div id="calendar-feed-container">Loading events...</div>
+            <div id="calendar-feed-container">
+                <p style="text-align:center;">📅 Syncing local events...</p>
+            </div>
         </div>
     </div>
 
@@ -88,6 +154,7 @@
         const newsJson = 'https://raw.githubusercontent.com/KFruti88/clay-county-news/main/news_data.json';
         const calendarJson = 'https://raw.githubusercontent.com/KFruti88/clay-county-news/main/calendar_data.json';
 
+        // 1. BRANDING & EMOJI LOGIC
         function getBranding(town) {
             const t = town ? town.toLowerCase() : "";
             if (t.includes('flora')) return { bg: '#0c0b82', accent: '#fe4f00', name: 'Flora' };
@@ -96,27 +163,28 @@
             return { bg: '#1a1a1a', accent: '#2ea3f2', name: 'Clay County' };
         }
 
-    // 2. PERMANENT EMOJI LOGIC
+        "              // 2. PERMANENT EMOJI LOGIC
     function getEmoji(item) {
-        const text = ((item.title || "") + " " + (item.full_story || "")).toLowerCase();
-        if (text.includes("tornado") || text.includes("severe") || text.includes("warning")) return "⚠️";
-        if (text.includes("fire")) return "🚒";
-        if (text.includes("police") || text.includes("sheriff") || text.includes("arrest")) return "🚔";
-        if (text.includes("obituary") || text.includes("funeral")) return "🕊️";
-        if (text.includes("tax") || text.includes("price") || text.includes("cost")) return "💲";
-        if (text.includes("football")) return "🏈";
-        if (text.includes("basketball")) return "🏀";
-        if (text.includes("school") || text.includes("bus")) return "🚌";
-        if (text.includes("church") || text.includes("pastor")) return "⛪";
-        if (text.includes("watermelon")) return "🍉";
-        if (text.includes("nasa") || text.includes("comet")) return "🔭";
-        if (text.includes("christmas")) return "🎄";
-        if (text.includes("thanksgiving")) return "🦃";
-        if (text.includes("halloween")) return "🎃";
-        if (text.includes("state news") || text.includes("illinois")) return "🏛️";
-        return "📰"; 
+        const text = ((item.title || """") + "" "" + (item.full_story || """")).toLowerCase();
+        if (text.includes(""tornado"") || text.includes(""severe"") || text.includes(""warning"")) return ""⚠️"";
+        if (text.includes(""fire"")) return ""🚒"";
+        if (text.includes(""police"") || text.includes(""sheriff"") || text.includes(""arrest"")) return ""🚔"";
+        if (text.includes(""obituary"") || text.includes(""funeral"")) return ""🕊️"";
+        if (text.includes(""tax"") || text.includes(""price"") || text.includes(""cost"")) return ""💲"";
+        if (text.includes(""football"")) return ""🏈"";
+        if (text.includes(""basketball"")) return ""🏀"";
+        if (text.includes(""school"") || text.includes(""bus"")) return ""🚌"";
+        if (text.includes(""church"") || text.includes(""pastor"")) return ""⛪"";
+        if (text.includes(""watermelon"")) return ""🍉"";
+        if (text.includes(""nasa"") || text.includes(""comet"")) return ""🔭"";
+        if (text.includes(""christmas"")) return ""🎄"";
+        if (text.includes(""thanksgiving"")) return ""🦃"";
+        if (text.includes(""halloween"")) return ""🎃"";
+        if (text.includes(""state news"") || text.includes(""illinois"")) return ""🏛️"";
+        return ""📰""; "
         }
 
+        // 2. TAB TOGGLE FUNCTION
         function showSection(id, btn) {
             document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -124,7 +192,12 @@
             btn.classList.add('active');
         }
 
-        // LOAD NEWS
+        // 3. NAV TOGGLE
+        document.getElementById('mobile-menu').addEventListener('click', () => {
+            document.getElementById('nav-list').classList.toggle('active');
+        });
+
+        // 4. LOAD NEWS
         fetch(newsJson).then(res => res.json()).then(data => {
             const container = document.getElementById('news-feed-container');
             container.innerHTML = '';
@@ -140,7 +213,7 @@
                     </article>`;
             });
 
-            // BOOKMARK JUMP HANDLER
+            // BOOKMARK HANDLER
             if (window.location.hash) {
                 setTimeout(() => {
                     const el = document.getElementById(window.location.hash.substring(1));
@@ -152,7 +225,7 @@
             }
         });
 
-        // LOAD CALENDAR
+        // 5. LOAD CALENDAR
         fetch(calendarJson).then(res => res.json()).then(data => {
             const container = document.getElementById('calendar-feed-container');
             container.innerHTML = '';
@@ -169,7 +242,7 @@
                             <div class="event-info">
                                 <div class="town-badge" style="background:${brand.accent}">${event.town}</div>
                                 <h3>${event.title}</h3>
-                                <p>📍 ${event.location} | 🕒 ${event.time}</p>
+                                <p style="font-weight:bold; margin-bottom:10px;">📍 ${event.location} | 🕒 ${event.time}</p>
                                 <div class="content-body">${event.description}</div>
                             </div>
                         </div>
