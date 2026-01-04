@@ -76,7 +76,6 @@ def get_metadata(text):
         if re.search(pattern, text):
             town_tags.append(town)
     
-    # Fallback to "County News" if no town is identified
     if not town_tags:
         town_tags.append("County News")
             
@@ -101,6 +100,7 @@ async def scrape_regional_news(query):
                         full_content = title_text + " " + body_text
                         
                         cat, tags, icon = get_metadata(full_content)
+                        # Keep relevance: either a specific town or a special category
                         if tags != ["County News"] or cat != "General News":
                             scraped_stories.append({
                                 "title": f"{icon}{clean_text(title_text)}",
