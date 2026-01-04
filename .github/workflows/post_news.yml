@@ -2,7 +2,6 @@ name: Scheduled News Update
 
 on:
   schedule:
-    # Runs at 22 and 44 minutes past every hour
     - cron: '22,44 * * * *'
   workflow_dispatch:
 
@@ -20,10 +19,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install httpx beautifulsoup4
+          # This line fixes the 'ModuleNotFoundError'
+          pip install httpx beautifulsoup4 
 
       - name: Run Scraper
-        run: python fetch_news.py
+        # IMPORTANT: Make sure this matches your actual filename (fetch_news.py)
+        run: python fetch_news.py 
 
       - name: Commit and Push changes
         run: |
