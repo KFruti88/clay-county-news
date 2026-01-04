@@ -7,8 +7,8 @@ from datetime import datetime
 import os
 
 # --- CONFIGURATION ---
-FEED_XML_FILE = 'feed.xml'                    # Output for RSS readers
-CALENDAR_JSON_FILE = "calendar_events.json"    # Output for Divi/FullCalendar
+FEED_XML_FILE = 'feed.xml'                    
+CALENDAR_JSON_FILE = "calendar_events.json"    
 RSS_SOURCE_URL = "https://www.wnoi.com/category/local/feed"
 NEWS_CENTER_URL = "https://supportmylocalcommunity.com/clay-county-news-center/"
 
@@ -25,7 +25,6 @@ THEMES = {
 def clean_text(text):
     """Scrub branding, frequencies, and leading dates for a clean display."""
     if not text: return ""
-    
     patterns = [
         r'(?i)wnoi', 
         r'(?i)103\.9/99\.3', 
@@ -33,18 +32,14 @@ def clean_text(text):
         r'(?i)by\s+tom\s+lavine', 
         r'^\d{1,2}/\d{1,2}/\d{2,4}\s*' # Strips leading dates
     ]
-    
     for p in patterns:
         text = re.sub(p, '', text)
-        
-    # Remove HTML tags and extra whitespace
     text = re.sub('<[^<]+?>', '', text)
     return text.strip()
 
 def get_primary_town(text):
     """Checks the full story content for specific town mentions."""
     if not text: return "General News"
-    
     town_map = {
         "Flora": r'(?i)\bflora\b',
         "Xenia": r'(?i)\bxenia\b',
@@ -52,15 +47,13 @@ def get_primary_town(text):
         "Clay City": r'(?i)clay\s*city',
         "Sailor Springs": r'(?i)sailor\s*springs'
     }
-    
     for town, pattern in town_map.items():
         if re.search(pattern, text):
             return town
-            
     return "General News"
 
 async def process_news():
-    """Main logic: Fetches external RSS, cleans it, and generates XML/JSON outputs."""
+    """Fetches external RSS, cleans it, and generates XML/JSON outputs."""
     stories = []
     seen_content = set()
     namespaces = {'content': 'http://purl.org/rss/1.0/modules/content/'}
@@ -89,7 +82,6 @@ async def process_news():
                     unique_key = clean_title if is_general else (clean_title + town_tag)
 
                     if unique_key not in seen_content:
-                        # 1. Prepare data for JSON (FullCalendar format)
                         stories.append({
                             "title": clean_title,
                             "start": today_iso,
@@ -100,7 +92,6 @@ async def process_news():
                             "extendedProps": {"town": town_tag}
                         })
                         
-                        # 2. Prepare data for XML (Standard RSS format)
                         rss_items_xml += f"""
         <item>
             <title>{clean_title}</title>
@@ -108,15 +99,12 @@ async def process_news():
             <description>{clean_text(brief[:200])}...</description>
             <pubDate>{pub_date}</pubDate>
         </item>"""
-                        
                         seen_content.add(unique_key)
 
-                # Save Calendar JSON
+                # Save Outputs
                 with open(CALENDAR_JSON_FILE, "w") as f:
                     json.dump(stories, f, indent=4)
-                print(f"Exported {len(stories)} events to {CALENDAR_JSON_FILE}")
-
-                # Save RSS XML
+                
                 rss_feed = f"""<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0">
     <channel>
@@ -128,10 +116,11 @@ async def process_news():
 </rss>"""
                 with open(FEED_XML_FILE, 'w') as f:
                     f.write(rss_feed)
-                print(f"Successfully generated {FEED_XML_FILE}")
+                
+                print(f"Update complete. {len(stories)} events exported.")
 
         except Exception as e:
-            print(f"Error during processing: {e}")
+            print(f"Error: {e}")
 
 if __name__ == "__main__":
     asyncio.run(process_news())
