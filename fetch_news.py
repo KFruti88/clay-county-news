@@ -20,7 +20,7 @@ THEMES = {
     "Xenia": {"bg": "#0077BE", "text": "#FFC0CB"},          
     "Flora": {"bg": "#FFFFFF", "text": "#000000"},          
     "Louisville": {"bg": "#FFFFFF", "text": "#000000"},     
-    "General": {"bg": "#808080", "text": "#FFFFFF"}         # Grey for General News
+    "General News": {"bg": "#808080", "text": "#FFFFFF"}    # Consolidated Grey
 }
 
 def clean_text(text):
@@ -32,8 +32,8 @@ def clean_text(text):
     return text.strip()
 
 def get_primary_town(text):
-    """Identifies if a specific town is mentioned in the story content."""
-    if not text: return "General"
+    """Checks the full story content for specific town mentions."""
+    if not text: return "General News"
     town_map = {
         "Flora": r'(?i)\bflora\b',
         "Xenia": r'(?i)\bxenia\b',
@@ -44,7 +44,7 @@ def get_primary_town(text):
     for town, pattern in town_map.items():
         if re.search(pattern, text):
             return town
-    return "General"
+    return "General News"
 
 async def fetch_rss():
     stories = []
@@ -60,7 +60,7 @@ async def fetch_rss():
                     content_node = item.find("content:encoded", namespaces)
                     full_text = content_node.text if content_node is not None else brief
 
-                    # Logic: Identify town based on Full Story content
+                    # Logic: Determine town tag based on the STORY content
                     town_tag = get_primary_town(full_text)
                     
                     stories.append({
@@ -69,7 +69,7 @@ async def fetch_rss():
                         "full_story": clean_text(full_text),
                         "link": NEWS_CENTER_URL,
                         "town_tag": town_tag,
-                        "theme": THEMES.get(town_tag, THEMES["General"])
+                        "theme": THEMES.get(town_tag, THEMES["General News"])
                     })
         except Exception as e:
             print(f"RSS Error: {e}")
@@ -83,29 +83,29 @@ async def run():
     seen_content = set()
 
     for story in all_stories:
+        # Create a unique key to identify duplicates
         content_hash = story['title'] + story['town_tag']
         
-        # 1. If it's a specific town mention (Clay City, Xenia, etc. in the text)
-        # Keep it exactly as is.
-        if story['town_tag'] in TOWNS and story['town_tag'] != "General":
+        # CATEGORY 1: Specific Town News (Town is mentioned in the story)
+        if story['town_tag'] != "General News":
             if content_hash not in seen_content:
                 final_output.append(story)
                 seen_content.add(content_hash)
         
-        # 2. If it's a general story (like 'The ReVue') that doesn't mention a town
-        # Label it General News and only keep ONE copy (deduplicate)
+        # CATEGORY 2: General News (Repeats like 'The ReVue')
         else:
-            story['town_tag'] = "General News"
-            story['theme'] = THEMES["General"]
+            # Only allow ONE instance of a General News story title
             if story['title'] not in seen_content:
+                story['town_tag'] = "General News"
+                story['theme'] = THEMES["General News"]
                 final_output.append(story)
                 seen_content.add(story['title'])
 
-    # Save to JSON
+    # Save the clean, de-duplicated list
     with open(DATA_EXPORT_FILE, "w") as f:
         json.dump(final_output, f, indent=4)
 
-    print(f"Done! {len(final_output)} unique entries saved.")
+    print(f"Done! {len(final_output)} unique entries saved to {DATA_EXPORT_FILE}")
 
 if __name__ == "__main__":
     asyncio.run(run())
