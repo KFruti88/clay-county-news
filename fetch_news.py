@@ -1,47 +1,132 @@
-import re
+import httpx
+import asyncio
 import json
+import re
 import xml.etree.ElementTree as ET
+from datetime import datetime
+import os
 
-# Configuration
-DATA_EXPORT_FILE = "calendar_events.json"
+# --- CONFIGURATION ---
+NEWS_DATA_FILE = 'news_data.json'  # Your local source
+FEED_XML_FILE = 'feed.xml'        # Output for RSS readers
+CALENDAR_JSON_FILE = "calendar_events.json" # Output for Divi Calendar
+RSS_SOURCE_URL = "https://www.wnoi.com/category/local/feed"
+NEWS_CENTER_URL = "https://supportmylocalcommunity.com/clay-county-news-center/"
+
+# --- COLOR THEMES ---
+THEMES = {
+    "Clay City": {"bg": "#ADD8E6", "text": "#000000"},
+    "Sailor Springs": {"bg": "#367C2B", "text": "#FFDE00"},
+    "Xenia": {"bg": "#0077BE", "text": "#FFC0CB"},
+    "Flora": {"bg": "#FFFFFF", "text": "#000000"},
+    "Louisville": {"bg": "#FFFFFF", "text": "#000000"},
+    "General News": {"bg": "#808080", "text": "#FFFFFF"}
+}
 
 def clean_text(text):
-    """Scrub branding, frequencies, and HTML tags based on your logic."""
+    """Scrub branding, frequencies, and leading dates for a clean display."""
     if not text: return ""
-    
-    # Patterns to remove (Fixed syntax from your snippet)
     patterns = [
-        r'(?i)wnoi', 
-        r'(?i)103\.9/99\.3', 
+        r'(?i)wnoi',
+        r'(?i)103\.9/99\.3',
         r'(?i)local\s*--',
-        r'(?i)by\s+tom\s+lavine', 
-        r'^\d{1,2}/\d{1,2}/\d{2,4}\s*'
+        r'(?i)by\s+tom\s+lavine',
+        r'^\d{1,2}/\d{1,2}/\d{2,4}\s*' 
     ]
-    
     for p in patterns:
         text = re.sub(p, '', text)
-        
-    # Remove HTML tags and extra whitespace
-    text = re.sub('<[^<]+?>', '', text)
+    text = re.sub('<[^<]+?>', '', text) 
     return text.strip()
 
-def format_for_calendar(stories):
-    """Converts scraped stories into FullCalendar-ready JSON."""
-    calendar_events = []
-    for story in stories:
-        calendar_events.append({
-            "title": story['title'],
-            "start": story['date'], # Ensure your scraper provides ISO date (YYYY-MM-DD)
-            "description": clean_text(story['full_text']),
-            "url": story.get('link', ''),
-            "extendedProps": {
-                "town": story.get('town_tag', 'General')
-            }
-        })
-    return calendar_events
+def get_primary_town(text):
+    """Checks the full story content for specific town mentions."""
+    if not text: return "General News"
+    town_map = {
+        "Flora": r'(?i)\bflora\b',
+        "Xenia": r'(?i)\bxenia\b',
+        "Louisville": r'(?i)\blouisville\b',
+        "Clay City": r'(?i)clay\s*city',
+        "Sailor Springs": r'(?i)sailor\s*springs'
+    }
+    for town, pattern in town_map.items():
+        if re.search(pattern, text):
+            return town
+    return "General News"
 
-# ... (Insert your RSS fetching logic here) ...
+async def process_news():
+    """Main logic: Generates both RSS XML and Calendar JSON."""
+    stories = []
+    seen_content = set()
+    namespaces = {'content': 'http://purl.org/rss/1.0/modules/content/'}
+    
+    # 1. Fetch from external RSS
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.get(RSS_SOURCE_URL, timeout=15)
+            if resp.status_code == 200:
+                root = ET.fromstring(resp.content)
+                today_iso = datetime.now().strftime('%Y-%m-%d')
+                pub_date = datetime.now().strftime("%a, %d %b %Y %H:%M:%S +0000")
 
-# Save the clean, de-duplicated list to the JSON file
-# with open(DATA_EXPORT_FILE, "w") as f:
-#     json.dump(final_output, f, indent=4)
+                rss_items_xml = ""
+
+                for item in root.findall("./channel/item")[:40]:
+                    raw_title = item.find("title").text
+                    brief = item.find("description").text or ""
+                    content_node = item.find("content:encoded", namespaces)
+                    full_text = content_node.text if content_node is not None else brief
+                    
+                    town_tag = get_primary_town(full_text)
+                    clean_title = clean_text(raw_title)
+                    
+                    # Deduplication Logic
+                    is_general = (town_tag == "General News")
+                    unique_key = clean_title if is_general else (clean_title + town_tag)
+
+                    if unique_key not in seen_content:
+                        # Add to JSON list
+                        stories.append({
+                            "title": clean_title,
+                            "start": today_iso,
+                            "description": clean_text(full_text),
+                            "url": NEWS_CENTER_URL,
+                            "backgroundColor": THEMES[town_tag]["bg"],
+                            "textColor": THEMES[town_tag]["text"],
+                            "extendedProps": {"town": town_tag}
+                        })
+                        
+                        # Add to XML string
+                        rss_items_xml += f"""
+        <item>
+            <title>{clean_title}</title>
+            <link>{NEWS_CENTER_URL}</link>
+            <description>{clean_text(brief[:200])}...</description>
+            <pubDate>{pub_date}</pubDate>
+        </item>"""
+                        
+                        seen_content.add(unique_key)
+
+                # 2. Save Calendar JSON
+                with open(CALENDAR_JSON_FILE, "w") as f:
+                    json.dump(stories, f, indent=4)
+                print(f"Exported {len(stories)} unique events to {CALENDAR_JSON_FILE}")
+
+                # 3. Save RSS XML
+                rss_feed = f"""<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+    <channel>
+        <title>Clay County News Feed</title>
+        <link>{NEWS_CENTER_URL}</link>
+        <description>Cleaned and Categorized Clay County News</description>
+        {rss_items_xml}
+    </channel>
+</rss>"""
+                with open(FEED_XML_FILE, 'w') as f:
+                    f.write(rss_feed)
+                print(f"Successfully generated {FEED_XML_FILE}")
+
+        except Exception as e:
+            print(f"Error during processing: {e}")
+
+if __name__ == "__main__":
+    asyncio.run(process_news())
