@@ -23,16 +23,35 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* GLASS CARD STYLING (Shared for News & Events) */
+        /* --- GLASS CARD STYLING --- */
         .glass-card { 
+            position: relative;
             scroll-margin-top: 100px; padding: clamp(20px, 5vw, 40px); margin-bottom: 30px;
             background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            overflow: hidden; /* Needed for the glossy sweep */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
+        .glass-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.12); }
+
+        /* --- THE GLOSSY SWEEP ANIMATION --- */
+        .glass-card::after {
+            content: ""; position: absolute; top: -150%; left: -150%; width: 300%; height: 300%;
+            background: linear-gradient(to bottom right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+            transform: rotate(35deg); transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1); pointer-events: none;
+        }
+        .glass-card:hover::after { top: -50%; left: -50%; }
+
+        /* --- BOOKMARK PULSE EFFECT --- */
+        @keyframes highlightPulse {
+            0% { border-color: rgba(46,163,242,0.3); }
+            50% { border-color: #2ea3f2; box-shadow: 0 0 20px rgba(46,163,242,0.4); }
+            100% { border-color: rgba(255, 255, 255, 0.3); }
+        }
+        .jump-highlight { animation: highlightPulse 2s ease-out; }
+
         .town-badge { display: inline-block; padding: 5px 12px; border-radius: 4px; color: #fff; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 15px; }
-        
-        /* HEADINGS */
         h2, h3 { display: flex; align-items: center; gap: 10px; }
 
         /* CALENDAR SPECIFIC */
@@ -77,25 +96,25 @@
             return { bg: '#1a1a1a', accent: '#2ea3f2', name: 'Clay County' };
         }
 
-        // 2. PERMANENT EMOJI LOGIC
-        function getEmoji(item) {
-            const text = ((item.title || "") + " " + (item.full_story || "")).toLowerCase();
-            if (text.includes("tornado") || text.includes("severe") || text.includes("warning")) return "⚠️";
-            if (text.includes("fire")) return "🚒";
-            if (text.includes("police") || text.includes("sheriff") || text.includes("arrest")) return "🚔";
-            if (text.includes("obituary") || text.includes("funeral")) return "🕊️";
-            if (text.includes("tax") || text.includes("price") || text.includes("cost")) return "💲";
-            if (text.includes("football")) return "🏈";
-            if (text.includes("basketball")) return "🏀";
-            if (text.includes("school") || text.includes("bus")) return "🚌";
-            if (text.includes("church") || text.includes("pastor")) return "⛪";
-            if (text.includes("watermelon")) return "🍉";
-            if (text.includes("nasa") || text.includes("comet")) return "🔭";
-            if (text.includes("christmas")) return "🎄";
-            if (text.includes("thanksgiving")) return "🦃";
-            if (text.includes("halloween")) return "🎃";
-            if (text.includes("state news") || text.includes("illinois")) return "🏛️";
-            return "📰";
+    // 2. PERMANENT EMOJI LOGIC
+    function getEmoji(item) {
+        const text = ((item.title || "") + " " + (item.full_story || "")).toLowerCase();
+        if (text.includes("tornado") || text.includes("severe") || text.includes("warning")) return "⚠️";
+        if (text.includes("fire")) return "🚒";
+        if (text.includes("police") || text.includes("sheriff") || text.includes("arrest")) return "🚔";
+        if (text.includes("obituary") || text.includes("funeral")) return "🕊️";
+        if (text.includes("tax") || text.includes("price") || text.includes("cost")) return "💲";
+        if (text.includes("football")) return "🏈";
+        if (text.includes("basketball")) return "🏀";
+        if (text.includes("school") || text.includes("bus")) return "🚌";
+        if (text.includes("church") || text.includes("pastor")) return "⛪";
+        if (text.includes("watermelon")) return "🍉";
+        if (text.includes("nasa") || text.includes("comet")) return "🔭";
+        if (text.includes("christmas")) return "🎄";
+        if (text.includes("thanksgiving")) return "🦃";
+        if (text.includes("halloween")) return "🎃";
+        if (text.includes("state news") || text.includes("illinois")) return "🏛️";
+        return "📰"; 
         }
 
         function showSection(id, btn) {
@@ -120,11 +139,15 @@
                         <div class="content-body">${item.full_story}</div>
                     </article>`;
             });
-            // Handle initial bookmark jump
+
+            // BOOKMARK JUMP HANDLER
             if (window.location.hash) {
                 setTimeout(() => {
                     const el = document.getElementById(window.location.hash.substring(1));
-                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth' });
+                        el.classList.add('jump-highlight');
+                    }
                 }, 1000);
             }
         });
