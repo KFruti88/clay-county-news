@@ -32,7 +32,6 @@ def clean_text(text):
     ]
     for p in patterns:
         text = re.sub(p, '', text)
-    # Remove HTML tags and extra whitespace
     text = re.sub('<[^<]+?>', '', text)
     return text.strip()
 
@@ -130,7 +129,7 @@ async def run():
         town_news = [s for s in unique_list if s['town_tag'] == town]
         
         if town in SMALL_TOWNS and not town_news:
-            # If a small town has no local news, duplicate General news with town's theme
+            # If no local news, duplicate General news with town's specific theme
             general_news = [s for s in unique_list if s['town_tag'] == "General"]
             for g in general_news:
                 fallback = deepcopy(g)
