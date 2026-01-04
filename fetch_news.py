@@ -29,7 +29,7 @@ def get_metadata(text):
     icon = ""
     is_video = True if re.search(r'youtube\.com|youtu\.be', text) else False
 
-    # Category Mapping
+    # Category and Holiday Mapping
     if re.search(r'(?i)\bobituary\b|\bobituaries\b|\bpassed\s*away\b', text): cat = "Obituary"; icon = "🕊️ "
     elif re.search(r'(?i)\bschool\b|\bunit\s*2\b|\bhigh\s*school\b', text): cat = "School News"; icon = "🚌 "
     elif re.search(r'(?i)christmas|xmas|santa', text): icon = "🎄 "
@@ -63,7 +63,7 @@ async def scrape_regional_news(query):
                         b_text = desc_node.get_text() if desc_node else ""
                         cat, tags, icon = get_metadata(t_text + " " + b_text)
                         
-                        # High-Signal Filter: Only keep if it's town-specific or a special category
+                        # High-Signal Filter: Only keep if it's town-specific or a priority category
                         if tags != ["County News"] or cat != "General News":
                             scraped_stories.append({
                                 "title": f"{icon}{clean_text(t_text)}",
