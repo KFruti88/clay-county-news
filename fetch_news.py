@@ -32,7 +32,7 @@ def clean_text(text):
 
 def get_metadata(text):
     """Detects Category, Icons (Holidays/State/School/Video), and Town tags."""
-    category = "General News"
+    cat = "General News"
     icon = ""
     
     # --- 1. VIDEO DETECTION ---
@@ -42,9 +42,9 @@ def get_metadata(text):
 
     # --- 2. CATEGORY & HOLIDAY DETECTION ---
     if re.search(r'(?i)\bobituary\b|\bobituaries\b|\bpassed\s*away\b|\bdeath\s*notice\b', text):
-        category = "Obituary"; icon = "🕊️ "
+        cat = "Obituary"; icon = "🕊️ "
     elif re.search(r'(?i)\bschool\b|\bunit\s*2\b|\bhigh\s*school\b|\bgrade\s*school\b|\bteacher\b', text):
-        category = "School News"; icon = "🚌 "
+        cat = "School News"; icon = "🚌 "
     elif re.search(r'(?i)christmas|xmas|santa|yuletide', text):
         icon = "🎄 "
     elif re.search(r'(?i)valentine|sweetheart', text):
@@ -52,11 +52,11 @@ def get_metadata(text):
     elif re.search(r'(?i)4th\s*of\s*july|july\s*4th|independence\s*day|fireworks', text):
         icon = "🎆 "
     elif re.search(r'(?i)\bstate\b|\bspringfield\b|\bpritzker\b|\bidot\b', text):
-        category = "State News"; icon = "🏦 "
+        cat = "State News"; icon = "🏦 "
     elif re.search(r'(?i)\bfire\b|\brescue\b|\bextrication\b|\bstructure\s*fire\b|\bmutual\s*aid\b', text):
-        category = "Fire & Rescue"; icon = "🚒 "
+        cat = "Fire & Rescue"; icon = "🚒 "
     elif re.search(r'(?i)\barrest\b|\bsheriff\b|\bpolice\b|\bbooking\b|\bcourt\s*news\b|\bblotter\b', text):
-        category = "Police Report"; icon = "🚨 "
+        cat = "Police Report"; icon = "🚨 "
 
     # Add Video Icon if YouTube is present
     if is_video:
@@ -80,7 +80,7 @@ def get_metadata(text):
     if not town_tags:
         town_tags.append("County News")
             
-    return category, town_tags, icon
+    return cat, town_tags, icon
 
 async def scrape_regional_news(query):
     """Searches regional NewsBreak and applies multi-tagging."""
@@ -119,7 +119,7 @@ async def process_news():
     pub_date = datetime.now().strftime("%a, %d %b %Y %H:%M:%S +0000")
     timestamp = datetime.now().isoformat()
 
-    # 1. Fetch Local RSS (WNOI)
+    # 1. Local RSS
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.get(RSS_SOURCE_URL, timeout=15)
@@ -131,16 +131,15 @@ async def process_news():
                     content_node = item.find("content:encoded", namespaces)
                     full_text = content_node.text if content_node is not None else (item.find("description").text or "")
                     
-                    category, tags, icon = get_metadata(raw_title + " " + full_text)
+                    cat, tags, icon = get_metadata(raw_title + " " + full_text)
                     clean_title = f"{icon}{clean_text(raw_title)}"
                     
-                    # Deduplication using normalized title hash
                     content_hash = re.sub(r'\W+', '', clean_title).lower()
                     if content_hash not in seen_hashes:
                         final_news.append({
                             "title": clean_title,
                             "description": clean_text(full_text),
-                            "category": category,
+                            "category": cat,
                             "tags": tags,
                             "link": NEWS_CENTER_URL,
                             "date_added": timestamp
@@ -170,7 +169,7 @@ async def process_news():
                 })
                 seen_hashes.add(content_hash)
 
-    # 3. Save as JSON with UTF-8
+    # 3. Save as JSON
     with open(NEWS_DATA_FILE, "w", encoding='utf-8') as f:
         json.dump(final_news, f, indent=4, ensure_ascii=False)
 
