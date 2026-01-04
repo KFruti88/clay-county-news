@@ -16,7 +16,7 @@ NEWS_CENTER_URL = "https://supportmylocalcommunity.com/clay-county-news-center/"
 TOWNS = ["Flora", "Louisville", "Clay City", "Xenia", "Sailor Springs"]
 
 def clean_text(text):
-    """Scrub branding, frequencies, and leading dates for a clean display."""
+    """Scrub branding, station frequencies, and leading dates for a clean display."""
     if not text: return ""
     patterns = [
         r'(?i)wnoi', 
@@ -35,21 +35,17 @@ def get_category_and_tags(text):
     category = "General News"
     icon = ""
     
-    # 1. Detect Category and Assign Emojis
     # Obituaries checked first for specificity
     if re.search(r'(?i)\bobituary\b|\bobituaries\b|\bpassed\s*away\b|\bdeath\s*notice\b', text):
         category = "Obituary"
         icon = "🕊️ "
-    # Fire and Rescue detection
     elif re.search(r'(?i)\bfire\b|\brescue\b|\bextrication\b|\bstructure\s*fire\b|\bmutual\s*aid\b', text):
         category = "Fire & Rescue"
         icon = "🚒 "
-    # Police and Sheriff detection
     elif re.search(r'(?i)\barrest\b|\bsheriff\b|\bpolice\b|\bbooking\b|\bcourt\s*news\b|\bblotter\b', text):
         category = "Police Report"
         icon = "🚨 "
 
-    # 2. Identify Town
     town_found = "Clay County"
     town_map = {
         "Flora": r'(?i)\bflora\b',
@@ -72,6 +68,7 @@ async def scrape_regional_news(query):
     async with httpx.AsyncClient(follow_redirects=True) as client:
         try:
             headers = {"User-Agent": "Mozilla/5.0"}
+            # Updated timeout to 12s as per your diff
             resp = await client.get(url, headers=headers, timeout=12)
             if resp.status_code == 200:
                 soup = BeautifulSoup(resp.text, 'html.parser')
@@ -84,7 +81,6 @@ async def scrape_regional_news(query):
                         full_content = title_text + " " + body_text
                         
                         cat, town, icon = get_category_and_tags(full_content)
-                        # Filter for relevance to your towns or categories
                         if town != "Clay County" or cat != "General News":
                             scraped_stories.append({
                                 "title": f"{icon}{clean_text(title_text)}",
@@ -96,11 +92,11 @@ async def scrape_regional_news(query):
     return scraped_stories
 
 async def process_news():
+    """Main logic: Fetches external RSS, cleans it, and generates XML/JSON outputs."""
     final_news = []
     seen_titles = set()
     pub_date = datetime.now().strftime("%a, %d %b %Y %H:%M:%S +0000")
 
-    # 1. Fetch Local RSS (WNOI)
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.get(RSS_SOURCE_URL, timeout=15)
@@ -163,6 +159,7 @@ async def process_news():
     
     rss_feed = f'<?xml version="1.0" encoding="UTF-8" ?><rss version="2.0"><channel><title>Clay County Unified News</title><link>{NEWS_CENTER_URL}</link><description>Combined Local and Regional Updates</description>{rss_items}</channel></rss>'
     
+    # Encoding set to utf-8 as per your diff
     with open(FEED_XML_FILE, 'w', encoding='utf-8') as f:
         f.write(rss_feed)
 
