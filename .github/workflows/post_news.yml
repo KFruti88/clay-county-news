@@ -22,7 +22,7 @@ jobs:
         run: pip install httpx beautifulsoup4
 
       - name: Run News Scraper
-        run: python generate_rss.py
+        run: python update_news.py
 
       - name: Save and Push Changes
         run: |
