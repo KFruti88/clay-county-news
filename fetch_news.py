@@ -102,7 +102,7 @@ async def scrape_regional_news(query):
                         
                         cat, tags, icon = get_metadata(full_content)
                         
-                        # RELEVANCE FILTER: Must mention a town OR have a specific category
+                        # RELEVANCE FILTER: Must mention a specific town OR have a specific category
                         if tags != ["County News"] or cat != "General News":
                             scraped_stories.append({
                                 "title": f"{icon}{clean_text(title_text)}",
