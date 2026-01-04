@@ -23,14 +23,19 @@ THEMES = {
 }
 
 def clean_text(text):
-    """Scrub branding, frequencies, and HTML tags."""
+    """Scrub branding, frequencies, dates, and HTML tags."""
     if not text: return ""
+    # Your updated pattern list including date stripping
     patterns = [
-        r'(?i)wnoi', r'(?i)103\.9/99\.3', r'(?i)local\s*--', 
-        r'(?i)by\s+tom\s+lavine', r'^\d{1,2}/\d{1,2}/\d{2,4}\s*'
+        r'(?i)wnoi', 
+        r'(?i)103\.9/99\.3', 
+        r'(?i)local\s*--', 
+        r'(?i)by\s+tom\s+lavine', 
+        r'^\d{1,2}/\d{1,2}/\d{2,4}\s*'
     ]
     for p in patterns:
         text = re.sub(p, '', text)
+    
     # Remove HTML tags and extra whitespace
     text = re.sub('<[^<]+?>', '', text)
     return text.strip()
@@ -65,7 +70,7 @@ async def fetch_rss():
                     content_node = item.find("content:encoded", namespaces)
                     full_text = content_node.text if content_node is not None else brief
 
-                    # Logic: Determine town tag based on the STORY content
+                    # Logic: Determine town tag based on the STORY content keywords
                     town_tag = get_primary_town(full_text)
                     
                     stories.append({
@@ -87,6 +92,8 @@ async def run():
     final_output = []
     seen_content = set()
 
+    
+
     for story in all_stories:
         # Create a unique key to identify duplicates
         content_hash = story['title'] + story['town_tag']
@@ -97,16 +104,16 @@ async def run():
                 final_output.append(story)
                 seen_content.add(content_hash)
         
-        # CATEGORY 2: General News (Repeats like 'The ReVue')
+        # CATEGORY 2: General News (Consolidate repeats like 'The ReVue')
         else:
-            # Only allow ONE instance of a General News story title
+            # Only allow ONE instance of a General News story title to exist
             if story['title'] not in seen_content:
                 story['town_tag'] = "General News"
                 story['theme'] = THEMES["General News"]
                 final_output.append(story)
                 seen_content.add(story['title'])
 
-    # Save the clean, de-duplicated list
+    # Save the clean, de-duplicated list to the JSON file
     with open(DATA_EXPORT_FILE, "w") as f:
         json.dump(final_output, f, indent=4)
 
