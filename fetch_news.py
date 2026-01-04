@@ -14,7 +14,6 @@ TOWNS = ["Flora", "Louisville", "Clay City", "Xenia", "Sailor Springs"]
 BLACKLIST = ["Cisne"]
 
 def clean_text(text):
-    """Removes branding, extra spaces, and HTML tags."""
     if not text: return ""
     patterns = [
         r'(?i)wnoi', r'(?i)103\.9/99\.3', r'(?i)local\s*--', 
@@ -32,39 +31,37 @@ async def get_full_content(url):
             resp = await client.get(url)
             if resp.status_code == 200:
                 soup = BeautifulSoup(resp.text, 'html.parser')
+                # WNOI usually puts the full story in 'entry-content'
                 article = soup.find('div', class_='entry-content')
                 if article:
-                    # Clean out social sharing junk
-                    for tag in article.find_all(['script', 'style', 'div']):
-                        if tag.get('class') and any(c in tag.get('class') for c in ['sharedaddy', 'jp-relatedposts']):
-                            tag.decompose()
+                    # Remove social media buttons and ads
+                    for junk in article.find_all(['script', 'style', 'div'], class_=['sharedaddy', 'jp-relatedposts']):
+                        junk.decompose()
                     return article.get_text(separator="\n").strip()
     except: pass
     return None
 
 def get_metadata(text):
-    """Categorization with strict Blacklist and smart town logic."""
     text_lower = text.lower()
+    # Check Blacklist
     if any(forbidden.lower() in text_lower for forbidden in BLACKLIST):
         return None, None
 
     cat = "General News"
-    # Priority Categories
-    if any(word in text_lower for word in ['musical', 'music', 'concert', 'band', 'revue', 'burmashavers']):
+    if any(word in text_lower for word in ['musical', 'music', 'concert', 'revue']):
         cat = "Arts & Entertainment"
-    elif any(word in text_lower for word in ['obituary', 'obituaries', 'passed away']):
+    elif any(word in text_lower for word in ['obituary', 'passed away']):
         cat = "Obituary"
-    elif any(word in text_lower for word in ['state', 'illinois', 'pritzker', 'tax', 'governor', 'grocery tax']):
-        cat = "State News"
-    elif any(word in text_lower for word in ['arrest', 'sheriff', 'police', 'blotter', 'jail', 'booked', 'deputy']):
+    elif any(word in text_lower for word in ['arrest', 'sheriff', 'police', 'jail']):
         cat = "Police Report"
-    elif any(word in text_lower for word in ['school', 'unit 2', 'high school', 'student', 'wolves', 'cardinals', 'gingerbread']):
+    elif any(word in text_lower for word in ['school', 'student', 'gingerbread']):
         cat = "School News"
-    elif any(word in text_lower for word in ['fire', 'rescue', 'structure fire', 'ems']):
-        cat = "Fire & Rescue"
+    elif any(word in text_lower for word in ['tax', 'pritzker', 'governor']):
+        cat = "State News"
 
     found_towns = [t for t in TOWNS if re.search(fr'(?i)\b{t}\b', text)]
     
+    # Tagging Logic
     if len(found_towns) > 1 or cat == "State News" or len(found_towns) == 0:
         town_tags = ["County News"]
     else:
@@ -73,7 +70,6 @@ def get_metadata(text):
     return cat, town_tags
 
 async def process_news():
-    """Main function to run the news gathering cycle."""
     final_news, seen_hashes = [], set()
     timestamp = datetime.now().isoformat()
 
@@ -82,7 +78,7 @@ async def process_news():
             resp = await client.get(RSS_SOURCE_URL, timeout=15)
             if resp.status_code == 200:
                 root = ET.fromstring(resp.content)
-                items = root.findall("./channel/item")[:20] # Focus on top 20 for quality
+                items = root.findall("./channel/item")[:15] # Top 15 stories
                 
                 for item in items:
                     raw_title = item.find("title").text
@@ -92,8 +88,8 @@ async def process_news():
                     cat, tags = get_metadata(raw_title + " " + desc)
                     if cat is None: continue 
 
-                    # Deep Scrape for the Full Article (For Main Center)
-                    full_story_text = await get_full_content(link)
+                    # DEEP SCRAPE: Get the actual long story text
+                    full_text = await get_full_content(link)
                     
                     clean_title = clean_text(raw_title)
                     story_id = re.sub(r'\W+', '', clean_title).lower()
@@ -103,19 +99,19 @@ async def process_news():
                             "id": story_id, 
                             "title": clean_title, 
                             "summary": clean_text(desc).replace('[&#8230;]', '...'),
-                            "full_story": full_story_text if full_story_text else clean_text(desc),
+                            "full_story": full_text if full_text else clean_text(desc),
                             "category": cat, 
                             "tags": tags, 
                             "link": f"{NEWS_CENTER_URL}#{story_id}", 
                             "date_added": timestamp
                         })
                         seen_hashes.add(story_id)
-        except Exception as e: print(f"Processing Error: {e}")
+        except Exception as e: print(f"Error: {e}")
 
-    # Save to JSON
+    # SAVE TO JSON
     with open(NEWS_DATA_FILE, "w", encoding='utf-8') as f:
         json.dump(final_news, f, indent=4, ensure_ascii=False)
-    print(f"Success: {len(final_news)} items stored. Cisne filtered.")
+    print(f"Finished: {len(final_news)} stories saved.")
 
 if __name__ == "__main__":
     asyncio.run(process_news())
