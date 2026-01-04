@@ -23,10 +23,15 @@ THEMES = {
 }
 
 def clean_text(text):
+    """Scrub branding, frequencies, and HTML tags."""
     if not text: return ""
-    patterns = [r'(?i)wnoi', r'(?i)103\.9/99\.3', r'(?i)local\s*--', r'(?i)by\s+tom\s+lavine']
+    patterns = [
+        r'(?i)wnoi', r'(?i)103\.9/99\.3', r'(?i)local\s*--', 
+        r'(?i)by\s+tom\s+lavine', r'^\d{1,2}/\d{1,2}/\d{2,4}\s*'
+    ]
     for p in patterns:
         text = re.sub(p, '', text)
+    # Remove HTML tags and extra whitespace
     text = re.sub('<[^<]+?>', '', text)
     return text.strip()
 
@@ -46,6 +51,7 @@ def get_primary_town(text):
     return "General News"
 
 async def fetch_rss():
+    """Fetches RSS feed and assigns town_tags based on STORY content."""
     stories = []
     namespaces = {'content': 'http://purl.org/rss/1.0/modules/content/'}
     async with httpx.AsyncClient() as client:
@@ -85,7 +91,7 @@ async def run():
         # Create a unique key to identify duplicates
         content_hash = story['title'] + story['town_tag']
         
-        # CATEGORY 1: Specific Town News (Town is mentioned in the story)
+        # CATEGORY 1: Specific Town News (Town is actually mentioned in the text)
         if story['town_tag'] != "General News":
             if content_hash not in seen_content:
                 final_output.append(story)
