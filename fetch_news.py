@@ -82,7 +82,7 @@ async def scrape_regional_news(query):
                         full_content = title_text + " " + body_text
                         
                         category, tags, icon = get_metadata(full_content)
-                        # Ensure we don't grab generic news that doesn't fit our towns/categories
+                        # Keep relevance: either a town is found or it's a specific category
                         if tags != ["County News"] or category != "General News":
                             scraped_stories.append({
                                 "title": f"{icon}{clean_text(title_text)}",
@@ -150,7 +150,7 @@ async def process_news():
                 })
                 seen_hashes.add(content_hash)
 
-    # 3. Save as JSON
+    # 3. Save as JSON with UTF-8
     with open(NEWS_DATA_FILE, "w", encoding='utf-8') as f:
         json.dump(final_news, f, indent=4, ensure_ascii=False)
 
