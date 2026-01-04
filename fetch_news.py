@@ -144,11 +144,11 @@ async def process_news():
                 })
                 seen_titles.add(s['title'])
 
-    # 3. Save as JSON
+    # 3. Save as JSON with UTF-8 and emoji support
     with open(NEWS_DATA_FILE, "w", encoding='utf-8') as f:
         json.dump(final_news, f, indent=4, ensure_ascii=False)
 
-    # 4. Save as RSS XML
+    # 4. Save as RSS XML with UTF-8 and emoji support
     rss_items = ""
     for item in final_news:
         rss_items += f"""
@@ -161,7 +161,6 @@ async def process_news():
     
     rss_feed = f'<?xml version="1.0" encoding="UTF-8" ?><rss version="2.0"><channel><title>Clay County Unified News</title><link>{NEWS_CENTER_URL}</link><description>Combined Local and Regional Updates</description>{rss_items}</channel></rss>'
     
-    # Save with UTF-8 to ensure emojis render correctly
     with open(FEED_XML_FILE, 'w', encoding='utf-8') as f:
         f.write(rss_feed)
 
