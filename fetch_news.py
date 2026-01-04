@@ -31,19 +31,38 @@ def clean_text(text):
     return text.strip()
 
 def get_metadata(text):
-    """Detects Category and tags either a specific Town OR County News."""
+    """Detects Category, Icons (Holidays/State/School/Video), and Town tags."""
     category = "General News"
     icon = ""
     
-    # 1. Category Detection
+    # --- 1. VIDEO DETECTION ---
+    is_video = False
+    if re.search(r'youtube\.com|youtu\.be', text):
+        is_video = True
+
+    # --- 2. CATEGORY & HOLIDAY DETECTION ---
     if re.search(r'(?i)\bobituary\b|\bobituaries\b|\bpassed\s*away\b|\bdeath\s*notice\b', text):
         category = "Obituary"; icon = "🕊️ "
+    elif re.search(r'(?i)\bschool\b|\bunit\s*2\b|\bhigh\s*school\b|\bgrade\s*school\b|\bteacher\b', text):
+        category = "School News"; icon = "🚌 "
+    elif re.search(r'(?i)christmas|xmas|santa|yuletide', text):
+        icon = "🎄 "
+    elif re.search(r'(?i)valentine|sweetheart', text):
+        icon = "🩷 "
+    elif re.search(r'(?i)4th\s*of\s*july|july\s*4th|independence\s*day|fireworks', text):
+        icon = "🎆 "
+    elif re.search(r'(?i)\bstate\b|\bspringfield\b|\bpritzker\b|\bidot\b', text):
+        category = "State News"; icon = "🏦 "
     elif re.search(r'(?i)\bfire\b|\brescue\b|\bextrication\b|\bstructure\s*fire\b|\bmutual\s*aid\b', text):
         category = "Fire & Rescue"; icon = "🚒 "
     elif re.search(r'(?i)\barrest\b|\bsheriff\b|\bpolice\b|\bbooking\b|\bcourt\s*news\b|\bblotter\b', text):
         category = "Police Report"; icon = "🚨 "
 
-    # 2. Town Detection
+    # Add Video Icon if YouTube is present
+    if is_video:
+        icon = f"📺 {icon}"
+
+    # --- 3. MULTI-TOWN TAGGING ---
     town_tags = []
     town_map = {
         "Flora": r'(?i)\bflora\b',
@@ -57,14 +76,14 @@ def get_metadata(text):
         if re.search(pattern, text):
             town_tags.append(town)
     
-    # If no town is mentioned, it is global "County News" for all feeds
+    # Fallback to "County News" if no town is identified
     if not town_tags:
         town_tags.append("County News")
             
     return category, town_tags, icon
 
 async def scrape_regional_news(query):
-    """Searches regional NewsBreak and applies tagging logic."""
+    """Searches regional NewsBreak and applies multi-tagging."""
     scraped_stories = []
     url = f"https://www.newsbreak.com/search?q={query.replace(' ', '+')}"
     async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -81,13 +100,13 @@ async def scrape_regional_news(query):
                         body_text = desc_node.get_text() if desc_node else ""
                         full_content = title_text + " " + body_text
                         
-                        category, tags, icon = get_metadata(full_content)
-                        # Keep relevance: either a town is found or it's a specific category
-                        if tags != ["County News"] or category != "General News":
+                        cat, tags, icon = get_metadata(full_content)
+                        # Keep relevance: either a specific town or a special category
+                        if tags != ["County News"] or cat != "General News":
                             scraped_stories.append({
                                 "title": f"{icon}{clean_text(title_text)}",
                                 "description": clean_text(body_text),
-                                "category": category,
+                                "category": cat,
                                 "tags": tags
                             })
         except: pass
@@ -115,6 +134,7 @@ async def process_news():
                     category, tags, icon = get_metadata(raw_title + " " + full_text)
                     clean_title = f"{icon}{clean_text(raw_title)}"
                     
+                    # Deduplication using normalized title hash
                     content_hash = re.sub(r'\W+', '', clean_title).lower()
                     if content_hash not in seen_hashes:
                         final_news.append({
