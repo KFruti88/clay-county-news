@@ -8,222 +8,155 @@
         /* --- GLOBAL STYLING --- */
         body { margin: 0; background: #f4f4f4; font-family: 'Playfair Display', serif; color: #1a1a1a; }
         .master-wrapper { max-width: 1100px; margin: 0 auto; padding: 20px; }
-        
-        /* --- TOP INFO BAR (Clock & Mini Weather) --- */
-        .top-info-bar {
-            background: #1a1a1a;
-            color: white;
-            padding: 8px 20px;
-            font-family: sans-serif;
-            font-size: 0.85rem;
-            border-bottom: 1px solid #333;
-        }
-        .info-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .clock-display { font-weight: bold; letter-spacing: 1px; color: #2ea3f2; display: flex; align-items: center; gap: 8px; }
-        .live-dot { width: 8px; height: 8px; background: #ff0000; border-radius: 50%; animation: blink 1s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-        .mini-weather-display { display: flex; gap: 10px; align-items: center; }
-        #temp-val { font-weight: 900; color: #fe4f00; } /* Flora Orange */
-
-        /* --- RESPONSIVE MENU BAR --- */
-        .community-nav {
+        /* --- SMART HEADER (Date, Clock, Weather) --- */
+        .custom-city-menu {
             width: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: #ffffff;
+            padding: 15px 0;
+            font-family: sans-serif;
             border-bottom: 2px solid #eee;
+            text-align: center;
             position: sticky;
             top: 0;
             z-index: 10000;
-            font-family: sans-serif;
         }
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
+        .header-info {
+            font-size: 0.85rem;
+            color: #555;
+            margin-bottom: 12px;
+            font-weight: bold;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            padding: 10px 20px;
+            gap: 10px;
+            letter-spacing: 0.5px;
         }
-        .nav-brand { font-weight: 900; letter-spacing: 1px; color: #1a1a1a; font-size: 1.1rem; }
-        .nav-links { display: flex; list-style: none; gap: 15px; margin: 0; padding: 0; align-items: center; }
-        .nav-links a { text-decoration: none; font-weight: bold; transition: 0.3s; font-size: 0.9rem; }
+        .live-dot { width: 8px; height: 8px; background: #ff0000; border-radius: 50%; animation: blink 1s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        
+        #header-clock { color: #2ea3f2; display: flex; align-items: center; gap: 5px; }
+        #header-weather { color: #fe4f00; }
+        .divider { color: #ccc; }
 
-        /* Town Link Branding */
-        .flora-link a { color: #fe4f00 !important; background-color: #00205b; padding: 8px 12px !important; border-radius: 5px; }
-        .louisville-link a { color: #d61a21 !important; background-color: #060404; padding: 8px 12px !important; border-radius: 5px; }
-        .claycity-link a { color: #ffffff !important; background-color: #0c30f0; padding: 8px 12px !important; border-radius: 5px; }
-        .home-btn { color: #333; padding: 8px 12px; }
+        /* --- NAVIGATION LINKS --- */
+        .city-nav {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin: 0;
+            padding: 0;
+        }
+        .city-nav li a {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+            padding: 8px 15px;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
 
-        /* Mobile Menu */
-        .menu-toggle { display: none; flex-direction: column; cursor: pointer; background: none; border: none; }
-        .bar { width: 25px; height: 3px; background-color: #333; margin: 2px 0; transition: 0.4s; }
+        /* Flora & Louisville Custom Buttons */
+        .btn-flora a { background-color: #00205b !important; color: #fe4f00 !important; border-radius: 4px; }
+        .btn-flora a:hover { background-color: #fe4f00 !important; color: #00205b !important; }
+        .btn-louisville a { background-color: #060404 !important; color: #d61a21 !important; border-radius: 4px; }
+        .btn-louisville a:hover { background-color: #d61a21 !important; color: #060404 !important; }
 
-        /* --- HUB TABS --- */
+        /* --- CONTENT CARDS --- */
         .center-title { text-align: center; font-size: clamp(2rem, 8vw, 3rem); margin: 30px 0 20px; font-weight: 900; }
         .hub-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; }
-        .tab-btn { 
-            padding: 12px 25px; cursor: pointer; border: none; background: rgba(0,0,0,0.05); 
-            font-weight: bold; font-family: sans-serif; border-radius: 50px; transition: 0.3s;
-        }
-        .tab-btn.active { background: #2ea3f2; color: #fff; box-shadow: 0 4px 15px rgba(46,163,242,0.3); }
+        .tab-btn { padding: 12px 25px; cursor: pointer; border: none; background: rgba(0,0,0,0.05); font-weight: bold; border-radius: 50px; transition: 0.3s; }
+        .tab-btn.active { background: #2ea3f2; color: #fff; }
 
-        /* --- WEATHER WIDGET BOX --- */
-        .weather-container { 
-            margin-bottom: 30px; 
-            border-radius: 12px; 
-            overflow: hidden; 
-            background: white; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        /* --- GLASS CARDS & ANIMATIONS --- */
         .content-section { display: none; }
         .content-section.active { display: block; animation: fadeIn 0.5s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .glass-card { 
-            position: relative; overflow: hidden;
-            scroll-margin-top: 120px; padding: clamp(20px, 5vw, 40px); margin-bottom: 30px;
-            background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease;
+            background: white; padding: 30px; margin-bottom: 30px; border-radius: 12px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-top: 8px solid #333;
         }
-        .glass-card:hover { transform: translateY(-5px); }
-        .glass-card::after {
-            content: ""; position: absolute; top: -150%; left: -150%; width: 300%; height: 300%;
-            background: linear-gradient(to bottom right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
-            transform: rotate(35deg); transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1); pointer-events: none;
-        }
-        .glass-card:hover::after { top: -50%; left: -50%; }
+        .town-badge { display: inline-block; padding: 5px 12px; border-radius: 4px; color: #fff; font-size: 0.75rem; font-weight: bold; margin-bottom: 15px; text-transform: uppercase; }
 
-        .town-badge { display: inline-block; padding: 5px 12px; border-radius: 4px; color: #fff; font-weight: bold; font-size: 0.75rem; text-transform: uppercase; margin-bottom: 15px; }
-        h2, h3 { display: flex; align-items: center; gap: 12px; margin: 10px 0; }
-        .content-body { font-family: 'Georgia', serif; font-size: 1.2rem; line-height: 1.8; color: #222; text-align: justify; }
-
-        @media (max-width: 850px) {
-            .menu-toggle { display: flex; }
-            .nav-links {
-                display: none; flex-direction: column; width: 100%; position: absolute;
-                top: 55px; left: 0; background: white; padding: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); gap: 15px;
-            }
-            .nav-links.active { display: flex; }
-            .nav-links li { width: 100%; text-align: center; }
-            .event-layout { flex-direction: column; }
-            .date-box { width: 100%; height: 45px; flex-direction: row; gap: 10px; }
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .city-nav { flex-direction: column; gap: 10px; }
+            .header-info { flex-direction: column; gap: 5px; }
+            .divider { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <div class="top-info-bar">
-        <div class="info-container">
-            <div id="live-clock" class="clock-display">
-                <div class="live-dot"></div> 00:00:00 PM
-            </div>
-            <div id="mini-weather" class="mini-weather-display">
-                <span id="temp-val">--°F</span> 
-                <span id="weather-desc" style="text-transform: capitalize;">62839 Weather...</span>
-            </div>
+    <div class="custom-city-menu">
+        <div class="header-info">
+            <span id="header-date">Loading Date...</span>
+            <span class="divider">|</span>
+            <span id="header-clock"><div class="live-dot"></div> 00:00:00 PM</span>
+            <span class="divider">|</span>
+            <span id="header-weather">Flora Weather...</span>
         </div>
+        <ul class="city-nav">
+            <li><a href="https://supportmylocalcommunity.com/">Home</a></li>
+            <li><a href="https://supportmylocalcommunity.com/clay-city/">Clay City</a></li>
+            <li><a href="https://supportmylocalcommunity.com/xenia/">Xenia</a></li>
+            <li class="btn-flora"><a href="https://ourflora.com/">Flora</a></li>
+            <li class="btn-louisville"><a href="https://supportmylocalcommunity.com/louisville/">Louisville</a></li>
+        </ul>
     </div>
 
-    <nav class="community-nav">
-        <div class="nav-container">
-            <div class="nav-brand">CLAY COUNTY HUB</div>
-            <button class="menu-toggle" id="mobile-menu">
-                <span class="bar"></span><span class="bar"></span><span class="bar"></span>
-            </button>
-            <ul class="nav-links" id="nav-list">
-                <li><a href="#" class="home-btn">🏠 Home</a></li>
-                <li class="flora-link"><a href="https://ourflora.com">Flora News</a></li>
-                <li class="louisville-link"><a href="https://ourlouisville.com">Louisville News</a></li>
-                <li class="claycity-link"><a href="https://ourclaycity.com">Clay City News</a></li>
-            </ul>
-        </div>
-    </nav>
-
     <div class="master-wrapper">
-        <div class="weather-container">
-            <a class="weatherwidget-io" href="https://forecast7.com/en/38base67minus88base48/62839/" data-label_1="FLORA / 62839" data-label_2="FORECAST" data-theme="pure">DETAILED FORECAST LOADING...</a>
-            <script>
-            !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';js.appendChild(fjs);}}(document,'script','weatherwidget-io-js');
-            </script>
-        </div>
-
         <h1 class="center-title">Community News & Events</h1>
 
         <div class="hub-tabs">
             <button class="tab-btn active" onclick="showSection('news-archive', this)">🗞️ Latest News</button>
-            <button class="tab-btn" onclick="showSection('calendar-archive', this)">📅 Community Calendar</button>
+            <button class="tab-btn" onclick="showSection('calendar-archive', this)">📅 Events Calendar</button>
         </div>
 
         <div id="news-archive" class="content-section active">
-            <div id="news-feed-container"><p style="text-align:center;">🗞️ Syncing the Daily Edition...</p></div>
+            <div id="news-feed-container"><p style="text-align:center;">🗞️ Syncing Daily Edition...</p></div>
         </div>
 
         <div id="calendar-archive" class="content-section">
-            <div id="calendar-feed-container"><p style="text-align:center;">📅 Syncing local events...</p></div>
+            <div id="calendar-feed-container"><p style="text-align:center;">📅 Loading Local Events...</p></div>
         </div>
     </div>
 
     <script>
-        // --- DATA FETCHING ---
+        // --- 1. CLOCK & WEATHER ---
+        function updateHeader() {
+            const now = new Date();
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('header-date').innerText = now.toLocaleDateString('en-US', dateOptions);
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('header-clock').innerHTML = `<div class="live-dot"></div> ${timeStr}`;
+        }
+        setInterval(updateHeader, 1000);
+        updateHeader();
+
+        async function getWeather() {
+            try {
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=38.67&longitude=-88.48&current_weather=true&temperature_unit=fahrenheit`);
+                const data = await res.json();
+                const weatherMap = { 0: "Sunny", 1: "Mainly Clear", 2: "Partly Cloudy", 3: "Overcast", 45: "Foggy", 61: "Rainy" };
+                const desc = weatherMap[data.current_weather.weathercode] || "Cloudy";
+                document.getElementById('header-weather').innerText = `${Math.round(data.current_weather.temperature)}°F • ${desc}`;
+            } catch (e) { document.getElementById('header-weather').innerText = "Weather Unavailable"; }
+        }
+        getWeather();
+        setInterval(getWeather, 600000);
+
+        // --- 2. DATA LOADERS ---
         const newsJson = './news_data.json';
         const calendarJson = 'https://raw.githubusercontent.com/KFruti88/Clay-County-All/main/Calendar/calendar_data.json';
 
-        // --- CLOCK & MINI WEATHER LOGIC ---
-        function updateClock() {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            document.getElementById('live-clock').innerHTML = `<div class="live-dot"></div> ${timeStr}`;
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
-        async function getMiniWeather() {
-            try {
-                // Coordinates for 62839 (Flora, IL)
-                const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=38.67&longitude=-88.48&current_weather=true&temperature_unit=fahrenheit`);
-                const data = await response.json();
-                const temp = Math.round(data.current_weather.temperature);
-                const code = data.current_weather.weathercode;
-                const weatherMap = {
-                    0: "Clear Skies", 1: "Mainly Clear", 2: "Partly Cloudy", 3: "Overcast",
-                    45: "Foggy", 51: "Light Drizzle", 61: "Rainy", 71: "Snowy", 95: "Stormy"
-                };
-                document.getElementById('temp-val').innerText = temp + "°F";
-                document.getElementById('weather-desc').innerText = weatherMap[code] || "Cloudy";
-            } catch (error) { document.getElementById('weather-desc').innerText = "Weather N/A"; }
-        }
-        getMiniWeather();
-        setInterval(getMiniWeather, 600000);
-
-        // --- HUB NAVIGATION & CONTENT ---
         function getBranding(town) {
             const t = town ? town.toLowerCase() : "";
             if (t.includes('flora')) return { bg: '#0c0b82', accent: '#fe4f00', name: 'Flora' };
-            if (t.includes('louisville')) return { bg: '#990000', accent: '#131314', name: 'Louisville' };
-            if (t.includes('clay city')) return { bg: '#0c30f0', accent: '#0c30f0', name: 'Clay City' };
+            if (t.includes('louisville')) return { bg: '#990000', accent: '#d61a21', name: 'Louisville' };
             return { bg: '#1a1a1a', accent: '#2ea3f2', name: 'Clay County' };
-        }
-
-        function getEmoji(item) {
-            const text = ((item.title || "") + " " + (item.full_story || "")).toLowerCase();
-            if (text.includes("severe") || text.includes("warning")) return "⚠️";
-            if (text.includes("fire")) return "🚒";
-            if (text.includes("police") || text.includes("arrest")) return "🚔";
-            if (text.includes("obituary")) return "🕊️";
-            if (text.includes("school")) return "🚌";
-            return "📰";
         }
 
         function showSection(id, btn) {
@@ -233,50 +166,33 @@
             btn.classList.add('active');
         }
 
-        document.getElementById('mobile-menu').addEventListener('click', () => {
-            document.getElementById('nav-list').classList.toggle('active');
-        });
-
-        // FETCH NEWS
         fetch(newsJson).then(res => res.json()).then(data => {
             const container = document.getElementById('news-feed-container');
             container.innerHTML = '';
             data.forEach(item => {
                 const brand = getBranding(item.tags ? item.tags[0] : "");
-                const icon = getEmoji(item);
-                const slug = item.slug || item.title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-');
                 container.innerHTML += `
-                    <article class="glass-card" id="${slug}" style="border-top: 8px solid ${brand.bg}">
-                        <div class="town-badge" style="background:${brand.accent}">${brand.name} Edition</div>
-                        <h2><span>${icon}</span> ${item.title}</h2>
-                        <div class="content-body">${item.full_story}</div>
-                    </article>`;
+                    <div class="glass-card" style="border-top-color: ${brand.bg}">
+                        <div class="town-badge" style="background:${brand.accent}">${brand.name}</div>
+                        <h2>${item.title}</h2>
+                        <div style="font-family: Georgia; line-height: 1.8;">${item.full_story}</div>
+                    </div>`;
             });
-        }).catch(err => { document.getElementById('news-feed-container').innerHTML = "No News Available."; });
+        });
 
-        // FETCH CALENDAR
         fetch(calendarJson).then(res => res.json()).then(data => {
             const container = document.getElementById('calendar-feed-container');
             container.innerHTML = '';
-            data.sort((a, b) => new Date(a.start_date) - new Date(b.start_date)).forEach(event => {
+            data.forEach(event => {
                 const brand = getBranding(event.town);
-                const d = new Date(event.start_date + 'T00:00:00');
                 container.innerHTML += `
-                    <div class="glass-card" style="border-left: 8px solid ${brand.bg}">
-                        <div class="event-layout">
-                            <div class="date-box" style="background:${brand.bg}">
-                                <span class="date-month">${d.toLocaleString('default',{month:'short'})}</span>
-                                <span class="date-day">${d.getDate()}</span>
-                            </div>
-                            <div class="event-info">
-                                <div class="town-badge" style="background:${brand.accent}">${event.town}</div>
-                                <h3>${event.title}</h3>
-                                <div class="content-body">${event.description}</div>
-                            </div>
-                        </div>
+                    <div class="glass-card" style="border-top-color: ${brand.bg}">
+                        <div class="town-badge" style="background:${brand.accent}">${event.town}</div>
+                        <h3>${event.title}</h3>
+                        <p>📍 ${event.location} | 🕒 ${event.time}</p>
                     </div>`;
             });
-        }).catch(err => { document.getElementById('calendar-feed-container').innerHTML = "Calendar sync in progress..."; });
+        });
     </script>
 </body>
 </html>
