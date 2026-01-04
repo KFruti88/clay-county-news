@@ -24,23 +24,55 @@ document.addEventListener('DOMContentLoaded', function() {
     const jsonUrl = 'https://raw.githubusercontent.com/KFruti88/clay-county-news/main/news_data.json';
     
     function getEmoji(item) {
-        const text = (item.title + " " + (item.category || "") + " " + item.full_story).toLowerCase();
-        if (text.includes("obituary") || text.includes("funeral")) return "🕊️";
-        if (text.includes("fire") || text.includes("smoke")) return "🚒";
-        if (text.includes("police") || text.includes("sheriff") || text.includes("arrest")) return "🚔";
+        const text = (
+            (item.title || "") + " " + 
+            (item.category || "") + " " + 
+            (item.full_story || "")
+        ).toLowerCase();
+
+        // --- EMERGENCY & WEATHER (Highest Priority) ---
+        if (text.includes("tornado") || text.includes("warning") || text.includes("severe") || text.includes("siren")) return "⚠️";
+        if (text.includes("fire") || text.includes("smoke") || text.includes("blaze")) return "🚒";
+        if (text.includes("police") || text.includes("sheriff") || text.includes("arrest") || text.includes("deputy") || text.includes("jail")) return "🚔";
+        if (text.includes("storm") || text.includes("thunder") || text.includes("lightning")) return "⛈️";
+        
+        // --- OBITUARIES ---
+        if (text.includes("obituary") || text.includes("funeral") || text.includes("passed away") || text.includes("visitation")) return "🕊️";
+
+        // --- FINANCIAL ---
+        if (text.includes("tax") || text.includes("price") || text.includes("payment") || text.includes("cost") || text.includes("fee")) return "💲";
+        if (text.includes("bill") || text.includes("spending") || text.includes("budget") || text.includes("funds")) return "💰";
+        if (text.includes("gas price") || text.includes("gasoline") || text.includes("fuel") || text.includes("gas")) return "⛽";
+
+        // --- SPORTS ---
         if (text.includes("football")) return "🏈";
         if (text.includes("basketball")) return "🏀";
         if (text.includes("baseball")) return "⚾";
         if (text.includes("softball")) return "🥎";
-        if (text.includes("school") || text.includes("bus") || text.includes("student")) return "🚌";
-        if (text.includes("church") || text.includes("pastor")) return "⛪";
-        if (text.includes("hospital") || text.includes("medical")) return "🏥";
-        if (text.includes("construction") || text.includes("road work")) return "🏗️";
-        if (text.includes("nasa") || text.includes("comet") || text.includes("meteor")) return "🔭";
-        if (text.includes("gas")) return "⛽";
+        if (text.includes("tennis")) return "🎾";
+        if (text.includes("golf")) return "🏌️";
+
+        // --- COMMUNITY & SCHOOLS ---
+        if (text.includes("school") || text.includes("bus") || text.includes("student") || text.includes("teacher") || text.includes("graduation")) return "🚌";
+        if (text.includes("church") || text.includes("pastor") || text.includes("worship") || text.includes("parish") || text.includes("sermon")) return "⛪";
+        if (text.includes("hospital") || text.includes("medical") || text.includes("clinic") || text.includes("doctor") || text.includes("nurse")) return "🏥";
+        if (text.includes("construction") || text.includes("road work") || text.includes("paving") || text.includes("bridge")) return "🏗️";
+        
+        // --- SCIENCE & STATE ---
+        if (text.includes("nasa") || text.includes("comet") || text.includes("star gazing") || text.includes("meteor")) return "🔭";
+        if (text.includes("state news") || text.includes("illinois") || text.includes("springfield")) return "🏛️";
+
+        // --- HOLIDAYS & EVENTS ---
+        if (text.includes("veterans day") || text.includes("military")) return "🎖️";
+        if (text.includes("memorial day") || text.includes("remembrance")) return "🎗️";
+        if (text.includes("christmas") || text.includes("santa")) return "🎄";
+        if (text.includes("thanksgiving") || text.includes("turkey")) return "🦃";
+        if (text.includes("halloween") || text.includes("pumpkin")) return "🎃";
         if (text.includes("watermelon")) return "🍉";
-        if (text.includes("state news") || text.includes("illinois")) return "🏛️";
-        return "📰";
+        if (text.includes("parade") || text.includes("festival") || text.includes("fair")) return "🎡";
+        if (text.includes("vote") || text.includes("election") || text.includes("ballot")) return "🗳️";
+
+        return "📰"; // The "Default" Newspaper Icon
     }
 
     const currentUrl = window.location.href.toLowerCase();
@@ -58,23 +90,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if(filtered.length === 0) {
             container.innerHTML = `<p>No recent local headlines for ${town}. Viewing General County News...</p>`;
-            // Optionally show general news here
             return;
         }
 
         filtered.forEach(item => {
             const icon = getEmoji(item);
-            const slug = item.slug || item.title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-');
-            const bookmarkLink = `https://supportmylocalcommunity.com/clay-county-news-center/#${slug}`;
-            
-            container.innerHTML += `
-                <div class="news-card">
-                    <div style="font-size:0.7rem; color:#999; text-transform:uppercase;">${town} Edition</div>
-                    <h3><span>${icon}</span> ${item.title}</h3>
-                    <div class="summary">${item.full_story.substring(0, 200)}...</div>
-                    <a href="${bookmarkLink}" class="read-more">READ FULL STORY →</a>
-                </div>`;
-        });
-    });
-});
-</script>
+            const slug = item.slug || item.title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s
