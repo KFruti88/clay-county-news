@@ -1,48 +1,47 @@
-<div id="clay-county-master-wrap">
-    <header class="news-center-header">
-        <div class="header-top">
-            <span id="live-date"></span>
-            <span class="edition-tag">Full County Edition</span>
-            <span id="live-time"></span>
-        </div>
-        <h1>Clay County News Center</h1>
-        <div class="header-divider"></div>
-    </header>
-
-    <div id="master-story-grid">
+<div id="master-story-grid">
         <div class="loading-spinner">Fetching the latest deep-dive reports...</div>
     </div>
-</div>
+
+    <aside class="news-sidebar">
+        <h2 style="border-bottom: 2px solid #000; margin-top: 0;">Local Bulletins</h2>
+        <div id="sidebar-content">
+            <p>Automated updates will appear here.</p>
+        </div>
+    </aside>
+</div> 
 
 <style>
-    /* Global Styles */
+    /* Global Layout */
     #clay-county-master-wrap {
-        max-width: 1000px;
+        max-width: 1200px; 
         margin: 40px auto;
         font-family: 'Ibarra Real Nova', 'Times New Roman', serif;
         color: #1a1a1a;
         padding: 0 15px;
+        display: flex;      /* Moves items side-by-side */
+        flex-wrap: wrap;    /* Allows stacking on phones */
+        gap: 30px;
     }
 
-    /* Header Styling */
-    .news-center-header { text-align: center; margin-bottom: 50px; }
-    .header-top { 
-        display: flex; 
-        justify-content: space-between; 
-        font-weight: bold; 
-        text-transform: uppercase; 
-        border-bottom: 2px solid #000;
-        padding-bottom: 5px;
-        font-size: 0.9rem;
+    .news-center-header { 
+        width: 100%;        /* Keeps header full-width at top */
+        text-align: center; 
+        margin-bottom: 50px; 
     }
-    .news-center-header h1 { 
-        font-size: clamp(2.5rem, 8vw, 4rem); 
-        font-weight: 900; 
-        margin: 15px 0; 
-        letter-spacing: -1px;
-        line-height: 1;
+
+    #master-story-grid {
+        flex: 2;            /* Left side (Stories) */
+        min-width: 300px;
     }
-    .header-divider { border-bottom: 6px double #000; margin-top: 5px; }
+
+    .news-sidebar {
+        flex: 1;            /* Right side (Sidebar) */
+        min-width: 250px;
+        padding: 20px;
+        background: #fdfdfd;
+        border-left: 1px solid #eee;
+        height: fit-content;
+    }
 
     /* Article Card Styles */
     .full-story-card {
@@ -51,10 +50,8 @@
         padding: 40px;
         margin-bottom: 60px;
         position: relative;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
-        scroll-margin-top: 100px; /* Prevents Divi header from covering the title */
     }
-
+    
     /* Town Border Themes */
     .silo-flora { border-top: 10px solid #FA4616; }
     .silo-louisville { border-top: 10px solid #C41E3A; }
@@ -71,28 +68,8 @@
         margin-bottom: 15px;
     }
 
-    .full-story-card h2 { 
-        font-size: 2.2rem; 
-        margin: 0 0 20px 0; 
-        line-height: 1.2;
-    }
-
-    .full-content {
-        font-size: 1.25rem;
-        line-height: 1.8;
-        white-space: pre-wrap; /* Crucial: Keeps the original article paragraph breaks */
-        color: #333;
-    }
-
-    .full-content p { margin-bottom: 1.5em; }
-
-    /* Loading State */
-    .loading-spinner { text-align: center; font-size: 1.5rem; padding: 100px 0; color: #777; font-style: italic; }
-
-    @media (max-width: 600px) {
-        .full-story-card { padding: 25px; }
-        .full-story-card h2 { font-size: 1.8rem; }
-    }
+    .full-story-card h2 { font-size: 2.2rem; margin: 0 0 20px 0; }
+    .full-content { font-size: 1.25rem; line-height: 1.8; white-space: pre-wrap; }
 </style>
 
 <script>
