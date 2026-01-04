@@ -126,11 +126,11 @@ async def run():
     final_output = []
     
     for town in TOWNS:
-        # Check if we have specific news for this town
+        # Filter news items specifically tagged for this town
         town_news = [s for s in unique_list if s['town_tag'] == town]
         
         if town in SMALL_TOWNS and not town_news:
-            # Duplicate 'General' news but apply the town's specific theme
+            # If a small town has no local news, duplicate General news with town's theme
             general_news = [s for s in unique_list if s['town_tag'] == "General"]
             for g in general_news:
                 fallback = deepcopy(g)
@@ -144,7 +144,7 @@ async def run():
     with open(DATA_EXPORT_FILE, "w") as f:
         json.dump(final_output, f, indent=4)
 
-    print(f"Complete! Updated {DATA_EXPORT_FILE} with {len(final_output)} themed entries.")
+    print(f"Update complete! Saved {len(final_output)} themed entries to {DATA_EXPORT_FILE}")
 
 if __name__ == "__main__":
     asyncio.run(run())
