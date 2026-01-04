@@ -29,7 +29,7 @@ def get_metadata(text):
     cat = "General News"; icon = ""
     is_video = True if re.search(r'youtube\.com|youtu\.be', text) else False
 
-    # Icon and Category mapping
+    # Category mapping
     if re.search(r'(?i)\bobituary\b|\bobituaries\b|\bpassed\s*away\b', text): cat = "Obituary"; icon = "🕊️ "
     elif re.search(r'(?i)\bschool\b|\bunit\s*2\b|\bhigh\s*school\b', text): cat = "School News"; icon = "🚌 "
     elif re.search(r'(?i)christmas|xmas|santa', text): icon = "🎄 "
@@ -41,7 +41,6 @@ def get_metadata(text):
 
     if is_video: icon = f"📺 {icon}"
 
-    # Multi-town tagging logic
     town_tags = [t for t in TOWNS if re.search(fr'(?i)\b{t}\b', text)]
     if not town_tags: town_tags.append("County News")
     
@@ -63,7 +62,6 @@ async def scrape_regional_news(query):
                         t_text = title_node.get_text()
                         b_text = desc_node.get_text() if desc_node else ""
                         cat, tags, icon = get_metadata(t_text + " " + b_text)
-                        # Filter for high-signal news only
                         if tags != ["County News"] or cat != "General News":
                             scraped_stories.append({"title": f"{icon}{clean_text(t_text)}", "description": clean_text(b_text), "category": cat, "tags": tags})
         except: pass
@@ -86,7 +84,6 @@ async def process_news():
                     desc = item.find("description").text or ""
                     cat, tags, icon = get_metadata(raw_title + " " + desc)
                     clean_title = f"{icon}{clean_text(raw_title)}"
-                    
                     content_hash = re.sub(r'\W+', '', clean_title).lower()
                     if content_hash not in seen_hashes:
                         final_news.append({"title": clean_title, "description": clean_text(desc), "category": cat, "tags": tags, "link": NEWS_CENTER_URL, "date_added": timestamp})
