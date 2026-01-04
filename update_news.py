@@ -1,123 +1,77 @@
-import httpx
-import asyncio
+import requests
+from bs4 import BeautifulSoup
 import json
 import re
-import xml.etree.ElementTree as ET
 from datetime import datetime
-from bs4 import BeautifulSoup
 
 # --- CONFIGURATION ---
-NEWS_DATA_FILE = 'news_data.json'
-RSS_SOURCE_URL = "https://www.wnoi.com/category/local/feed"
-TOWNS = ["Flora", "Louisville", "Clay City", "Xenia", "Sailor Springs"]
-BLACKLIST = ["Cisne"]
+JSON_FILE = "news_data.json"
+TOWNS = ["Flora", "Louisville", "Clay City", "Xenia", "Sailor Springs", "Clay County"]
 
-def weld_text(text):
-    """Prevents layout breaking by 'gluing' dates, decimals, and punctuation."""
-    if not text: return ""
-    # Snaps punctuation to the word
-    text = re.sub(r'\s+([.,!?;:])', r'\1', text)
-    # Glues 1st, 2nd, etc.
-    text = re.sub(r'(\d+)(st|nd|rd|th)\b', r'\1\2', text)
-    # Glues decimals like 56.5%
-    text = re.sub(r'(\d+)\.(\d+)', r'\1.\2', text)
-    return text.strip()
+# List of URLs to monitor
+SOURCES = [
+    {"url": "https://www.effinghamradio.com/local-news/", "tag": "Regional"},
+    {"url": "https://www.wfiwradio.com/local-news/", "tag": "Regional"},
+    {"url": "https://freedom929.com/category/local-news/", "tag": "Regional"},
+    {"url": "https://www.frankandbright.com/", "tag": "Obituaries"},
+    {"url": "http://www.kistler-patterson.com/obituaries/obituary-listings", "tag": "Obituaries"},
+    {"url": "https://www.wnoi.com/category/general-news/", "tag": "General News"}
+]
 
-def clean_text(text):
-    """Cleans station signatures but strictly preserves email addresses."""
-    if not text: return ""
-    # Strip HTML tags but preserve inner text (crucial for emails)
-    text = re.sub(r'<[^>]+>', ' ', text)
-    
-    patterns = [
-        r'(?i)wnoi', r'(?i)103\.9/99\.3', r'(?i)local\s*--', 
-        r'(?i)by\s+tom\s+lavine', r'^\d{1,2}/\d{1,2}/\d{2,4}\s*'
-    ]
-    for p in patterns: 
-        text = re.sub(p, '', text)
-    
-    return weld_text(text)
+def generate_slug(title):
+    slug = title.lower().strip()
+    slug = re.sub(r'[^\w\s-]', '', slug)
+    slug = re.sub(r'[\s_-]+', '-', slug)
+    return slug
 
-async def get_full_content(url):
-    """Fetches full story text from WNOI."""
-    try:
-        async with httpx.AsyncClient() as client:
-            resp = await client.get(url, timeout=10)
-            if resp.status_code == 200:
-                soup = BeautifulSoup(resp.text, 'html.parser')
-                content = soup.find('div', class_='entry-content')
-                # separator=' ' ensures email/link text doesn't mash into nearby words
-                return content.get_text(separator=' ') if content else ""
-    except:
-        return ""
-    return ""
+def get_town_tags(text):
+    found_tags = [town for town in TOWNS if town.lower() in text.lower()]
+    return found_tags if found_tags else ["County News"]
 
-def get_metadata(text):
-    """
-    Identifies ALL mentioned towns for multi-page visibility.
-    If no towns match, it defaults to 'County News'.
-    """
-    text_lower = text.lower()
-    if any(bad.lower() in text_lower for bad in BLACKLIST):
-        return None, []
+def fetch_and_filter():
+    all_news = []
+    headers = {'User-Agent': 'Mozilla/5.0'}
 
-    # Creates a list of all towns found in the story
-    found_towns = [town for town in TOWNS if town.lower() in text_lower]
-    
-    # Logic: Use found towns as tags, or fallback to County News
-    assigned_tags = found_towns if found_towns else ["County News"]
-    
-    return "General News", assigned_tags
-
-async def process_news():
-    final_news = []
-    seen_ids = set() # THE DEDUPLICATOR: Prevents duplicate stories in JSON
-    timestamp = datetime.now().isoformat()
-
-    async with httpx.AsyncClient() as client:
+    for source in SOURCES:
         try:
-            resp = await client.get(RSS_SOURCE_URL, timeout=15)
-            if resp.status_code == 200:
-                root = ET.fromstring(resp.content)
-                items = root.findall("./channel/item")[:20]
+            print(f"Checking {source['url']}...")
+            res = requests.get(source['url'], headers=headers, timeout=10)
+            if res.status_code != 200: continue
+            
+            soup = BeautifulSoup(res.text, 'html.parser')
+            
+            # This logic finds headlines (h2/h3) and nearby paragraphs
+            for item in soup.find_all(['article', 'div'], class_=re.compile('post|entry|item|obituary')):
+                title_el = item.find(['h2', 'h3', 'a'])
+                if not title_el: continue
+                title = title_el.text.strip()
                 
-                for item in items:
-                    raw_title = item.find("title").text
-                    link = item.find("link").text
-                    desc = item.find("description").text or ""
-
-                    # --- DEDUPLICATION CHECK ---
-                    story_id = re.sub(r'\W+', '', raw_title).lower()
-                    if story_id in seen_ids:
-                        continue # Skip this loop; we already have this story
-                    seen_ids.add(story_id)
-
-                    full_text = await get_full_content(link)
-                    check_text = raw_title + " " + (full_text if full_text else desc)
+                # Filter: Only keep if it mentions your towns/county
+                story_text = item.text.strip()
+                if any(town.lower() in story_text.lower() for town in TOWNS):
                     
-                    cat, tags = get_metadata(check_text)
-                    if cat is None: continue 
+                    category = source['tag']
+                    # Smart category override
+                    if "obituary" in story_text.lower(): category = "Obituaries"
+                    if "fire" in story_text.lower() or "police" in story_text.lower(): category = "Police & Fire"
 
-                    clean_title = clean_text(raw_title)
-                    story_body = full_text if full_text else desc
-                    
-                    final_news.append({
-                        "id": story_id, 
-                        "title": clean_title, 
-                        "full_story": clean_text(story_body), 
-                        "category": cat, 
-                        "tags": tags,
-                        "link": link,
-                        "date_added": timestamp
-                    })
-        except Exception as e: 
-            print(f"Error: {e}")
-
-    # Final Save
-    with open(NEWS_DATA_FILE, "w", encoding='utf-8') as f:
-        json.dump(final_news, f, indent=4, ensure_ascii=False)
-    
-    print(f"Update complete. {len(final_news)} unique stories processed.")
+                    news_entry = {
+                        "title": title,
+                        "slug": generate_slug(title),
+                        "full_story": story_text[:1000], # Keep it concise
+                        "category": category,
+                        "tags": get_town_tags(story_text),
+                        "date_added": datetime.now().isoformat()
+                    }
+                    all_news.append(news_entry)
+        except Exception as e:
+            print(f"Error on {source['url']}: {e}")
+            
+    return all_news
 
 if __name__ == "__main__":
-    asyncio.run(process_news())
+    latest_news = fetch_and_filter()
+    # Save the results
+    with open(JSON_FILE, 'w', encoding='utf-8') as f:
+        json.dump(latest_news, f, indent=4, ensure_ascii=False)
+    print("News Sync Complete.")
