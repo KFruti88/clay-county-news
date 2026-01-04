@@ -32,6 +32,7 @@ def clean_text(text):
     ]
     for p in patterns:
         text = re.sub(p, '', text)
+    # Remove HTML tags and extra whitespace
     text = re.sub('<[^<]+?>', '', text)
     return text.strip()
 
