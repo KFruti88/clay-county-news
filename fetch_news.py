@@ -7,29 +7,29 @@ from bs4 import BeautifulSoup
 
 # --- CONFIGURATION ---
 DATA_EXPORT_FILE = "news_data.json"
-TOWNS = ["Flora", "Clay City", "Xenia", "Louisville", "Sailor Springs"]
+SMALL_TOWNS = ["Clay City", "Xenia", "Sailor Springs"]
+TOWNS = ["Flora", "Louisville"] + SMALL_TOWNS
 RSS_URL = "https://www.wnoi.com/category/local/feed"
 NEWS_CENTER_URL = "https://supportmylocalcommunity.com/clay-county-news-center/"
 
+# --- COLOR THEMES ---
+THEMES = {
+    "Clay City": {"bg": "#ADD8E6", "text": "#000000"},      # Light Blue / Black
+    "Sailor Springs": {"bg": "#367C2B", "text": "#FFDE00"}, # JD Green / JD Yellow
+    "Xenia": {"bg": "#0077BE", "text": "#FFC0CB"},          # Ocean Blue / Pink
+    "Flora": {"bg": "#FFFFFF", "text": "#000000"},          # Default White/Black
+    "Louisville": {"bg": "#FFFFFF", "text": "#000000"},     # Default White/Black
+    "General": {"bg": "#F4F4F4", "text": "#333333"}         # Soft Grey for County News
+}
+
 def clean_text(text):
-    """Scrub branding, frequencies, and HTML tags."""
     if not text: return ""
-    patterns = [
-        r'(?i)wnoi', r'(?i)103\.9/99\.3', r'(?i)local\s*--', 
-        r'(?i)by\s+tom\s+lavine', r'^\d{1,2}/\d{1,2}/\d{2,4}\s*'
-    ]
+    patterns = [r'(?i)wnoi', r'(?i)103\.9/99\.3', r'(?i)local\s*--', r'(?i)by\s+tom\s+lavine']
     for p in patterns:
         text = re.sub(p, '', text)
-    text = re.sub('<[^<]+?>', '', text)
-    return text.strip()
+    return re.sub('<[^<]+?>', '', text).strip()
 
 def get_primary_town(text):
-    """
-    Identifies the primary town. To prevent a story from appearing on multiple 
-    town pages, it returns only the FIRST town match found in the text.
-    """
-    if not text: return "General"
-
     town_map = {
         "Flora": r'(?i)\bflora\b',
         "Xenia": r'(?i)\bxenia\b',
@@ -37,17 +37,14 @@ def get_primary_town(text):
         "Clay City": r'(?i)clay\s*city',
         "Sailor Springs": r'(?i)sailor\s*springs'
     }
-
     for town, pattern in town_map.items():
         if re.search(pattern, text):
-            return town  # Return and exit immediately on first match
+            return town  
     return "General"
 
 async def fetch_rss():
-    """Fetches RSS feed and assigns exactly ONE town_tag per story."""
     stories = []
     namespaces = {'content': 'http://purl.org/rss/1.0/modules/content/'}
-    
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.get(RSS_URL, timeout=15)
@@ -55,76 +52,55 @@ async def fetch_rss():
                 root = ET.fromstring(resp.content)
                 for item in root.findall("./channel/item")[:30]:
                     title = item.find("title").text
-                    brief = item.find("description").text or ""
-                    content_tag = item.find("content:encoded", namespaces)
-                    full_text = content_tag.text if content_tag is not None else brief
-
-                    # Assign to exactly ONE town or 'General'
-                    town_tag = get_primary_town(title + " " + full_text)
-
+                    full_text = (item.find("content:encoded", namespaces).text 
+                                 if item.find("content:encoded", namespaces) is not None 
+                                 else item.find("description").text)
+                    
+                    town_tag = get_primary_town(title + " " + (full_text or ""))
+                    
                     stories.append({
                         "title": clean_text(title),
-                        "brief": clean_text(brief)[:180] + "...",
                         "full_story": clean_text(full_text),
-                        "link": NEWS_CENTER_URL,
-                        "town_tag": town_tag 
+                        "town_tag": town_tag,
+                        "theme": THEMES.get(town_tag, THEMES["General"])
                     })
-        except Exception as e:
-            print(f"RSS Error: {e}")
-    return stories
-
-async def scrape_town(town):
-    """Scrapes NewsBreak for town-specific updates."""
-    stories = []
-    url = f"https://www.newsbreak.com/search?q={town}+IL+news"
-    async with httpx.AsyncClient(follow_redirects=True) as client:
-        try:
-            headers = {"User-Agent": "Mozilla/5.0"}
-            resp = await client.get(url, headers=headers)
-            if resp.status_code == 200:
-                soup = BeautifulSoup(resp.text, 'html.parser')
-                for art in soup.find_all('article')[:3]:
-                    title_node = art.find('h3') or art.find('a')
-                    if title_node:
-                        stories.append({
-                            "title": clean_text(title_node.get_text()),
-                            "brief": f"Community update for {town}.",
-                            "full_story": f"Detailed community updates for {town}. Visit the News Center for the full report.",
-                            "link": NEWS_CENTER_URL,
-                            "town_tag": town
-                        })
-        except Exception as e:
-            print(f"Scrape Error for {town}: {e}")
+        except Exception as e: print(f"RSS Error: {e}")
     return stories
 
 async def run():
-    # Using title as key ensures a story only exists ONCE in the final JSON
-    seen_stories = {} 
+    seen_stories = {}
+    print("Gathering news and applying themes...")
 
-    print("Gathering news...")
+    # 1. Fetch all unique stories
+    all_raw_stories = await fetch_rss()
+    for s in all_raw_stories:
+        seen_stories[s['title']] = s
 
-    # 1. Process RSS (Regional News)
-    regional = await fetch_rss()
-    for story in regional:
-        seen_stories[story['title']] = story
-
-    # 2. Process Town Scrapes (Local News)
+    # 2. Logic: Ensure small towns have content (Fallback to General)
+    final_output = []
+    unique_list = list(seen_stories.values())
+    
+    # We want to make sure the JSON includes entries for small towns 
+    # even if they are just duplicates of "General" news with the town's colors.
     for town in TOWNS:
-        print(f"Checking {town}...")
-        town_stories = await scrape_town(town)
-        for story in town_stories:
-            title = story['title']
-            # Only add if the title hasn't been captured yet (Deduplication)
-            if title not in seen_stories:
-                seen_stories[title] = story
+        town_news = [s for s in unique_list if s['town_tag'] == town]
+        
+        if town in SMALL_TOWNS and not town_news:
+            # Grab General news but RE-COLOR it for the specific town
+            general_news = [s for s in unique_list if s['town_tag'] == "General"]
+            for g in general_news:
+                fallback_story = g.copy()
+                fallback_story['town_tag'] = town # Tag it so the page finds it
+                fallback_story['theme'] = THEMES[town] # Apply town colors
+                final_output.append(fallback_story)
+        else:
+            final_output.extend(town_news)
 
-    # 3. Export to JSON
-    final_list = list(seen_stories.values())
+    # 3. Save to JSON
     with open(DATA_EXPORT_FILE, "w") as f:
-        json.dump(final_list, f, indent=4)
+        json.dump(final_output, f, indent=4)
 
-    print(f"Update complete! Saved {len(final_list)} unique stories to {DATA_EXPORT_FILE}")
-    print(f"Individual town pages should now filter by 'town_tag'.")
+    print(f"Complete! JSON updated with {len(final_output)} entries and custom themes.")
 
 if __name__ == "__main__":
     asyncio.run(run())
