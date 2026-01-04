@@ -1,181 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clay County News & Events</title>
-    <style>
-        body { margin: 0; background: transparent; font-family: 'Playfair Display', serif; }
-        .master-wrapper { max-width: 1100px; margin: 0 auto; padding: 20px; }
-        
-        .center-title { text-align: center; font-size: clamp(2rem, 8vw, 3.2rem); margin-bottom: 20px; border-bottom: 4px solid #1a1a1a; padding-bottom: 10px; }
-
-        /* TAB NAVIGATION */
-        .hub-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 40px; }
-        .tab-btn { 
-            padding: 12px 25px; cursor: pointer; border: none; background: rgba(0,0,0,0.1); 
-            font-weight: bold; font-family: sans-serif; border-radius: 5px; transition: 0.3s;
-        }
-        .tab-btn.active { background: #2ea3f2; color: #fff; box-shadow: 0 4px 15px rgba(46,163,242,0.3); }
-
-        .content-section { display: none; }
-        .content-section.active { display: block; animation: fadeIn 0.5s ease; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- GLASS CARD STYLING --- */
-        .glass-card { 
-            position: relative;
-            scroll-margin-top: 100px; padding: clamp(20px, 5vw, 40px); margin-bottom: 30px;
-            background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            overflow: hidden; /* Needed for the glossy sweep */
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .glass-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.12); }
-
-        /* --- THE GLOSSY SWEEP ANIMATION --- */
-        .glass-card::after {
-            content: ""; position: absolute; top: -150%; left: -150%; width: 300%; height: 300%;
-            background: linear-gradient(to bottom right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
-            transform: rotate(35deg); transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1); pointer-events: none;
-        }
-        .glass-card:hover::after { top: -50%; left: -50%; }
-
-        /* --- BOOKMARK PULSE EFFECT --- */
-        @keyframes highlightPulse {
-            0% { border-color: rgba(46,163,242,0.3); }
-            50% { border-color: #2ea3f2; box-shadow: 0 0 20px rgba(46,163,242,0.4); }
-            100% { border-color: rgba(255, 255, 255, 0.3); }
-        }
-        .jump-highlight { animation: highlightPulse 2s ease-out; }
-
-        .town-badge { display: inline-block; padding: 5px 12px; border-radius: 4px; color: #fff; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 15px; }
-        h2, h3 { display: flex; align-items: center; gap: 10px; }
-
-        /* CALENDAR SPECIFIC */
-        .event-layout { display: flex; gap: 20px; }
-        .date-box { min-width: 70px; height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; color: #fff; }
-        .date-day { font-size: 1.6rem; font-weight: 900; }
-        .date-month { font-size: 0.7rem; text-transform: uppercase; }
-
-        .content-body { font-family: 'Georgia', serif; font-size: clamp(1rem, 3vw, 1.25rem); line-height: 1.8; color: #222; text-align: justify; }
-
-        @media (max-width: 600px) { .event-layout { flex-direction: column; } .date-box { width: 100%; height: 40px; flex-direction: row; gap: 10px; } }
-    </style>
-</head>
-<body>
-
-    <div class="master-wrapper">
-        <h1 class="center-title">Clay County Community Hub</h1>
-
-        <div class="hub-tabs">
-            <button class="tab-btn active" onclick="showSection('news-archive', this)">🗞️ Latest News</button>
-            <button class="tab-btn" onclick="showSection('calendar-archive', this)">📅 Community Calendar</button>
-        </div>
-
-        <div id="news-archive" class="content-section active">
-            <div id="news-feed-container">Loading news...</div>
-        </div>
-
-        <div id="calendar-archive" class="content-section">
-            <div id="calendar-feed-container">Loading events...</div>
-        </div>
-    </div>
-
-    <script>
-        const newsJson = 'https://raw.githubusercontent.com/KFruti88/clay-county-news/main/news_data.json';
-        const calendarJson = 'https://raw.githubusercontent.com/KFruti88/clay-county-news/main/calendar_data.json';
-
-        function getBranding(town) {
-            const t = town ? town.toLowerCase() : "";
-            if (t.includes('flora')) return { bg: '#0c0b82', accent: '#fe4f00', name: 'Flora' };
-            if (t.includes('louisville')) return { bg: '#990000', accent: '#131314', name: 'Louisville' };
-            if (t.includes('clay city')) return { bg: '#0c30f0', accent: '#0c30f0', name: 'Clay City' };
-            return { bg: '#1a1a1a', accent: '#2ea3f2', name: 'Clay County' };
-        }
-
-             "              // 2. PERMANENT EMOJI LOGIC
-    function getEmoji(item) {
-        const text = ((item.title || """") + "" "" + (item.full_story || """")).toLowerCase();
-        if (text.includes(""tornado"") || text.includes(""severe"") || text.includes(""warning"")) return ""⚠️"";
-        if (text.includes(""fire"")) return ""🚒"";
-        if (text.includes(""police"") || text.includes(""sheriff"") || text.includes(""arrest"")) return ""🚔"";
-        if (text.includes(""obituary"") || text.includes(""funeral"")) return ""🕊️"";
-        if (text.includes(""tax"") || text.includes(""price"") || text.includes(""cost"")) return ""💲"";
-        if (text.includes(""football"")) return ""🏈"";
-        if (text.includes(""basketball"")) return ""🏀"";
-        if (text.includes(""school"") || text.includes(""bus"")) return ""🚌"";
-        if (text.includes(""church"") || text.includes(""pastor"")) return ""⛪"";
-        if (text.includes(""watermelon"")) return ""🍉"";
-        if (text.includes(""nasa"") || text.includes(""comet"")) return ""🔭"";
-        if (text.includes(""christmas"")) return ""🎄"";
-        if (text.includes(""thanksgiving"")) return ""🦃"";
-        if (text.includes(""halloween"")) return ""🎃"";
-        if (text.includes(""state news"") || text.includes(""illinois"")) return ""🏛️"";
-        return ""📰""; "
-        }
-
-        function showSection(id, btn) {
-            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            btn.classList.add('active');
-        }
-
-        // LOAD NEWS
-        fetch(newsJson).then(res => res.json()).then(data => {
-            const container = document.getElementById('news-feed-container');
-            container.innerHTML = '';
-            data.forEach(item => {
-                const brand = getBranding(item.tags ? item.tags[0] : "");
-                const icon = getEmoji(item);
-                const slug = item.slug || item.title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-');
-                container.innerHTML += `
-                    <article class="glass-card" id="${slug}" style="border-top: 8px solid ${brand.bg}">
-                        <div class="town-badge" style="background:${brand.accent}">${brand.name} Edition</div>
-                        <h2><span>${icon}</span> ${item.title}</h2>
-                        <div class="content-body">${item.full_story}</div>
-                    </article>`;
-            });
-
-            // BOOKMARK JUMP HANDLER
-            if (window.location.hash) {
-                setTimeout(() => {
-                    const el = document.getElementById(window.location.hash.substring(1));
-                    if (el) {
-                        el.scrollIntoView({ behavior: 'smooth' });
-                        el.classList.add('jump-highlight');
-                    }
-                }, 1000);
-            }
-        });
-
-        // LOAD CALENDAR
-        fetch(calendarJson).then(res => res.json()).then(data => {
-            const container = document.getElementById('calendar-feed-container');
-            container.innerHTML = '';
-            data.sort((a, b) => new Date(a.start_date) - new Date(b.start_date)).forEach(event => {
-                const brand = getBranding(event.town);
-                const d = new Date(event.start_date + 'T00:00:00');
-                container.innerHTML += `
-                    <div class="glass-card" style="border-left: 8px solid ${brand.bg}">
-                        <div class="event-layout">
-                            <div class="date-box" style="background:${brand.bg}">
-                                <span class="date-month">${d.toLocaleString('default',{month:'short'})}</span>
-                                <span class="date-day">${d.getDate()}</span>
-                            </div>
-                            <div class="event-info">
-                                <div class="town-badge" style="background:${brand.accent}">${event.town}</div>
-                                <h3>${event.title}</h3>
-                                <p>📍 ${event.location} | 🕒 ${event.time}</p>
-                                <div class="content-body">${event.description}</div>
-                            </div>
-                        </div>
-                    </div>`;
-            });
-        });
-    </script>
-</body>
-</html>
+[
+  {
+    "title": "Test Flora Watermelon Festival Details Announced",
+    "full_story": "The annual Flora Watermelon Festival is set to return this August. Organizers have confirmed a record number of vendors and the return of the popular seed-spitting contest. Local businesses are encouraged to sign up for booth space by the end of the month.",
+    "tags": ["Flora"],
+    "date_added": "2026-01-04T10:00:00",
+    "slug": "flora-watermelon-festival-details"
+  },
+  {
+    "title": "Test Louisville School Board Discusses New Budget",
+    "full_story": "The Louisville School Board met Monday night to discuss the upcoming fiscal year budget. Key topics included facility upgrades and new technology initiatives for the elementary school. Public comment is invited at the next scheduled meeting.",
+    "tags": ["Louisville"],
+    "date_added": "2026-01-03T14:30:00",
+    "slug": "louisville-school-budget-update"
+  },
+  {
+    "title": "Test Clay City High School Basketball Victory",
+    "full_story": "The Clay City basketball team secured a thrilling victory last night in the final seconds of the game. The team showed incredible defense, leading to a 54-52 win. The next game is scheduled for Friday night away.",
+    "tags": ["Clay City"],
+    "date_added": "2026-01-02T20:15:00",
+    "slug": "clay-city-basketball-win"
+  }
+]
