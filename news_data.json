@@ -40,6 +40,7 @@ async def get_full_content(url):
             if resp.status_code == 200:
                 soup = BeautifulSoup(resp.text, 'html.parser')
                 content = soup.find('div', class_='entry-content')
+                # separator=' ' keeps emails and links from mashing into text
                 return content.get_text(separator=' ') if content else ""
     except:
         return ""
@@ -47,22 +48,26 @@ async def get_full_content(url):
 
 def get_metadata(text):
     """
-    Finds all town mentions for tagging.
-    If no towns are found, it tags 'County News'.
-    Category is always 'General News'.
+    Finds ALL town mentions for multi-page visibility.
+    - If "Flora" and "Louisville" are mentioned, it gets both tags.
+    - If NO towns are found, it tags 'County News'.
+    - Category is always 'General News' for display.
     """
     text_lower = text.lower()
     if any(bad.lower() in text_lower for bad in BLACKLIST):
         return None, []
 
+    # This creates a list of every town mentioned in the story
     found_towns = [town for town in TOWNS if town.lower() in text_lower]
+    
+    # Use the specific towns found, otherwise default to County News
     assigned_tags = found_towns if found_towns else ["County News"]
     
     return "General News", assigned_tags
 
 async def process_news():
     final_news = []
-    seen_ids = set() # STRICT DUPLICATE TRACKER
+    seen_ids = set() # STRICT DUPLICATE TRACKER for this run
     timestamp = datetime.now().isoformat()
 
     async with httpx.AsyncClient() as client:
@@ -78,11 +83,11 @@ async def process_news():
                     desc = item.find("description").text or ""
 
                     # --- DUPLICATE CHECK ---
-                    # Create ID from title: "Flora Fire" -> "florafire"
+                    # Normalized ID: "Flora Fire!!!" -> "florafire"
                     story_id = re.sub(r'\W+', '', raw_title).lower()
                     
                     if story_id in seen_ids:
-                        continue # Skip this story entirely if we already processed it
+                        continue # Skip this loop if the title was already processed
                     
                     seen_ids.add(story_id)
                     # -----------------------
@@ -99,7 +104,7 @@ async def process_news():
                     final_news.append({
                         "id": story_id, 
                         "title": clean_title, 
-                        "full_story": clean_text(story_body), # Emails preserved
+                        "full_story": clean_text(story_body), 
                         "category": cat, 
                         "tags": tags,
                         "link": link,
