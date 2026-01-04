@@ -35,7 +35,6 @@ def get_category_and_tags(text):
     category = "General News"
     icon = ""
     
-    # Obituaries checked first for specificity
     if re.search(r'(?i)\bobituary\b|\bobituaries\b|\bpassed\s*away\b|\bdeath\s*notice\b', text):
         category = "Obituary"
         icon = "🕊️ "
@@ -68,7 +67,6 @@ async def scrape_regional_news(query):
     async with httpx.AsyncClient(follow_redirects=True) as client:
         try:
             headers = {"User-Agent": "Mozilla/5.0"}
-            # Updated timeout to 12s per your requirement
             resp = await client.get(url, headers=headers, timeout=12)
             if resp.status_code == 200:
                 soup = BeautifulSoup(resp.text, 'html.parser')
@@ -81,7 +79,6 @@ async def scrape_regional_news(query):
                         full_content = title_text + " " + body_text
                         
                         cat, town, icon = get_category_and_tags(full_content)
-                        # Keep relevance to towns or specific categories
                         if town != "Clay County" or cat != "General News":
                             scraped_stories.append({
                                 "title": f"{icon}{clean_text(title_text)}",
@@ -98,7 +95,7 @@ async def process_news():
     seen_titles = set()
     pub_date = datetime.now().strftime("%a, %d %b %Y %H:%M:%S +0000")
 
-    # 1. Fetch Local RSS (WNOI)
+    # 1. Local RSS
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.get(RSS_SOURCE_URL, timeout=15)
@@ -124,7 +121,7 @@ async def process_news():
                         seen_titles.add(clean_title)
         except: print("Local RSS source unavailable.")
 
-    # 2. Regional Scrape Tasks (Multi-State Regional Queries)
+    # 2. Regional Scrape
     search_tasks = []
     for town in TOWNS:
         search_tasks.append(scrape_regional_news(f"{town} IL news"))
