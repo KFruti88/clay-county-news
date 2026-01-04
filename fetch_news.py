@@ -12,7 +12,7 @@ RSS_SOURCE_URL = "https://www.wnoi.com/category/local/feed"
 NEWS_CENTER_URL = "https://supportmylocalcommunity.com/clay-county-news-center/"
 
 TOWNS = ["Flora", "Louisville", "Clay City", "Xenia", "Sailor Springs"]
-BLACKLIST = ["Cisne"] # Stories containing these words will be deleted instantly
+BLACKLIST = ["Cisne"] # Stories containing this word will be deleted instantly
 
 def clean_text(text):
     """Removes branding, extra spaces, and HTML tags."""
@@ -30,10 +30,10 @@ def clean_text(text):
     return text.strip()
 
 def get_metadata(text):
-    """Smarter categorization with Blacklist and multi-town logic."""
+    """Categorization with Blacklist and smart multi-town logic."""
     text_lower = text.lower()
-
-    # 1. BLACKLIST CHECK: If "Cisne" is found, skip the story.
+    
+    # 1. BLACKLIST CHECK
     if any(forbidden.lower() in text_lower for forbidden in BLACKLIST):
         return None, None
 
@@ -56,16 +56,16 @@ def get_metadata(text):
     # 3. Smart Town Tagging
     found_towns = [t for t in TOWNS if re.search(fr'(?i)\b{t}\b', text)]
     
-    # If mentions >1 town, or is State News, promote to County News
+    # If it's state news or mentions more than 1 town, it's County-Wide
     if len(found_towns) > 1 or cat == "State News" or len(found_towns) == 0:
         town_tags = ["County News"]
     else:
         town_tags = found_towns
-
+    
     return cat, town_tags
 
 async def scrape_regional_news(query):
-    """Searches external sources with relevance filtering."""
+    """Scrapes Newsbreak/Web for additional local context."""
     scraped_stories = []
     url = f"https://www.newsbreak.com/search?q={query.replace(' ', '+')}"
     async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -81,7 +81,6 @@ async def scrape_regional_news(query):
                         t_text, b_text = title_node.get_text(), (desc_node.get_text() if desc_node else "")
                         cat, tags = get_metadata(t_text + " " + b_text)
                         
-                        # Only proceed if story was NOT blacklisted
                         if cat and (tags != ["County News"] or cat != "General News"):
                             scraped_stories.append({
                                 "title": clean_text(t_text), 
@@ -93,11 +92,11 @@ async def scrape_regional_news(query):
     return scraped_stories
 
 async def process_news():
-    """Main processing logic."""
+    """Main function to run the news gathering cycle."""
     final_news, seen_hashes = [], set()
     timestamp = datetime.now().isoformat()
 
-    # 1. Local RSS Processing
+    # 1. Process Local RSS
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.get(RSS_SOURCE_URL, timeout=15)
@@ -108,7 +107,7 @@ async def process_news():
                     desc = item.find("description").text or ""
                     
                     cat, tags = get_metadata(raw_title + " " + desc)
-                    if cat is None: continue # Skip Blacklisted
+                    if cat is None: continue # Skip if Blacklisted
 
                     clean_title = clean_text(raw_title)
                     content_hash = re.sub(r'\W+', '', clean_title).lower()
@@ -127,7 +126,7 @@ async def process_news():
                         seen_hashes.add(content_hash)
         except Exception as e: print(f"RSS Error: {e}")
 
-    # 2. Regional Web Scraping
+    # 2. Process Regional Web
     tasks = [scrape_regional_news(f"{t} IL news") for t in TOWNS]
     results = await asyncio.gather(*tasks)
     for result_set in results:
@@ -145,7 +144,7 @@ async def process_news():
                 })
                 seen_hashes.add(h)
 
-    # 3. Save JSON
+    # 3. Save Output
     with open(NEWS_DATA_FILE, "w", encoding='utf-8') as f:
         json.dump(final_news, f, indent=4, ensure_ascii=False)
     print(f"Success: {len(final_news)} items stored. Cisne filtered.")
