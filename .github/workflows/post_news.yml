@@ -1,47 +1,36 @@
-name: News Distribution Pipeline
+name: Hourly News Update
 
 on:
-  workflow_dispatch:      # Manual trigger
   schedule:
-    - cron: '0 */4 * * *'  # Runs every 4 hours
+    # This cron expression runs at minute 0 of every hour
+    - cron: '0 * * * *'
+  # Allows you to manually trigger it from the "Actions" tab for testing
+  workflow_dispatch:
 
 jobs:
-  build:
+  update-news:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write     # Vital for saving data back to GitHub
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: 🍽️ Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: 🐍 Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.10'
 
-      - name: Install dependencies
+      - name: 💿 Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install httpx beautifulsoup4
 
-      - name: Run news aggregator
+      - name: 🚀 Run News Scraper
         run: python fetch_news.py
 
-      - name: Commit and Push changes
+      - name: 💾 Commit and Push Changes
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          
-          # Prevent 'file not found' errors
-          touch posted_links.json news_data.json
-          
-          git add news_data.json posted_links.json
-          
-          # Completed logic to push only if changes exist
-          if git diff --staged --quiet; then
-            echo "No new changes to commit."
-          else
-            git commit -m "Update news data [skip ci]"
-            git push
-          fi
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add news_data.json feed.xml
+          git diff-index --quiet HEAD || git commit -m "Update news data [skip ci]"
+          git push
