@@ -35,6 +35,7 @@ def get_category_and_tags(text):
     category = "General News"
     icon = ""
     
+    # Obituaries checked first for specificity
     if re.search(r'(?i)\bobituary\b|\bobituaries\b|\bpassed\s*away\b|\bdeath\s*notice\b', text):
         category = "Obituary"
         icon = "🕊️ "
