@@ -8,45 +8,32 @@ import os
 from bs4 import BeautifulSoup
 
 # --- CONFIGURATION ---
-FEED_XML_FILE = 'feed.xml'              
-NEWS_DATA_FILE = 'news_data.json'        
+NEWS_DATA_FILE = 'news_data.json'
 RSS_SOURCE_URL = "https://www.wnoi.com/category/local/feed"
 NEWS_CENTER_URL = "https://supportmylocalcommunity.com/clay-county-news-center/"
 
-TOWNS = ["Flora", "Louisville", "Clay City", "Xenia", "Sailor Springs"]
-
 def clean_text(text):
-    """Scrub branding, station frequencies, and leading dates for a clean display."""
     if not text: return ""
-    patterns = [
-        r'(?i)wnoi', 
-        r'(?i)103\.9/99\.3', 
-        r'(?i)local\s*--',
-        r'(?i)by\s+tom\s+lavine', 
-        r'^\d{1,2}/\d{1,2}/\d{2,4}\s*' 
-    ]
+    patterns = [r'(?i)wnoi', r'(?i)103\.9/99\.3', r'(?i)local\s*--', r'(?i)by\s+tom\s+lavine', r'^\d{1,2}/\d{1,2}/\d{2,4}\s*']
     for p in patterns:
         text = re.sub(p, '', text)
     text = re.sub('<[^<]+?>', '', text)
     return text.strip()
 
-def get_category_and_tags(text):
-    """Detects category (Fire, Police, Obituary) and identifies the town."""
+def get_metadata(text):
+    """Detects Category, Emojis, and ALL mentioned towns."""
+    # 1. Category Detection
     category = "General News"
     icon = ""
-    
-    # Obituaries checked first for specificity
-    if re.search(r'(?i)\bobituary\b|\bobituaries\b|\bpassed\s*away\b|\bdeath\s*notice\b', text):
-        category = "Obituary"
-        icon = "🕊️ "
-    elif re.search(r'(?i)\bfire\b|\brescue\b|\bextrication\b|\bstructure\s*fire\b|\bmutual\s*aid\b', text):
-        category = "Fire & Rescue"
-        icon = "🚒 "
-    elif re.search(r'(?i)\barrest\b|\bsheriff\b|\bpolice\b|\bbooking\b|\bcourt\s*news\b|\bblotter\b', text):
-        category = "Police Report"
-        icon = "🚨 "
+    if re.search(r'(?i)\bobituary\b|\bobituaries\b|\bpassed\s*away\b', text):
+        category = "Obituary"; icon = "🕊️ "
+    elif re.search(r'(?i)\bfire\b|\brescue\b|\bextrication\b|\bstructure\s*fire\b', text):
+        category = "Fire & Rescue"; icon = "🚒 "
+    elif re.search(r'(?i)\barrest\b|\bsheriff\b|\bpolice\b|\bbooking\b|\bblotter\b', text):
+        category = "Police Report"; icon = "🚨 "
 
-    town_found = "Clay County"
+    # 2. Multi-Town Tagging
+    town_tags = []
     town_map = {
         "Flora": r'(?i)\bflora\b',
         "Xenia": r'(?i)\bxenia\b',
@@ -54,49 +41,23 @@ def get_category_and_tags(text):
         "Clay City": r'(?i)clay\s*city',
         "Sailor Springs": r'(?i)sailor\s*springs'
     }
+    
     for town, pattern in town_map.items():
         if re.search(pattern, text):
-            town_found = town
-            break
-            
-    return category, town_found, icon
-
-async def scrape_regional_news(query):
-    """Searches regional NewsBreak for specific mentions in IL, MO, IN, KY."""
-    scraped_stories = []
-    url = f"https://www.newsbreak.com/search?q={query.replace(' ', '+')}"
-    async with httpx.AsyncClient(follow_redirects=True) as client:
-        try:
-            headers = {"User-Agent": "Mozilla/5.0"}
-            resp = await client.get(url, headers=headers, timeout=12)
-            if resp.status_code == 200:
-                soup = BeautifulSoup(resp.text, 'html.parser')
-                for art in soup.find_all('article')[:3]:
-                    title_node = art.find('h3') or art.find('a')
-                    desc_node = art.find('p') or art.find('div', class_='description')
-                    if title_node:
-                        title_text = title_node.get_text()
-                        body_text = desc_node.get_text() if desc_node else ""
-                        full_content = title_text + " " + body_text
-                        
-                        cat, town, icon = get_category_and_tags(full_content)
-                        if town != "Clay County" or cat != "General News":
-                            scraped_stories.append({
-                                "title": f"{icon}{clean_text(title_text)}",
-                                "description": clean_text(body_text),
-                                "category": cat,
-                                "town": town
-                            })
-        except: pass
-    return scraped_stories
+            town_tags.append(town)
+    
+    # If no specific town is found, or as a global fallback
+    if not town_tags:
+        town_tags.append("County News")
+    
+    return category, town_tags, icon
 
 async def process_news():
-    """Main logic: Fetches external RSS, cleans it, and generates XML/JSON outputs."""
     final_news = []
-    seen_titles = set()
+    seen_hashes = set() # Global deduplication
     pub_date = datetime.now().strftime("%a, %d %b %Y %H:%M:%S +0000")
+    timestamp = datetime.now().isoformat()
 
-    # 1. Local RSS
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.get(RSS_SOURCE_URL, timeout=15)
@@ -105,64 +66,33 @@ async def process_news():
                 namespaces = {'content': 'http://purl.org/rss/1.0/modules/content/'}
                 for item in root.findall("./channel/item")[:40]:
                     raw_title = item.find("title").text
-                    content_node = item.find("content:encoded", namespaces)
-                    full_text = content_node.text if content_node is not None else (item.find("description").text or "")
+                    full_text = (item.find("content:encoded", namespaces).text 
+                                 if item.find("content:encoded", namespaces) is not None 
+                                 else item.find("description").text)
                     
-                    cat, town, icon = get_category_and_tags(raw_title + " " + full_text)
+                    category, tags, icon = get_metadata(raw_title + " " + full_text)
                     clean_title = f"{icon}{clean_text(raw_title)}"
                     
-                    if clean_title not in seen_titles:
+                    # Deduplication check
+                    content_hash = re.sub(r'\W+', '', clean_title).lower()
+                    if content_hash not in seen_hashes:
                         final_news.append({
                             "title": clean_title,
                             "description": clean_text(full_text),
-                            "category": cat,
-                            "town": town,
-                            "link": NEWS_CENTER_URL
+                            "category": category,
+                            "tags": tags, # List of towns: e.g. ["Flora", "County News"]
+                            "link": NEWS_CENTER_URL,
+                            "date_added": timestamp
                         })
-                        seen_titles.add(clean_title)
-        except: print("Local RSS source unavailable.")
+                        seen_hashes.add(content_hash)
+        except Exception as e:
+            print(f"Error: {e}")
 
-    # 2. Regional Scrape
-    search_tasks = []
-    for town in TOWNS:
-        search_tasks.append(scrape_regional_news(f"{town} IL news"))
-        search_tasks.append(scrape_regional_news(f"{town} IL fire rescue police"))
-        search_tasks.append(scrape_regional_news(f"{town} IL obituaries"))
-
-    regional_results = await asyncio.gather(*search_tasks)
-    for result_set in regional_results:
-        for s in result_set:
-            if s['title'] not in seen_titles:
-                final_news.append({
-                    "title": s['title'],
-                    "description": s['description'],
-                    "category": s['category'],
-                    "town": s['town'],
-                    "link": NEWS_CENTER_URL
-                })
-                seen_titles.add(s['title'])
-
-    # 3. Save as JSON with UTF-8 and emoji support
+    # Save as JSON
     with open(NEWS_DATA_FILE, "w", encoding='utf-8') as f:
         json.dump(final_news, f, indent=4, ensure_ascii=False)
 
-    # 4. Save as RSS XML with UTF-8 and emoji support
-    rss_items = ""
-    for item in final_news:
-        rss_items += f"""
-        <item>
-            <title>{item['title']}</title>
-            <link>{item['link']}</link>
-            <description>[{item['town']} - {item['category']}] {item['description'][:250]}...</description>
-            <pubDate>{pub_date}</pubDate>
-        </item>"""
-    
-    rss_feed = f'<?xml version="1.0" encoding="UTF-8" ?><rss version="2.0"><channel><title>Clay County Unified News</title><link>{NEWS_CENTER_URL}</link><description>Combined Local and Regional Updates</description>{rss_items}</channel></rss>'
-    
-    with open(FEED_XML_FILE, 'w', encoding='utf-8') as f:
-        f.write(rss_feed)
-
-    print(f"Update complete. Processed {len(final_news)} news items.")
+    print(f"Update complete. {len(final_news)} unique items stored.")
 
 if __name__ == "__main__":
     asyncio.run(process_news())
