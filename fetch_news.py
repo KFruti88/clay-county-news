@@ -15,29 +15,24 @@ NEWS_CENTER_URL = "https://supportmylocalcommunity.com/clay-county-news-center/"
 
 # --- COLOR THEMES ---
 THEMES = {
-    "Clay City": {"bg": "#ADD8E6", "text": "#000000"},      # Light Blue / Black
-    "Sailor Springs": {"bg": "#367C2B", "text": "#FFDE00"}, # JD Green / JD Yellow
-    "Xenia": {"bg": "#0077BE", "text": "#FFC0CB"},          # Ocean Blue / Pink
-    "Flora": {"bg": "#FFFFFF", "text": "#000000"},          # Default White/Black
-    "Louisville": {"bg": "#FFFFFF", "text": "#000000"},     # Default White/Black
-    "General": {"bg": "#F4F4F4", "text": "#333333"}         # Soft Grey for County News
+    "Clay City": {"bg": "#ADD8E6", "text": "#000000"},      
+    "Sailor Springs": {"bg": "#367C2B", "text": "#FFDE00"}, 
+    "Xenia": {"bg": "#0077BE", "text": "#FFC0CB"},          
+    "Flora": {"bg": "#FFFFFF", "text": "#000000"},          
+    "Louisville": {"bg": "#FFFFFF", "text": "#000000"},     
+    "General": {"bg": "#808080", "text": "#FFFFFF"}         # Grey for General News
 }
 
 def clean_text(text):
-    """Scrub branding, frequencies, and HTML tags."""
     if not text: return ""
-    patterns = [
-        r'(?i)wnoi', r'(?i)103\.9/99\.3', r'(?i)local\s*--', 
-        r'(?i)by\s+tom\s+lavine', r'^\d{1,2}/\d{1,2}/\d{2,4}\s*'
-    ]
+    patterns = [r'(?i)wnoi', r'(?i)103\.9/99\.3', r'(?i)local\s*--', r'(?i)by\s+tom\s+lavine']
     for p in patterns:
         text = re.sub(p, '', text)
-    # Remove HTML tags and extra whitespace
     text = re.sub('<[^<]+?>', '', text)
     return text.strip()
 
 def get_primary_town(text):
-    """Identifies the primary town or defaults to General."""
+    """Identifies if a specific town is mentioned in the story content."""
     if not text: return "General"
     town_map = {
         "Flora": r'(?i)\bflora\b',
@@ -52,7 +47,6 @@ def get_primary_town(text):
     return "General"
 
 async def fetch_rss():
-    """Fetches RSS feed and assigns town_tags and themes."""
     stories = []
     namespaces = {'content': 'http://purl.org/rss/1.0/modules/content/'}
     async with httpx.AsyncClient() as client:
@@ -66,7 +60,9 @@ async def fetch_rss():
                     content_node = item.find("content:encoded", namespaces)
                     full_text = content_node.text if content_node is not None else brief
 
-                    town_tag = get_primary_town(title + " " + full_text)
+                    # Logic: Identify town based on Full Story content
+                    town_tag = get_primary_town(full_text)
+                    
                     stories.append({
                         "title": clean_text(title),
                         "brief": clean_text(brief)[:180] + "...",
@@ -79,72 +75,37 @@ async def fetch_rss():
             print(f"RSS Error: {e}")
     return stories
 
-async def scrape_town(town):
-    """Scrapes NewsBreak for town-specific updates."""
-    stories = []
-    url = f"https://www.newsbreak.com/search?q={town}+IL+news"
-    async with httpx.AsyncClient(follow_redirects=True) as client:
-        try:
-            headers = {"User-Agent": "Mozilla/5.0"}
-            resp = await client.get(url, headers=headers)
-            if resp.status_code == 200:
-                soup = BeautifulSoup(resp.text, 'html.parser')
-                for art in soup.find_all('article')[:3]:
-                    title_node = art.find('h3') or art.find('a')
-                    if title_node:
-                        stories.append({
-                            "title": clean_text(title_node.get_text()),
-                            "brief": f"Community update for {town}.",
-                            "full_story": f"Detailed community updates for {town}.",
-                            "link": NEWS_CENTER_URL,
-                            "town_tag": town,
-                            "theme": THEMES.get(town, THEMES["General"])
-                        })
-        except Exception as e:
-            print(f"Scrape Error for {town}: {e}")
-    return stories
-
 async def run():
-    seen_stories = {}
-    print("Gathering news and applying themes...")
-
-    # 1. Process RSS (Regional News)
-    rss_stories = await fetch_rss()
-    for s in rss_stories:
-        seen_stories[s['title']] = s
-
-    # 2. Process Town Scrapes
-    for town in TOWNS:
-        print(f"Checking {town}...")
-        scraped = await scrape_town(town)
-        for s in scraped:
-            if s['title'] not in seen_stories:
-                seen_stories[s['title']] = s
-
-    # 3. Apply Fallback Logic for Small Towns
-    unique_list = list(seen_stories.values())
-    final_output = []
+    print("Gathering news and filtering duplicates...")
+    all_stories = await fetch_rss()
     
-    for town in TOWNS:
-        # Filter news items specifically tagged for this town
-        town_news = [s for s in unique_list if s['town_tag'] == town]
-        
-        if town in SMALL_TOWNS and not town_news:
-            # If no local news, duplicate General news with town's specific theme
-            general_news = [s for s in unique_list if s['town_tag'] == "General"]
-            for g in general_news:
-                fallback = deepcopy(g)
-                fallback['town_tag'] = town
-                fallback['theme'] = THEMES[town]
-                final_output.append(fallback)
-        else:
-            final_output.extend(town_news)
+    final_output = []
+    seen_content = set()
 
-    # 4. Save to JSON
+    for story in all_stories:
+        content_hash = story['title'] + story['town_tag']
+        
+        # 1. If it's a specific town mention (Clay City, Xenia, etc. in the text)
+        # Keep it exactly as is.
+        if story['town_tag'] in TOWNS and story['town_tag'] != "General":
+            if content_hash not in seen_content:
+                final_output.append(story)
+                seen_content.add(content_hash)
+        
+        # 2. If it's a general story (like 'The ReVue') that doesn't mention a town
+        # Label it General News and only keep ONE copy (deduplicate)
+        else:
+            story['town_tag'] = "General News"
+            story['theme'] = THEMES["General"]
+            if story['title'] not in seen_content:
+                final_output.append(story)
+                seen_content.add(story['title'])
+
+    # Save to JSON
     with open(DATA_EXPORT_FILE, "w") as f:
         json.dump(final_output, f, indent=4)
 
-    print(f"Update complete! Saved {len(final_output)} themed entries to {DATA_EXPORT_FILE}")
+    print(f"Done! {len(final_output)} unique entries saved.")
 
 if __name__ == "__main__":
     asyncio.run(run())
