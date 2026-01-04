@@ -1,139 +1,80 @@
-<div id="master-story-grid">
-        <div class="loading-spinner">Fetching the latest deep-dive reports...</div>
+<div class="news-outer-wrapper">
+    <div id="auto-news-feed" class="newspaper-grid">
+        <p class="loading-text">🗞️ Syncing the Daily Edition...</p>
     </div>
-
-    <aside class="news-sidebar">
-        <h2 style="border-bottom: 2px solid #000; margin-top: 0;">Local Bulletins</h2>
-        <div id="sidebar-content">
-            <p>Automated updates will appear here.</p>
-        </div>
-    </aside>
-</div> 
+</div>
 
 <style>
-    /* Global Layout */
-    #clay-county-master-wrap {
-        max-width: 1200px; 
-        margin: 40px auto;
-        font-family: 'Ibarra Real Nova', 'Times New Roman', serif;
-        color: #1a1a1a;
-        padding: 0 15px;
-        display: flex;      /* Moves items side-by-side */
-        flex-wrap: wrap;    /* Allows stacking on phones */
-        gap: 30px;
+    .news-outer-wrapper { display: flex; justify-content: center; width: 100%; padding: 40px 0; background: #f4f4f4; }
+    .newspaper-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; max-width: 1200px; width: 95%; }
+    .news-card { 
+        flex: 1 1 350px; max-width: 450px; position: relative; padding: 25px; 
+        background: #fff; border: 1px solid #dcdcdc; border-top: 5px solid #333;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow: hidden; transition: all 0.3s ease; 
     }
-
-    .news-center-header { 
-        width: 100%;        /* Keeps header full-width at top */
-        text-align: center; 
-        margin-bottom: 50px; 
-    }
-
-    #master-story-grid {
-        flex: 2;            /* Left side (Stories) */
-        min-width: 300px;
-    }
-
-    .news-sidebar {
-        flex: 1;            /* Right side (Sidebar) */
-        min-width: 250px;
-        padding: 20px;
-        background: #fdfdfd;
-        border-left: 1px solid #eee;
-        height: fit-content;
-    }
-
-    /* Article Card Styles */
-    .full-story-card {
-        background: #fff;
-        border: 1px solid #e0e0e0;
-        padding: 40px;
-        margin-bottom: 60px;
-        position: relative;
-    }
-    
-    /* Town Border Themes */
-    .silo-flora { border-top: 10px solid #FA4616; }
-    .silo-louisville { border-top: 10px solid #C41E3A; }
-    .silo-claycity { border-top: 10px solid #0c30f0; }
-    .silo-county { border-top: 10px solid #333; }
-
-    .category-badge {
-        display: inline-block;
-        background: #f0f0f0;
-        padding: 5px 12px;
-        font-weight: 900;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        margin-bottom: 15px;
-    }
-
-    .full-story-card h2 { font-size: 2.2rem; margin: 0 0 20px 0; }
-    .full-content { font-size: 1.25rem; line-height: 1.8; white-space: pre-wrap; }
+    .news-card:hover { transform: translateY(-8px); box-shadow: 0 15px 40px rgba(0,0,0,0.12); border-top-color: #2ea3f2; }
+    .news-card h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #111; margin: 10px 0; line-height: 1.2; display: flex; align-items: flex-start; gap: 8px; }
+    .news-card .summary { font-family: Georgia, serif; line-height: 1.7; color: #444; text-align: justify; }
+    .read-more { display: inline-block; margin-top: 20px; font-weight: bold; color: #2ea3f2; text-decoration: none; border: 2px solid #2ea3f2; padding: 8px 20px; transition: 0.3s; }
+    .read-more:hover { background: #2ea3f2; color: #fff; }
 </style>
 
 <script>
-async function runFullNewsCenter() {
-    const JSON_URL = 'https://raw.githubusercontent.com/KFruti88/clay-county-news/main/news_data.json';
-    const grid = document.getElementById('master-story-grid');
+document.addEventListener('DOMContentLoaded', function() {
+    const jsonUrl = 'https://raw.githubusercontent.com/KFruti88/clay-county-news/main/news_data.json';
     
-    // Set Header Info
-    document.getElementById('live-date').innerText = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-    
-    try {
-        const response = await fetch(JSON_URL);
-        const data = await response.json();
-        grid.innerHTML = '';
+    function getEmoji(item) {
+        const text = (item.title + " " + (item.category || "") + " " + item.full_story).toLowerCase();
+        if (text.includes("obituary") || text.includes("funeral")) return "🕊️";
+        if (text.includes("fire") || text.includes("smoke")) return "🚒";
+        if (text.includes("police") || text.includes("sheriff") || text.includes("arrest")) return "🚔";
+        if (text.includes("football")) return "🏈";
+        if (text.includes("basketball")) return "🏀";
+        if (text.includes("baseball")) return "⚾";
+        if (text.includes("softball")) return "🥎";
+        if (text.includes("school") || text.includes("bus") || text.includes("student")) return "🚌";
+        if (text.includes("church") || text.includes("pastor")) return "⛪";
+        if (text.includes("hospital") || text.includes("medical")) return "🏥";
+        if (text.includes("construction") || text.includes("road work")) return "🏗️";
+        if (text.includes("nasa") || text.includes("comet") || text.includes("meteor")) return "🔭";
+        if (text.includes("gas")) return "⛽";
+        if (text.includes("watermelon")) return "🍉";
+        if (text.includes("state news") || text.includes("illinois")) return "🏛️";
+        return "📰";
+    }
 
-        data.forEach(story => {
-            const tagString = story.tags.join(" ");
-            let siloClass = "silo-county";
-            let mascot = "📢";
+    const currentUrl = window.location.href.toLowerCase();
+    let town = "County News";
+    if (currentUrl.includes('flora')) town = "Flora";
+    else if (currentUrl.includes('louisville')) town = "Louisville";
+    else if (currentUrl.includes('clay-city')) town = "Clay City";
+    else if (currentUrl.includes('xenia')) town = "Xenia";
+    else if (currentUrl.includes('sailor-springs')) town = "Sailor Springs";
 
-            // Determine Silo Branding
-            if (tagString.includes("Flora")) { siloClass = "silo-flora"; mascot = "🐺"; }
-            else if (tagString.includes("Louisville")) { siloClass = "silo-louisville"; mascot = "🐦"; }
-            else if (tagString.includes("Clay City")) { siloClass = "silo-claycity"; mascot = "🐺"; }
+    fetch(jsonUrl).then(res => res.json()).then(data => {
+        const container = document.getElementById('auto-news-feed');
+        container.innerHTML = '';
+        const filtered = data.filter(item => item.tags && item.tags.includes(town));
 
-            // Build Category Icons
-            let catIcon = "📰";
-            if (story.category === "Arts & Entertainment") catIcon = "🎭";
-            else if (story.category === "Police Report") catIcon = "🚨";
-            else if (story.category === "State News") catIcon = "🏦";
-            else if (story.category === "School News") catIcon = "🚌";
-            else if (story.category === "Obituary") catIcon = "🕊️";
-
-            grid.innerHTML += `
-                <article class="full-story-card ${siloClass}" id="${story.id}">
-                    <div class="category-badge">${catIcon} ${story.category}</div>
-                    <h2>${story.title}</h2>
-                    <div class="full-content">${story.full_story}</div>
-                </article>
-            `;
-        });
-
-        // Deep Link Scroll Handler: Jumps to the story if the URL has a #hash
-        if(window.location.hash) {
-            setTimeout(() => {
-                const targetArticle = document.querySelector(window.location.hash);
-                if(targetArticle) {
-                    targetArticle.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }, 600);
+        if(filtered.length === 0) {
+            container.innerHTML = `<p>No recent local headlines for ${town}. Viewing General County News...</p>`;
+            // Optionally show general news here
+            return;
         }
 
-    } catch (err) {
-        grid.innerHTML = '<div class="loading-spinner">Error loading news feed. Please refresh.</div>';
-    }
-}
-
-// Live Time Update
-function updateTime() {
-    const options = { timeZone: 'America/Chicago', hour: '2-digit', minute: '2-digit', hour12: true };
-    document.getElementById('live-time').innerText = new Intl.DateTimeFormat([], options).format(new Date());
-}
-
-runFullNewsCenter();
-setInterval(updateTime, 1000);
-updateTime();
+        filtered.forEach(item => {
+            const icon = getEmoji(item);
+            const slug = item.slug || item.title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-');
+            const bookmarkLink = `https://supportmylocalcommunity.com/clay-county-news-center/#${slug}`;
+            
+            container.innerHTML += `
+                <div class="news-card">
+                    <div style="font-size:0.7rem; color:#999; text-transform:uppercase;">${town} Edition</div>
+                    <h3><span>${icon}</span> ${item.title}</h3>
+                    <div class="summary">${item.full_story.substring(0, 200)}...</div>
+                    <a href="${bookmarkLink}" class="read-more">READ FULL STORY →</a>
+                </div>`;
+        });
+    });
+});
 </script>
