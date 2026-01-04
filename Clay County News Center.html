@@ -94,15 +94,25 @@
             return { border: '#1a1a1a', badge: '#2ea3f2', name: 'Clay County' };
         }
 
-        function getEmoji(item) {
-            const text = ((item.title || "") + " " + (item.full_story || "")).toLowerCase();
-            if (text.includes("fire")) return "🚒";
-            if (text.includes("police")) return "🚔";
-            if (text.includes("tax") || text.includes("price")) return "💲";
-            if (text.includes("school")) return "🚌";
-            if (text.includes("obituary")) return "🕊️";
-            if (text.includes("tornado") || text.includes("severe")) return "⚠️";
-            return "📰";
+                   // 2. PERMANENT EMOJI LOGIC
+    function getEmoji(item) {
+        const text = ((item.title || "") + " " + (item.full_story || "")).toLowerCase();
+        if (text.includes("tornado") || text.includes("severe") || text.includes("warning")) return "⚠️";
+        if (text.includes("fire")) return "🚒";
+        if (text.includes("police") || text.includes("sheriff") || text.includes("arrest")) return "🚔";
+        if (text.includes("obituary") || text.includes("funeral")) return "🕊️";
+        if (text.includes("tax") || text.includes("price") || text.includes("cost")) return "💲";
+        if (text.includes("football")) return "🏈";
+        if (text.includes("basketball")) return "🏀";
+        if (text.includes("school") || text.includes("bus")) return "🚌";
+        if (text.includes("church") || text.includes("pastor")) return "⛪";
+        if (text.includes("watermelon")) return "🍉";
+        if (text.includes("nasa") || text.includes("comet")) return "🔭";
+        if (text.includes("christmas")) return "🎄";
+        if (text.includes("thanksgiving")) return "🦃";
+        if (text.includes("halloween")) return "🎃";
+        if (text.includes("state news") || text.includes("illinois")) return "🏛️";
+        return "📰"; 
         }
 
         fetch(jsonUrl).then(res => res.json()).then(data => {
