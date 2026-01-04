@@ -68,7 +68,7 @@ async def scrape_regional_news(query):
     async with httpx.AsyncClient(follow_redirects=True) as client:
         try:
             headers = {"User-Agent": "Mozilla/5.0"}
-            # Updated timeout to 12s as per your diff
+            # Updated timeout to 12s per your requirement
             resp = await client.get(url, headers=headers, timeout=12)
             if resp.status_code == 200:
                 soup = BeautifulSoup(resp.text, 'html.parser')
@@ -81,6 +81,7 @@ async def scrape_regional_news(query):
                         full_content = title_text + " " + body_text
                         
                         cat, town, icon = get_category_and_tags(full_content)
+                        # Keep relevance to towns or specific categories
                         if town != "Clay County" or cat != "General News":
                             scraped_stories.append({
                                 "title": f"{icon}{clean_text(title_text)}",
@@ -97,6 +98,7 @@ async def process_news():
     seen_titles = set()
     pub_date = datetime.now().strftime("%a, %d %b %Y %H:%M:%S +0000")
 
+    # 1. Fetch Local RSS (WNOI)
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.get(RSS_SOURCE_URL, timeout=15)
@@ -143,8 +145,8 @@ async def process_news():
                 seen_titles.add(s['title'])
 
     # 3. Save as JSON
-    with open(NEWS_DATA_FILE, "w") as f:
-        json.dump(final_news, f, indent=4)
+    with open(NEWS_DATA_FILE, "w", encoding='utf-8') as f:
+        json.dump(final_news, f, indent=4, ensure_ascii=False)
 
     # 4. Save as RSS XML
     rss_items = ""
@@ -159,7 +161,7 @@ async def process_news():
     
     rss_feed = f'<?xml version="1.0" encoding="UTF-8" ?><rss version="2.0"><channel><title>Clay County Unified News</title><link>{NEWS_CENTER_URL}</link><description>Combined Local and Regional Updates</description>{rss_items}</channel></rss>'
     
-    # Encoding set to utf-8 as per your diff
+    # Save with UTF-8 to ensure emojis render correctly
     with open(FEED_XML_FILE, 'w', encoding='utf-8') as f:
         f.write(rss_feed)
 
