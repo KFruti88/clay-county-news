@@ -4,7 +4,7 @@ on:
   schedule:
     # Runs at 22 and 44 minutes past every hour
     - cron: '22,44 * * * *'
-  workflow_dispatch: # Allows you to run it manually whenever you want
+  workflow_dispatch: # Keeps the "Run workflow" button active
 
 jobs:
   build:
