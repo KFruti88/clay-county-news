@@ -16,7 +16,7 @@ NEWS_CENTER_URL = "https://supportmylocalcommunity.com/clay-county-news-center/"
 TOWNS = ["Flora", "Louisville", "Clay City", "Xenia", "Sailor Springs"]
 
 def clean_text(text):
-    """Scrub branding, station frequencies, and leading dates."""
+    """Scrub branding, frequencies, and leading dates for a clean display."""
     if not text: return ""
     patterns = [
         r'(?i)wnoi', 
@@ -35,10 +35,8 @@ def get_category_and_tags(text):
     category = "General News"
     icon = ""
     
-    # 
-    
     # 1. Detect Category and Assign Emojis
-    # We check for obituaries first as they are often very specific
+    # Obituaries checked first for specificity
     if re.search(r'(?i)\bobituary\b|\bobituaries\b|\bpassed\s*away\b|\bdeath\s*notice\b', text):
         category = "Obituary"
         icon = "🕊️ "
@@ -74,7 +72,7 @@ async def scrape_regional_news(query):
     async with httpx.AsyncClient(follow_redirects=True) as client:
         try:
             headers = {"User-Agent": "Mozilla/5.0"}
-            resp = await client.get(url, headers=headers, timeout=10)
+            resp = await client.get(url, headers=headers, timeout=12)
             if resp.status_code == 200:
                 soup = BeautifulSoup(resp.text, 'html.parser')
                 for art in soup.find_all('article')[:3]:
@@ -86,9 +84,10 @@ async def scrape_regional_news(query):
                         full_content = title_text + " " + body_text
                         
                         cat, town, icon = get_category_and_tags(full_content)
+                        # Filter for relevance to your towns or categories
                         if town != "Clay County" or cat != "General News":
                             scraped_stories.append({
-                                "title": f"{icon}{clean_text(title_text)}", # Prepend emoji here
+                                "title": f"{icon}{clean_text(title_text)}",
                                 "description": clean_text(body_text),
                                 "category": cat,
                                 "town": town
@@ -114,7 +113,6 @@ async def process_news():
                     full_text = content_node.text if content_node is not None else (item.find("description").text or "")
                     
                     cat, town, icon = get_category_and_tags(raw_title + " " + full_text)
-                    # Add category icon to the cleaned title
                     clean_title = f"{icon}{clean_text(raw_title)}"
                     
                     if clean_title not in seen_titles:
@@ -128,11 +126,11 @@ async def process_news():
                         seen_titles.add(clean_title)
         except: print("Local RSS source unavailable.")
 
-    # 2. Regional Scrape Tasks (Multi-State)
+    # 2. Regional Scrape Tasks (Multi-State Regional Queries)
     search_tasks = []
     for town in TOWNS:
         search_tasks.append(scrape_regional_news(f"{town} IL news"))
-        search_tasks.append(scrape_regional_news(f"{town} IL fire and police"))
+        search_tasks.append(scrape_regional_news(f"{town} IL fire rescue police"))
         search_tasks.append(scrape_regional_news(f"{town} IL obituaries"))
 
     regional_results = await asyncio.gather(*search_tasks)
@@ -165,7 +163,7 @@ async def process_news():
     
     rss_feed = f'<?xml version="1.0" encoding="UTF-8" ?><rss version="2.0"><channel><title>Clay County Unified News</title><link>{NEWS_CENTER_URL}</link><description>Combined Local and Regional Updates</description>{rss_items}</channel></rss>'
     
-    with open(FEED_XML_FILE, 'w') as f:
+    with open(FEED_XML_FILE, 'w', encoding='utf-8') as f:
         f.write(rss_feed)
 
     print(f"Update complete. Processed {len(final_news)} news items.")
