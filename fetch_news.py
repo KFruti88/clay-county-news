@@ -101,7 +101,6 @@ async def scrape_regional_news(query):
                         full_content = title_text + " " + body_text
                         
                         cat, tags, icon = get_metadata(full_content)
-                        # Keep relevance: either a specific town or a special category
                         if tags != ["County News"] or cat != "General News":
                             scraped_stories.append({
                                 "title": f"{icon}{clean_text(title_text)}",
@@ -113,7 +112,7 @@ async def scrape_regional_news(query):
     return scraped_stories
 
 async def process_news():
-    """Main logic: Fetches news, tags by town/county, and deduplicates."""
+    """Main logic: Fetches news, tags, and deduplicates."""
     final_news = []
     seen_hashes = set() 
     pub_date = datetime.now().strftime("%a, %d %b %Y %H:%M:%S +0000")
