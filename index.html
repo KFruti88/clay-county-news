@@ -1,1 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clay County News Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Georgia&display=swap" rel="stylesheet">
+    <style>
+        /* GLOBAL SAFETY */
+        body { margin: 0; background: transparent; font-family: 'Playfair Display', serif; scroll-behavior: smooth; overflow-x: hidden; }
+        .main-hub-container { max-width: 1000px; margin: 0 auto; padding: 10px; }
 
+        /* NEWS CARDS */
+        .glass-card { background: white; padding: 25px; margin-bottom: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 8px solid #333; }
+        
+        /* TOWN COLORS */
+        .flora-card { border-top-color: #fe4f00 !important; }
+        .louisville-card { border-top-color: #d61a21 !important; }
+        .claycity-card { border-top-color: #0c30f0 !important; }
+        .xenia-card { border-top-color: #1b5e20 !important; }
+        .sailor-card { border-top-color: #5d4037 !important; }
+        .general-card { border-top-color: #888 !important; background: #e0e0e0; color: #000; }
+
+        .read-more-btn { display: inline-block; margin-top: 15px; padding: 10px 20px; background: #333; color: #fff; text-decoration: none; border-radius: 5px; font-family: sans-serif; font-weight: bold; font-size: 0.85rem; }
+        h2 { margin-top: 0; font-size: 1.4rem; }
+    </style>
+</head>
+<body>
+
+<div class="main-hub-container">
+    <div id="news-container">🗞️ Syncing News Feed...</div>
+</div>
+
+<script>
+    const newsJson = 'https://raw.githubusercontent.com/KFruti88/clay-county-news/main/news_data.json';
+    const mainNewsCenter = "https://supportmylocalcommunity.com/clay-county-news-center/";
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const filterTown = urlParams.get('town'); // Detects ?town=name
+    const isFullStory = urlParams.get('view') === 'full'; // Detects ?view=full
+
+    function getTownClass(town) {
+        const t = town ? town.toLowerCase() : 'general';
+        if (t.includes('flora')) return 'flora-card';
+        if (t.includes('louisville')) return 'louisville-card';
+        if (t.includes('clay city')) return 'claycity-card';
+        if (t.includes('xenia')) return 'xenia-card';
+        if (t.includes('sailor')) return 'sailor-card';
+        return 'general-card';
+    }
+
+    fetch(newsJson).then(res => res.json()).then(data => {
+        const container = document.getElementById('news-container');
+        container.innerHTML = '';
+
+        data.forEach(item => {
+            const itemTown = (item.town || 'general').toLowerCase();
+            
+            // LOGIC: Show if Master Page OR if town matches OR if it's General News
+            if (!filterTown || itemTown === filterTown || itemTown === 'general') {
+                const townClass = getTownClass(itemTown);
+                const bodyText = isFullStory ? item.full_story : (item.summary || item.full_story.substring(0, 150) + "...");
+
+                container.innerHTML += `
+                    <article class="glass-card ${townClass}" id="post-${item.id}">
+                        <div style="font-weight:bold; color:#666; margin-bottom:8px; font-family:sans-serif; font-size:0.8rem;">${item.date}</div>
+                        <h2>${item.title}</h2>
+                        <div style="font-family:Georgia; line-height:1.6; font-size:1.05rem;">${bodyText}</div>
+                        ${!isFullStory ? `<a href="${mainNewsCenter}?id=${item.id}#post-${item.id}" target="_parent" class="read-more-btn">Read Full Story</a>` : ''}
+                    </article>`;
+            }
+        });
+
+        // AUTO-SCROLL FOR BOOKMARKS
+        const scrollId = urlParams.get('id');
+        if (scrollId) {
+            setTimeout(() => {
+                const target = document.getElementById('post-' + scrollId);
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 500);
+        }
+    });
+</script>
+</body>
+</html>
