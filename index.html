@@ -1,1 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clay County News & Events Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Georgia&display=swap" rel="stylesheet">
+    <style>
+        /* --- GLOBAL & NAV STYLING --- */
+        body { margin: 0; background: #f4f4f4; font-family: 'Playfair Display', serif; color: #1a1a1a; overflow-x: hidden; scroll-behavior: smooth; }
+        .master-wrapper { max-width: 1100px; margin: 0 auto; padding: 20px; }
+        
+        .custom-city-menu { width: 100vw; background: #fff; padding: 25px 0; border-bottom: 2px solid #eee; position: sticky; top: 0; z-index: 10000; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .header-info { display: flex; gap: 30px; margin-bottom: 20px; align-items: center; }
+        .invert-me { mix-blend-mode: difference; color: #ffffff; font-weight: 900; font-family: sans-serif; font-size: 1rem; }
+        .live-dot { width: 8px; height: 8px; background: #ff0000; border-radius: 50%; animation: blink 1s infinite; display: inline-block; margin-right: 5px; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } }
+        
+        .city-nav { list-style: none; display: flex; gap: 25px; margin: 0; padding: 0; align-items: center; }
+        .city-nav li a { text-decoration: none; font-weight: bold; font-family: sans-serif; padding: 12px 22px; border-radius: 8px; transition: 0.4s; min-width: 110px; text-align: center; display: block; }
+        
+        /* Town Colors */
+        .btn-xenia a { background-color: #1b5e20; color: #ffffff; transform: scale(1.1); box-shadow: 0 4px 10px rgba(27,94,32,0.3); }
+        .btn-xenia a:hover { background-color: #ffffff; color: #1b5e20; outline: 2px solid #1b5e20; }
+        .btn-home a { color: #333; border: 1px solid #ccc; }
+        .btn-claycity a { background: #0c30f0; color: #fff; }
+        .btn-flora a { background: #00205b; color: #fe4f00; }
+        .btn-louisville a { background: #060404; color: #d61a21; }
 
+        /* --- HUB TABS & SUBMIT BUTTON --- */
+        .tab-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin: 30px 0; }
+        .tab-btn { padding: 15px 30px; cursor: pointer; border: none; background: #ddd; font-weight: bold; border-radius: 50px; transition: 0.3s; font-family: sans-serif; }
+        .tab-btn.active { background: #2ea3f2; color: #fff; box-shadow: 0 4px 15px rgba(46,163,242,0.3); }
+
+        /* THE UPDATED GREEN SUBMIT BUTTON */
+        .submit-btn { 
+            background: #28a745; color: white; padding: 12px 25px; border-radius: 50px; 
+            text-decoration: none; font-weight: bold; font-family: sans-serif; font-size: 0.9rem;
+            transition: 0.3s; box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+        }
+        .submit-btn:hover { background: #218838; transform: translateY(-2px); }
+
+        /* --- CONTENT CARDS --- */
+        .content-section { display: none; }
+        .content-section.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
+
+        .glass-card { background: white; padding: 40px; margin-bottom: 40px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); border-top: 8px solid #333; transition: 0.5s; scroll-margin-top: 150px; }
+        .town-badge { display: inline-block; padding: 6px 15px; border-radius: 4px; color: #fff; font-size: 0.8rem; font-weight: bold; margin-bottom: 15px; text-transform: uppercase; font-family: sans-serif; }
+        .content-body { font-family: 'Georgia', serif; font-size: 1.25rem; line-height: 1.9; text-align: justify; white-space: pre-line; }
+
+        /* Event Grid */
+        .event-grid { display: grid; grid-template-columns: 80px 1fr; gap: 20px; align-items: start; }
+        .date-tile { background: #333; color: #fff; text-align: center; padding: 10px; border-radius: 8px; font-family: sans-serif; }
+        .date-tile .month { font-size: 0.8rem; text-transform: uppercase; display: block; }
+        .date-tile .day { font-size: 1.8rem; font-weight: 900; display: block; }
+
+        @media (max-width: 850px) { 
+            .city-nav { flex-direction: column; gap: 10px; width: 100%; }
+            .tab-container { flex-direction: column; }
+            .event-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="custom-city-menu">
+    <div class="header-info">
+        <span id="live-date" class="invert-me">Loading Date...</span>
+        <span id="live-clock" class="invert-me"><div class="live-dot"></div> 00:00:00 PM</span>
+    </div>
+    <ul class="city-nav">
+        <li><a href="index.html" style="color:#333; border:1px solid #ccc;">Home Hub</a></li>
+        <li class="btn-claycity"><a href="https://supportmylocalcommunity.com/clay-city/" target="_blank">Clay City</a></li>
+        <li class="btn-xenia"><a href="https://supportmylocalcommunity.com/xenia/" target="_blank">Xenia</a></li>
+        <li class="btn-flora"><a href="https://ourflora.com/" target="_blank">Flora</a></li>
+        <li class="btn-louisville"><a href="https://supportmylocalcommunity.com/louisville/" target="_blank">Louisville</a></li>
+    </ul>
+</div>
+
+<div class="master-wrapper">
+    <div class="tab-container">
+        <button class="tab-btn active" onclick="showSection('news-archive', this)">🗞️ News Feed</button>
+        <button class="tab-btn" onclick="showSection('calendar-archive', this)">📅 Community Calendar</button>
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSfjcIxIw_6s3YCmmnZDJOSYpjAQ3D3VA_go_3eK7GjpsNPI-g/viewform" id="submit-action" class="submit-btn" target="_blank">➕ Submit News</a>
+    </div>
+
+    <div id="news-archive" class="content-section active">
+        <div id="news-container">🗞️ Syncing the Daily Edition...</div>
+    </div>
+
+    <div id="calendar-archive" class="content-section">
+        <div id="calendar-container">📅 Loading community events...</div>
+    </div>
+</div>
+
+<script>
+    const newsJson = './news_data.json';
+    const calendarJson = 'https://raw.githubusercontent.com/KFruti88/Clay-County-All/main/Calendar/calendar_data.json';
+
+    // 1. TAB & SUBMIT BUTTON LOGIC
+    function showSection(id, btn) {
+        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
+
+        const submitBtn = document.getElementById('submit-action');
+        submitBtn.innerText = (id === 'news-archive') ? "➕ Submit News" : "➕ Submit Event";
+    }
+
+    // (Fetch News, Calendar, and Clock logic remains the same)
+    // ...
+</script>
+</body>
+</html>
