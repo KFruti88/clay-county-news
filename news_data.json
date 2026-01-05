@@ -1,12 +1,401 @@
 [
     {
-        "id": "unique-story-id",
-        "title": "Headline of the News Story",
-        "summary": "A short preview of the article...",
-        "full_story": "The complete text of the news article, which may include HTML tags like <p> or <img>.",
-        "tags": ["Town Name"],
-        "source": "WNOI Radio or Freedom 92.9",
-        "link": "https://original-source-link.com",
+        "id": "cisne-clinic-reopens",
+        "title": "CISNE CLINIC REOPENS",
+        "summary": "1/2/26 Horizon Healthcare announced that the Cisne Clinic will reopen and resume full operations on Monday. The clinic was temporarily closed to allow for necessary facility maintenance and improvements to ensure a safe, comfortable, and welcoming en...",
+        "full_story": "1/2/26 Horizon Healthcare announced that the Cisne Clinic will reopen and resume full operations on Monday. The clinic was temporarily closed to allow for necessary facility maintenance and improvements to ensure a safe, comfortable, and welcoming environment for patients and staff. \u00a0During this time, the clinic underwent partial remodeling and updates, enhancing the space while meeting all appropriate safety and care standards. Horizon Healthcare remains committed to delivering accessible, high-quality care and is eager to welcome patients back to the Cisne Clinic beginning Monday. For additional information or to schedule an appointment, contact Horizon Healthcare at 618-842-4617.",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "WNOI Radio",
+        "link": "https://www.wnoi.com/cisne-clinic-reopens/",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "county-fair-queen-pageant",
+        "title": "COUNTY FAIR QUEEN PAGEANT",
+        "summary": "1/2/26 The 2026 Miss Illinois County Fair Queen Pageant will be held on Saturday, January 17 th and Sunday the 18 th in Springfield. \u00a0Clay County Fair Queen Olivia Haun will be honored at a sendoff party at the State Bank Suites Sunday from 1 to 3 pm...",
+        "full_story": "1/2/26 The 2026 Miss Illinois County Fair Queen Pageant will be held on Saturday, January 17 th and Sunday the 18 th in Springfield. \u00a0Clay County Fair Queen Olivia Haun will be honored at a sendoff party at the State Bank Suites Sunday from 1 to 3 pm. The pageant happens during the annual meeting and convention of the Illinois Association of Agricultural Fairs. \u00a0With former county fair queens taking part, the actual competition on Saturday will include Speech, Swimsuit, and Evening Gown Competitions and Pageant Finals on Sunday the 18 th . The sendoff will be a come and go event.\u00a0 Everyone is welcome to wish Olivia Good Luck as she heads off to represent Clay County. \u00a0T-shirt orders will also be ready for pickup at the party. Voting for this year\u2019s People\u2019s Choice award winner is now open.\u00a0 Through midnight January 17 th , use the link in this story to make your voice count and show support for Olivia by voting. \u00a0The cost is $1 per vote and you can vote as many times as you like.\u00a0 The People\u2019s Choice winner will be announced on stage and will earn a cash scholarship. \u00a0The winner will also get to donate $500 to a charity of their choice. Johnna Fulcher is the retiring Miss Illinois County Fair Queen. https://illinoiscountyfairs.org/peoples-choice/",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "WNOI Radio",
+        "link": "https://www.wnoi.com/county-fair-queen-pageant-4/",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "wayne-county-sheriffs-report",
+        "title": "WAYNE COUNTY SHERIFFS REPORT",
+        "summary": "1/2/26 Wednesday at approximately 4:30 pm Wayne County Sheriff\u2019s Deputies were called to a residence in Cisne on the report of a possible domestic disturbance. When the first Deputy arrived, they heard a female inside the residence screaming for help...",
+        "full_story": "1/2/26 Wednesday at approximately 4:30 pm Wayne County Sheriff\u2019s Deputies were called to a residence in Cisne on the report of a possible domestic disturbance. When the first Deputy arrived, they heard a female inside the residence screaming for help.\u00a0 The door to the residence was locked so the Deputy forced entry and located a female with blood on her face and shirt.\u00a0 The victim stated the suspect Robert J. Irvin, 50, of Cisne, had fled out the back door of the residence as the Deputy was making entry.\u00a0 Prior to this Irvin is accused of striking the victim numerous times with a telephone.\u00a0 A second Deputy arrived on scene and began searching for Irvin.\u00a0 Irvin was located walking down the street and taken into custody and transported to the Wayne County Jail. Irvin faces preliminary charges of aggravated domestic battery and interfering with the reporting of domestic battery. On Monday Wayne County Sheriff\u2019s Office conducted an investigation into Jesus N. B. Guzman, 32, of Fairfield. The investigation showed that Guzman, who was on pretrial release for numerous charges including Grooming a juvenile, was in physical contact with the alleged victim in the case.\u00a0 At the conclusion of the investigation Guzman was located at a residence in Geff, and taken into custody for violation of pretrial conditions.",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "WNOI Radio",
+        "link": "https://www.wnoi.com/wayne-county-sheriffs-report/",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "ho-ho-holiday-highlight-contest",
+        "title": "HO HO HOLIDAY HIGHLIGHT CONTEST",
+        "summary": "1/2/26 Ho Ho Holiday Highlight entries are now due.\u00a0 Each day in December a different business was featured, listeners were asked to keep track of those business\u2019s then send us your list of all 31 highlighted business\u2019s. Your completed contest entry ...",
+        "full_story": "1/2/26 Ho Ho Holiday Highlight entries are now due.\u00a0 Each day in December a different business was featured, listeners were asked to keep track of those business\u2019s then send us your list of all 31 highlighted business\u2019s. Your completed contest entry list can be mailed to P.O. Box 368 in Flora, emailed to [email\u00a0protected] , faxed to 618-662-2407 or hand delivered to WNOI Studios at 1001 North Olive Road in Flora.\u00a0 Please include your name, address & phone number.\u00a0 Entries must be received at WNOI by close of business (4pm) on Monday. Three winners will be drawn from all correct entries during The Revue Show at 2pm on Wednesday, January 7 th .\u00a0 1 st Prize is a $300 Shopping Spree, 2 nd Prize is a $150 Shopping Spree and 3 rd Prize is a $75 Shopping Spree.\u00a0 Winners will have three days to determine which one business sponsor they will redeem their prize at.",
+        "tags": [
+            "Flora"
+        ],
+        "source": "WNOI Radio",
+        "link": "https://www.wnoi.com/ho-ho-holiday-highlight-contest-3/",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "peak-scholarship",
+        "title": "PEAK SCHOLARSHIP",
+        "summary": "1/2/26 Frontier Community College and Olney Central College are pleased to announce the Kenton Peak Scholarship, a $1,000 annual award supporting students pursuing para-medical fields, emergency medical response, and other healthcare-related programs...",
+        "full_story": "1/2/26 Frontier Community College and Olney Central College are pleased to announce the Kenton Peak Scholarship, a $1,000 annual award supporting students pursuing para-medical fields, emergency medical response, and other healthcare-related programs. The Kenton Peak Scholarship can be awarded to either an incoming freshman or a returning sophomore. \u00a0Funds may be used for tuition, textbooks, fees, and other program-related expenses, helping students prepare for vital roles as future first responders and healthcare providers. To be eligible, applicants must, be enrolled in a para-medical, EM responder, or healthcare program at FCC or OCC, maintain a minimum 2.5 GPA, take an active role in emergency preparedness, and plan to serve as an EMT or healthcare provider after graduation. The application deadline for the Kenton Peak Scholarship is February 27 th . For more information or to apply, visit https://iecc.edu/fcc/admissions-aid/scholarships or contact FCC or OCC Student Services.",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "WNOI Radio",
+        "link": "https://www.wnoi.com/peak-scholarship-3/",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "grocery-tax-gone",
+        "title": "GROCERY TAX GONE?",
+        "summary": "1/2/26 Illinois\u2019 statewide 1% grocery tax went away yesterday, although many people continue to pay it at the local level. Data compiled by the Illinois Municipal League shows that 656 municipalities, a little more than half of the state\u2019s municipali...",
+        "full_story": "1/2/26 Illinois\u2019 statewide 1% grocery tax went away yesterday, although many people continue to pay it at the local level. Data compiled by the Illinois Municipal League shows that 656 municipalities, a little more than half of the state\u2019s municipalities, have passed an ordinance establishing their own grocery tax. \u00a0Those communities are home to 7.2 million people, or 56.5% of the state\u2019s population. \u00a0Three counties, Washington, Wabash and Moultrie have also approved countywide grocery taxes.\u00a0 In Clay County, Flora, Louisville and Clay City have all passed a 1% grocery tax. Governor JB Pritzker signed a bill in 2024 eliminating the 1% statewide grocery tax, which he touted as a measure to ease residents\u2019 tax burden. \u00a0But because the revenue from the state grocery tax went to municipal governments, rather than state coffers, the measure allowed local governments to levy their own 1% tax via ordinance, rather than a referendum to voters.",
+        "tags": [
+            "Flora",
+            "Louisville",
+            "Clay City"
+        ],
+        "source": "WNOI Radio",
+        "link": "https://www.wnoi.com/grocery-tax-gone/",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "gingerbread-house-display",
+        "title": "GINGERBREAD HOUSE DISPLAY",
+        "summary": "1/2/26 Time is running out to vote for your favorite Flora High School Foods Class Gingerbread house. \u00a0Displays are at the Flora Public Library through Tuesday.\u00a0 The students were asked to make houses from children\u2019s books. There are 30 different hou...",
+        "full_story": "1/2/26 Time is running out to vote for your favorite Flora High School Foods Class Gingerbread house. \u00a0Displays are at the Flora Public Library through Tuesday.\u00a0 The students were asked to make houses from children\u2019s books. There are 30 different houses, and the public is encouraged to go into the library and vote for their favorite creation. \u00a0Simply write the number of your favorite house on your ballot and place it in the box. \u00a0After January 6 th the 1 st , 2 nd and 3 rd prize winners will be named.",
+        "tags": [
+            "Flora"
+        ],
+        "source": "WNOI Radio",
+        "link": "https://www.wnoi.com/gingerbread-house-display-6/",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "rural-healthcare-award",
+        "title": "RURAL HEALTHCARE AWARD",
+        "summary": "1/2/26 Illinois has been awarded $193,418,216 per year for five years through the $50 billion federal Rural Healthcare Transformation Program (RHTP) fund, which will be utilized to expand equitable access to healthcare and to eliminate barriers to ca...",
+        "full_story": "1/2/26 Illinois has been awarded $193,418,216 per year for five years through the $50 billion federal Rural Healthcare Transformation Program (RHTP) fund, which will be utilized to expand equitable access to healthcare and to eliminate barriers to care that many residents of rural communities face. \u00a0All 50 states applied for the RHTP funding, and a total of $10 billion will be available each year over five years, beginning in fiscal year 2026. While this funding will provide support to improve healthcare access in rural Illinois communities, it will be far from enough to counteract the cuts imposed to the Medicaid program through various provisions in the Trump Administration\u2019s budget bill. \u00a0According to an estimate from KFF, the Trump Administration\u2019s budget bill is expected to cut $137 billion from rural healthcare providers nationally, nearly three times the $50 billion allocated in the fund. The Illinois Department of Healthcare and Family Services (HFS), in strategic partnership with its sister agencies and interested parties, utilized the federal Centers for Medicare & Medicaid\u2019s (CMS) five strategic goals from the RHTP Notice of Funding Opportunity (NOFO), to develop a comprehensive plan to strengthen Illinois\u2019 rural healthcare system for the future. \u00a0The plan outlines a vision built on three key categories of initiatives designed to incentivize health system transformation and create regional partnerships, increase the use of technology and mobile health services, and expand the rural healthcare workforce within the state. Roughly 1.9 million people, or 15% of Illinois\u2019 population, live in rural areas of the state. \u00a0RHTP funding will be directed to entities that serve these individuals in rural census tracts across Illinois. \u00a0Eighty-five counties, or more than two thirds of the counties in the state, include these types of census tracts as designated by the federal Health Resources and Services Administration (HRSA). \u00a0Within this framework, particular attention will be paid to sub-populations, such as individuals living with chronic disease and those with mental health conditions. HFS will continue engaging with stakeholders on next steps regarding funding distribution. \u00a0Staff planning and implementation are underway in partnership with other state agencies as well as with federal CMS.",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "WNOI Radio",
+        "link": "https://www.wnoi.com/rural-healthcare-award/",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "farm-payments-announced",
+        "title": "FARM PAYMENTS ANNOUNCED",
+        "summary": "1/2/26 Farmers are now learning how much aid they can expect to receive from a $12 billion package that President Donald Trump announced earlier this month. The US Department of Agriculture released the figures on Wednesday for how much aid per acre ...",
+        "full_story": "1/2/26 Farmers are now learning how much aid they can expect to receive from a $12 billion package that President Donald Trump announced earlier this month. The US Department of Agriculture released the figures on Wednesday for how much aid per acre farmers can plan on for each row crop. \u00a0The details arrived after most farmers had already met with their bankers to arrange financing for next year\u2019s crops and placed orders for the seed and fertilizer they would need. \u00a0But officials have promised that the payments should arrive by the end of February. Soybean farmers have been hit especially hard by Trump\u2019s trade war with China, which stopped buying any American crops after Trump announced his tariffs this spring. \u00a0China is the world\u2019s largest buyer of soybeans. This aid package is expected to help farmers weather the trade disruptions until China buys more soybeans under an agreement announced in October and until provisions of Trump\u2019s massive budget bill take effect later this year. Soybean farmers will get $30.88 per acre while corn farmers will receive $44.36 per acre. \u00a0Another crop hit hard when China stopped buying was sorghum, and those farmers will get $48.11 per acre. \u00a0The amounts are based on a USDA formula on the cost of production. But farmers say the aid won\u2019t solve all their problems as they continue to deal with the soaring costs of fertilizer, seeds and labor that make it hard to turn a profit right now. \u00a0Some agricultural trade groups have said they worry that thousands of farmers could go out of business, but others have said they believe most farmers have the financial resources and equity needed to survive. Kentucky soybean farmer Caleb Ragland, who was president of the American Soybean Association until recently, said the aid is \u201ca Band-Aid on a deep wound. We need competition and opportunities in the market to make our future brighter.\u201d The President of the National Corn Growers Association Jed Bower also urged the Trump administration to focus on cultivating additional uses for their crops. \u00a0Farmers will benefit from having more buyers whether it is for ethanol and animal feed at home or for international markets. \u201cCorn growers have been sounding the alarm about the fact that farmers have been faced with multiple consecutive years of low corn prices and high input costs,\u201d Bower said. \u00a0\u201cWhile this financial assistance is helpful and welcomed, we urgently need the administration and Congress to develop markets in the United States and abroad that will provide growers with more long-term economic certainty.\u201d Agriculture Secretary Brooke Rollins said that is the goal and promised to continue working to open new markets while strengthening the safety net for farmers. Minnesota Soybean Growers Association President Darin Johnson said the aid number for soybeans fell short of what farmers had been hoping for, so more help could be needed, though this package will help. Most farmers remain steadfast supporters of Trump even after the disruptions caused by the trade war. \u00a0They generally support many of his other policies and believe they will get a better trade deal in the end. These aid payments will add up to $11 billion for row crop farmers who raise corn, soybeans, wheat, sorghum and other crops. \u00a0Another $1 billion has been set aside for specialty crops and sugar, but the administration hasn\u2019t released any details of aid for those crops. The aid payments will be capped at $155,000 per farmer or entity, and only farms that make less than $900,000 in adjusted gross income will be eligible. The USDA says the average size of the 1.88 million farms nationwide was 466 acres last year. \u00a0Still, many farmers are much larger than that as larger operations have continued to buy up neighboring farms over time.",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "WNOI Radio",
+        "link": "https://www.wnoi.com/farm-payments-announced/",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "the-revue",
+        "title": "The ReVue",
+        "summary": "12/31/25 Today on the ReVue I talk with the musical group the BurmaShavers, Steve Folwler and Jerry Wilson about their music. Burma Shavers.wav Booking information is available at [email\u00a0protected]...",
+        "full_story": "12/31/25 Today on the ReVue I talk with the musical group the BurmaShavers, Steve Folwler and Jerry Wilson about their music. Burma Shavers.wav Booking information is available at [email\u00a0protected]",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "WNOI Radio",
+        "link": "https://www.wnoi.com/the-revue-9/",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "upcoming-freshmen-orientation-in-olney",
+        "title": "UPCOMING FRESHMEN ORIENTATION IN OLNEY",
+        "summary": "<p><img width=\"1281\" height=\"819\" src=\"https://freedom929.com/wp-content/uploads/sites/30/RICHLAND_COUNTY_SCHOOL_Graphic.jpg\" class=\"attachment-post-thumbnail size-post-thumbnail wp-post-image\" alt=\"\" decoding=\"async\" srcset=\"https://freedom929.com/w...",
+        "full_story": "<p><img width=\"1281\" height=\"819\" src=\"https://freedom929.com/wp-content/uploads/sites/30/RICHLAND_COUNTY_SCHOOL_Graphic.jpg\" class=\"attachment-post-thumbnail size-post-thumbnail wp-post-image\" alt=\"\" decoding=\"async\" srcset=\"https://freedom929.com/wp-content/uploads/sites/30/RICHLAND_COUNTY_SCHOOL_Graphic.jpg 1281w, https://freedom929.com/wp-content/uploads/sites/30/RICHLAND_COUNTY_SCHOOL_Graphic-300x192.jpg 300w, https://freedom929.com/wp-content/uploads/sites/30/RICHLAND_COUNTY_SCHOOL_Graphic-150x96.jpg 150w, https://freedom929.com/wp-content/uploads/sites/30/RICHLAND_COUNTY_SCHOOL_Graphic-768x491.jpg 768w\" sizes=\"(max-width: 1281px) 100vw, 1281px\" /></p><!-- wp:paragraph -->\n<p>(OLNEY) With the Richland County schools to resume classes and activities next week, it\u2019s been announced that Richland County High School will host its Freshmen Orientation for all 8th graders of Richland County on Wednesday evening, January 14th, from 5:30 to 7:00. Following a brief presentation, students and their guests will tour the High School. Refreshments will be provided and RSVP\u2019s are not required. If questions, call the Student Services Office at Richland County High School at 618-393-2191, next week. All 8th graders and guests are urged to attend.</p>\n<!-- /wp:paragraph -->",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "Freedom 92.9",
+        "link": "https://freedom929.com/upcoming-freshmen-orientation-in-olney/",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "sign-up-now-for-upcoming-conference",
+        "title": "SIGN UP NOW FOR UPCOMING CONFERENCE",
+        "summary": "<p><img width=\"1281\" height=\"819\" src=\"https://freedom929.com/wp-content/uploads/sites/30/AGRICULTURE_UPDATE_Graphic-1.jpg\" class=\"attachment-post-thumbnail size-post-thumbnail wp-post-image\" alt=\"\" decoding=\"async\" srcset=\"https://freedom929.com/wp-...",
+        "full_story": "<p><img width=\"1281\" height=\"819\" src=\"https://freedom929.com/wp-content/uploads/sites/30/AGRICULTURE_UPDATE_Graphic-1.jpg\" class=\"attachment-post-thumbnail size-post-thumbnail wp-post-image\" alt=\"\" decoding=\"async\" srcset=\"https://freedom929.com/wp-content/uploads/sites/30/AGRICULTURE_UPDATE_Graphic-1.jpg 1281w, https://freedom929.com/wp-content/uploads/sites/30/AGRICULTURE_UPDATE_Graphic-1-300x192.jpg 300w, https://freedom929.com/wp-content/uploads/sites/30/AGRICULTURE_UPDATE_Graphic-1-150x96.jpg 150w, https://freedom929.com/wp-content/uploads/sites/30/AGRICULTURE_UPDATE_Graphic-1-768x491.jpg 768w\" sizes=\"(max-width: 1281px) 100vw, 1281px\" /></p><!-- wp:paragraph -->\n<p>(SPRINGFIELD) Registration is now open for the Fourth Annual From Food to Flowers : Everything Local Conference, scheduled for January 28th thru 30th, at the Bank of Springfield Center. The three day event combines the Illinois Specialty Crop Conference and the Local Food and Farmers Market Conference, a collaborative effort among producers and agribusiness leaders to enhance local food systems, hosted in part by Farm Bureau. Featured will be exhibitors, free consultations, breakout sessions, various meetings, and more. Those interested can register by January 16th, two weeks from today, for a discounted registration rate. For more details or to register, visit the ILFB website, at ilfb.org/get-involved/evens/everything-local-conference.</p>\n<!-- /wp:paragraph -->",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "Freedom 92.9",
+        "link": "https://freedom929.com/sign-up-now-for-upcoming-conference/",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "news-from-around-illinois",
+        "title": "NEWS FROM AROUND ILLINOIS",
+        "summary": "<p><img width=\"1281\" height=\"819\" src=\"https://freedom929.com/wp-content/uploads/sites/30/State-News.jpeg\" class=\"attachment-post-thumbnail size-post-thumbnail wp-post-image\" alt=\"\" decoding=\"async\" srcset=\"https://freedom929.com/wp-content/uploads/s...",
+        "full_story": "<p><img width=\"1281\" height=\"819\" src=\"https://freedom929.com/wp-content/uploads/sites/30/State-News.jpeg\" class=\"attachment-post-thumbnail size-post-thumbnail wp-post-image\" alt=\"\" decoding=\"async\" srcset=\"https://freedom929.com/wp-content/uploads/sites/30/State-News.jpeg 1281w, https://freedom929.com/wp-content/uploads/sites/30/State-News-300x192.jpeg 300w, https://freedom929.com/wp-content/uploads/sites/30/State-News-150x96.jpeg 150w, https://freedom929.com/wp-content/uploads/sites/30/State-News-768x491.jpeg 768w\" sizes=\"(max-width: 1281px) 100vw, 1281px\" /></p><!-- wp:paragraph -->\n<p>(SPRINGFIELD) One of the nearly 300 new laws that took effect yesterday in Illinois is a ban on compact fluorescent light bulbs. While the law prohibits the sale and distribution of screw-base and bayonet-base compact fluorescent lamps, restrictions on pin-base compact fluorescent and linear fluorescent lamps are set to begin next year, in 2027. Democratic sponsors of the new law say that toxic pollutants in fluorescent bulbs are the problem, posing a health risk to all ages.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>(SPRINGFIELD) Another new law that began yesterday will let statewide veterinarians renew yearly medical exemptions for pets that are too sick to receive rabies shots, a change that many supporters call \u201ccommon sense.\u201d While the Illinois State Veterinary Medical Association says the law finally brings needed clarity to state rules, which allows veterinarians the sole ability to exempt an animal from rabies vaccination if it would compromise the particular animal\u2019s health, although the percentage of animals affected is very low, plus the risk to the public is zero.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>(SPRINGFIELD) Illinois Community Colleges have announced that its second annual \u201cFeed the Need\u201d Campus Food Drive, which started in 2024 to help combat food insecurity on junior college campuses and support students in need, collected nearly 180,000 non-perishable food items for local campus and community food banks, dwarfing last year\u2019s collection of nearly 91,000 food items. Most all of the 45 junior colleges in 39 community college districts, including those in the Illinois Eastern Community College District, took part in the statewide initiative.</p>\n<!-- /wp:paragraph -->",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "Freedom 92.9",
+        "link": "https://freedom929.com/news-from-around-illinois-95/",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "regional-weather-outlook",
+        "title": "REGIONAL WEATHER OUTLOOK",
+        "summary": "<p><img width=\"1281\" height=\"819\" src=\"https://freedom929.com/wp-content/uploads/sites/30/FRIDAY_WeatherUpdate_Graphic.jpg\" class=\"attachment-post-thumbnail size-post-thumbnail wp-post-image\" alt=\"\" decoding=\"async\" srcset=\"https://freedom929.com/wp-...",
+        "full_story": "<p><img width=\"1281\" height=\"819\" src=\"https://freedom929.com/wp-content/uploads/sites/30/FRIDAY_WeatherUpdate_Graphic.jpg\" class=\"attachment-post-thumbnail size-post-thumbnail wp-post-image\" alt=\"\" decoding=\"async\" srcset=\"https://freedom929.com/wp-content/uploads/sites/30//FRIDAY_WeatherUpdate_Graphic.jpg 1281w, https://freedom929.com/wp-content/uploads/sites/30//FRIDAY_WeatherUpdate_Graphic-300x192.jpg 300w, https://freedom929.com/wp-content/uploads/sites/30//FRIDAY_WeatherUpdate_Graphic-150x96.jpg 150w, https://freedom929.com/wp-content/uploads/sites/30//FRIDAY_WeatherUpdate_Graphic-768x491.jpg 768w\" sizes=\"(max-width: 1281px) 100vw, 1281px\" /></p><!-- wp:paragraph -->\n<p>(OLNEY/NEWTON) With a high pressure ridge hanging over the Midwest, we\u2019ll stay dry with plenty of clouds and maybe some sunshine on this Friday, and after a seasonably cool weekend, our downstate area temperatures will rise and average 10 to 15 degrees above normal most of the work week, next week. At this point in time, our next significant chance of precipitation in the next week will be in the form of rain next Thursday into Friday. Stay tuned for weather updates and monitor a NOAA Weather Alert Radio for more weather information and forecast details.</p>\n<!-- /wp:paragraph -->",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "Freedom 92.9",
+        "link": "https://freedom929.com/regional-weather-outlook-102/",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "local-municipal-meetings-next-week",
+        "title": "LOCAL MUNICIPAL MEETINGS NEXT WEEK",
+        "summary": "<p><img width=\"1281\" height=\"819\" src=\"https://freedom929.com/wp-content/uploads/sites/30/NEWS_UPDATE_Graphic.jpg\" class=\"attachment-post-thumbnail size-post-thumbnail wp-post-image\" alt=\"\" decoding=\"async\" srcset=\"https://freedom929.com/wp-content/u...",
+        "full_story": "<p><img width=\"1281\" height=\"819\" src=\"https://freedom929.com/wp-content/uploads/sites/30/NEWS_UPDATE_Graphic.jpg\" class=\"attachment-post-thumbnail size-post-thumbnail wp-post-image\" alt=\"\" decoding=\"async\" srcset=\"https://freedom929.com/wp-content/uploads/sites/30/NEWS_UPDATE_Graphic.jpg 1281w, https://freedom929.com/wp-content/uploads/sites/30/NEWS_UPDATE_Graphic-300x192.jpg 300w, https://freedom929.com/wp-content/uploads/sites/30/NEWS_UPDATE_Graphic-150x96.jpg 150w, https://freedom929.com/wp-content/uploads/sites/30/NEWS_UPDATE_Graphic-768x491.jpg 768w\" sizes=\"(max-width: 1281px) 100vw, 1281px\" /></p><!-- wp:paragraph -->\n<p>(NEWTON/OLNEY) There are two municipal meetings coming up next week :</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>The City of Olney Plan Commission will meet this coming Monday night, January 5th, at Olney City Hall, starting at 7:30 \u2013 the only agenda item is a public hearing with discussion and a possible vote on the rezoning request of 4751 East Radio Tower Lane from a Light Industrial District (M-1) to a Single-Family Residence District (R-1)</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>The Newton City Council will have a regularly scheduled meeting next Tuesday night, January 6th, at the Newton City Hall, beginning at 6:00 \u2013 the Council\u2019s Finance &amp; Audit Committee meets a half hour earlier at 5:30, also at the Newton City Hall</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>All the meetings are open to the public, with the exception of any executive sessions.</p>\n<!-- /wp:paragraph -->",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "Freedom 92.9",
+        "link": "https://freedom929.com/local-municipal-meetings-next-week/",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "olney-central-college-nursing-program",
+        "title": "OLNEY CENTRAL COLLEGE / NURSING PROGRAM",
+        "summary": "<p><img width=\"1281\" height=\"819\" src=\"https://freedom929.com/wp-content/uploads/sites/30/Olney-Central-College-2.png\" class=\"attachment-post-thumbnail size-post-thumbnail wp-post-image\" alt=\"\" decoding=\"async\" srcset=\"https://freedom929.com/wp-conte...",
+        "full_story": "<p><img width=\"1281\" height=\"819\" src=\"https://freedom929.com/wp-content/uploads/sites/30/Olney-Central-College-2.png\" class=\"attachment-post-thumbnail size-post-thumbnail wp-post-image\" alt=\"\" decoding=\"async\" srcset=\"https://freedom929.com/wp-content/uploads/sites/30/Olney-Central-College-2.png 1281w, https://freedom929.com/wp-content/uploads/sites/30/Olney-Central-College-2-300x192.png 300w, https://freedom929.com/wp-content/uploads/sites/30/Olney-Central-College-2-150x96.png 150w, https://freedom929.com/wp-content/uploads/sites/30/Olney-Central-College-2-768x491.png 768w\" sizes=\"(max-width: 1281px) 100vw, 1281px\" /></p><!-- wp:paragraph -->\n<p>(OLNEY) The next one hour meeting for students interested in applying for Fall 2026 admission to the Associate Degree Nursing Program at OCC is later this month in Wattleworth Hall Room 213, plus there will be two more virtual sessions, one this month and another in February. To make an application to the OCC nursing program or for a meeting appointment, call Julie at 618-847-9201, extension 4520, next week, when the Olney Central College offices reopen.</p>\n<!-- /wp:paragraph -->",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "Freedom 92.9",
+        "link": "https://freedom929.com/olney-central-college-nursing-program/",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "harvested-deer-can-help-those-in-need",
+        "title": "HARVESTED DEER CAN HELP THOSE IN NEED",
+        "summary": "<p><img width=\"1281\" height=\"819\" src=\"https://freedom929.com/wp-content/uploads/sites/30/HUNTING_Graphic.jpg\" class=\"attachment-post-thumbnail size-post-thumbnail wp-post-image\" alt=\"\" decoding=\"async\" srcset=\"https://freedom929.com/wp-content/uploa...",
+        "full_story": "<p><img width=\"1281\" height=\"819\" src=\"https://freedom929.com/wp-content/uploads/sites/30/HUNTING_Graphic.jpg\" class=\"attachment-post-thumbnail size-post-thumbnail wp-post-image\" alt=\"\" decoding=\"async\" srcset=\"https://freedom929.com/wp-content/uploads/sites/30//HUNTING_Graphic.jpg 1281w, https://freedom929.com/wp-content/uploads/sites/30//HUNTING_Graphic-300x192.jpg 300w, https://freedom929.com/wp-content/uploads/sites/30//HUNTING_Graphic-150x96.jpg 150w, https://freedom929.com/wp-content/uploads/sites/30//HUNTING_Graphic-768x491.jpg 768w\" sizes=\"(max-width: 1281px) 100vw, 1281px\" /></p><!-- wp:paragraph -->\n<p>(NEWTON/OLNEY) Area deer hunters are encouraged to\u00a0help out\u00a0this year\u2019s Hunters Feeding Illinois program\u00a0whereas\u00a0harvested deer are donated to\u00a0participating\u00a0meat processors, who in turn provide venison meat to statewide food pantries to help families in need.\u00a0Hunters in Clay, Richland, Jasper, Lawrence, Edwards, Wayne, and most of the surrounding counties are urged to help out.\u00a0As\u00a0hunter\u00a0donate their harvested deer, the\u00a0freshly\u00a0ground venison will be provided to local food\u00a0pantries, but\u00a0only based on the\u00a0amount\u00a0of harvested deer donated.\u00a0Others in the area can also help out with monetary donations for the meat processing cost.\u00a0For each $50 donated, the Feeding Illinois program matches that\u00a0to pay\u00a0for the $100 processing fee. To see how folks and/or hunters can help out, go to the\u00a0go.illinois.edu/HuntersFeedingIllinois\u00a0website. The first four days of the Late Winter Firearm Season\u00a0is\u00a0tomorrow through Sunday, but only for thirty counties around the state, including Jasper, Crawford, Coles, Effingham, Fayette, Clay, Marion, Jefferson, and Hamilton. The final three days of the season will be January 16th \u201318th.\u00a0</p>\n<!-- /wp:paragraph -->",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "Freedom 92.9",
+        "link": "https://freedom929.com/harvested-deer-can-help-those-in-need/",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "upcoming-activities",
+        "title": "UPCOMING ACTIVITIES",
+        "summary": "<p><img width=\"1281\" height=\"819\" src=\"https://freedom929.com/wp-content/uploads/sites/30/LOCAL_EVENT_Graphic-1.jpg\" class=\"attachment-post-thumbnail size-post-thumbnail wp-post-image\" alt=\"\" decoding=\"async\" srcset=\"https://freedom929.com/wp-content...",
+        "full_story": "<p><img width=\"1281\" height=\"819\" src=\"https://freedom929.com/wp-content/uploads/sites/30/LOCAL_EVENT_Graphic-1.jpg\" class=\"attachment-post-thumbnail size-post-thumbnail wp-post-image\" alt=\"\" decoding=\"async\" srcset=\"https://freedom929.com/wp-content/uploads/sites/30/LOCAL_EVENT_Graphic-1.jpg 1281w, https://freedom929.com/wp-content/uploads/sites/30/LOCAL_EVENT_Graphic-1-300x192.jpg 300w, https://freedom929.com/wp-content/uploads/sites/30/LOCAL_EVENT_Graphic-1-150x96.jpg 150w, https://freedom929.com/wp-content/uploads/sites/30/LOCAL_EVENT_Graphic-1-768x491.jpg 768w\" sizes=\"(max-width: 1281px) 100vw, 1281px\" /></p><!-- wp:paragraph -->\n<p>(OLNEY) The Richland County Soil &amp; Water Conservation District has announced its Annual Meeting is coming up on Thursday night, January 22nd, 2026, at the Best Western Parkside Event Center in Olney. With the doors to open that evening at 5:30 with registration, the catered meal will be served at 6:00, followed by the annual business meeting at 7:00, and guest speaker Holly Spangler. The $10.00 tickets can be purchased from any of the SWCD Directors, at the SWCD District Office along South Route 130, or by calling the District Office and reserving tickets at 618-392-7141. There will be no ticket sales made after Friday, January 16th, 2026.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>(OLNEY) The next Queen of Hearts drawing at the Olney VFW Post is this coming Sunday afternoon at 4:00, with tickets on sale all this week, up until about 3:55 on Sunday. This week\u2019s jackpot should be over $11,000 to the winner, if they are present. Open to the public, the Queen of Hearts ticket sales goes to support the VFW Post along with local Veterans and their families.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>(BIBLE GROVE) It\u2019s the next scheduled Gym Bob\u2019s Jamboree Show this weekend up in Bible Grove, in northern Clay County, with the doors opening at 12:00 noon this Sunday and showtime at 1:00. Hosted by Mike Porter, Marsha Banning, and Gym Bob\u2019s Jamboree Band, this month\u2019s special will feature another \u201c50\u2019s &amp; 60\u2019s Show.\u201d While not necessary, reservations can be made by calling 618-665-3956. With tickets on sale at the door, go to GymBobs.com for more details.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>(SAILOR SPRINGS) The Clay City/Sailor Springs American Legion Post 230 will have another first Saturday of the month breakfast this weekend with serving from 7:00 to 10:00, featuring pancakes, sausage, biscuits, gravy, and drinks, all for a donation at the door, plus carry outs are available. All ages are welcome to enjoy a great breakfast and support the local Veterans. That\u2019s just off the Clay City / Dieterich Blacktop in Sailor Springs this coming Saturday morning.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>(OLNEY) The Olney VFW is hosting a \u201cDrive-By Birthday Celebration\u201d tomorrow, on January 1st, 2026, for World War II Veteran, Robert \u201cBob\u201d Sayre, who\u2019ll be turning 102 years old. Those who\u2019d like to take part should gather at the VFW on North Walnut Street by 1:45 as the Birthday Celebration convoy is scheduled to leave the VFW at 1:50. All are invited to take part.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>(OLNEY) Tonight is the final night to visit the Christmas Lights Display in the Olney City Park, lit up at dusk on this New Year\u2019s Eve. Monetary donations are accepted by the Bucket Brigade at the end of the display with all the money to assist with display expenses and repairs.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>(NEWTON) Only a few more nights remain to visit the Christmas Lights Display in Newton\u2019s Peterson Park, open each night from 5:00 to 10:00 through this Sunday night, January 4th.</p>\n<!-- /wp:paragraph -->",
+        "tags": [
+            "Clay City",
+            "Sailor Springs"
+        ],
+        "source": "Freedom 92.9",
+        "link": "https://freedom929.com/upcoming-activities/",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "herrin-traffic-stop-leads-to-meth-arrest",
+        "title": "Herrin traffic stop leads to meth arrest",
+        "summary": "WILLIAMSON COUNTY, Ill. (WSIL) -- Williamson County Sheriff's Deputies pulled over a vehicle in Herrin early on December 26, 2025, leading to a drug-related arrest....",
+        "full_story": "WILLIAMSON COUNTY, Ill. (WSIL) -- Williamson County Sheriff's Deputies pulled over a vehicle in Herrin early on December 26, 2025, leading to a drug-related arrest.",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "WSIL TV 3",
+        "link": "https://www.wsiltv.com/news/crime/herrin-traffic-stop-leads-to-meth-arrest/article_1cb3797c-dac9-4679-b737-77189a21e3af.html",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "significant-warm-up-ahead-with-widespread-rain-pos",
+        "title": "Significant Warm-Up Ahead, With Widespread Rain Possible Late Week",
+        "summary": "As we move into Monday and Tuesday, a substantial warm-up begins. We're forecasting sunny skies on Monday with a high near 56, followed by intervals of clouds and sunshine on Tuesday with highs reaching a pleasant 62 degrees....",
+        "full_story": "As we move into Monday and Tuesday, a substantial warm-up begins. We're forecasting sunny skies on Monday with a high near 56, followed by intervals of clouds and sunshine on Tuesday with highs reaching a pleasant 62 degrees.",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "WSIL TV 3",
+        "link": "https://www.wsiltv.com/weather/forecast/significant-warm-up-ahead-with-widespread-rain-possible-late-week/article_760a84d0-b2b6-531c-b246-e70083a24b9f.html",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "one-dead-in-pope-county-crash",
+        "title": "One dead in Pope County crash",
+        "summary": "POPE COUNTY, Ill. (WSIL) -- According to Pope County Sheriff Jerry Suits, on January 2, at 11:56 p.m., they received a 911 call from a truck driver passing by which reported a vehicle crash....",
+        "full_story": "POPE COUNTY, Ill. (WSIL) -- According to Pope County Sheriff Jerry Suits, on January 2, at 11:56 p.m., they received a 911 call from a truck driver passing by which reported a vehicle crash.",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "WSIL TV 3",
+        "link": "https://www.wsiltv.com/news/illinois/one-dead-in-pope-county-crash/article_fcd364dd-9c61-4ce1-8fd3-1070f917fa47.html",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "marble-hill-hosts-2026-bollinger-county-quilt-show",
+        "title": "Marble Hill hosts 2026 Bollinger County Quilt Show",
+        "summary": "MARBLE HILL, Mo. (WSIL) -- The 2026 Bollinger County Quilt Show is set to take place on Saturday, February 7, and Sunday, February 8, at the Mayfield Event Center. The event promises to showcase a range of stunning quilts, from\u2026...",
+        "full_story": "MARBLE HILL, Mo. (WSIL) -- The 2026 Bollinger County Quilt Show is set to take place on Saturday, February 7, and Sunday, February 8, at the Mayfield Event Center. The event promises to showcase a range of stunning quilts, from\u2026",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "WSIL TV 3",
+        "link": "https://www.wsiltv.com/news/missouri/marble-hill-hosts-2026-bollinger-county-quilt-show/article_a1700042-5221-46e0-9e46-8b7db17a469a.html",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "teenagers-as-young-as-14-and-15-among-victims-of-s",
+        "title": "Teenagers as young as 14 and 15 among victims of Swiss bar fire, raising questions about ID checks",
+        "summary": "(CNN) \u2014 Teenagers as young as 14 and 15 were among the victims of the deadly fire at a ski resort bar in Crans-Montana, Switzerland, police said Sunday, raising questions about whether sufficient age checks were in place....",
+        "full_story": "(CNN) \u2014 Teenagers as young as 14 and 15 were among the victims of the deadly fire at a ski resort bar in Crans-Montana, Switzerland, police said Sunday, raising questions about whether sufficient age checks were in place.",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "WSIL TV 3",
+        "link": "https://www.wsiltv.com/news/teenagers-as-young-as-14-and-15-among-victims-of-swiss-bar-fire-raising-questions/article_519e7804-9f0d-5a3b-9abc-93470ca58dee.html",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "us-stocks-had-a-remarkable-2025-but-international-",
+        "title": "US stocks had a remarkable 2025. But international markets did much better",
+        "summary": "(CNN) \u2014 US stocks had a stellar 2025, but global markets stole the show....",
+        "full_story": "(CNN) \u2014 US stocks had a stellar 2025, but global markets stole the show.",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "WSIL TV 3",
+        "link": "https://www.wsiltv.com/news/consumer/us-stocks-had-a-remarkable-2025-but-international-markets-did-much-better/article_57546a1a-98b8-57f6-ab4b-42b6ef888858.html",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "one-found-dead-after-crash-in-western-kentucky",
+        "title": "One found dead after crash in Western Kentucky",
+        "summary": "LIVINGSTON COUNTY, Ky. (WSIL) -- One person was found dead after a single-vehicle crash on Thursday morning in Livingston County....",
+        "full_story": "LIVINGSTON COUNTY, Ky. (WSIL) -- One person was found dead after a single-vehicle crash on Thursday morning in Livingston County.",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "WSIL TV 3",
+        "link": "https://www.wsiltv.com/news/kentucky/one-found-dead-after-crash-in-western-kentucky/article_da20228c-8605-487a-a827-dd0e9347871c.html",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "significant-warm-up-rain-returns-late-week",
+        "title": "Significant Warm Up, Rain Returns Late Week",
+        "summary": "Good evening, everyone! We're looking at a noticeable shift in our weather pattern as we move through the upcoming week. This weekend, we're expecting a return to drier conditions with seasonably cool temperatures. Highs will be in the low to\u2026...",
+        "full_story": "Good evening, everyone! We're looking at a noticeable shift in our weather pattern as we move through the upcoming week. This weekend, we're expecting a return to drier conditions with seasonably cool temperatures. Highs will be in the low to\u2026",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "WSIL TV 3",
+        "link": "https://www.wsiltv.com/weather/forecast/significant-warm-up-rain-returns-late-week/article_8e2b5549-aebc-5d78-bbca-f5f49b1c5a29.html",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "one-dead-after-house-fire-in-butler-county",
+        "title": "One dead after house fire in Butler County",
+        "summary": "BUTLER COUNTY, Mo. (WSIL) -- One person is dead after a house fire in Butler County....",
+        "full_story": "BUTLER COUNTY, Mo. (WSIL) -- One person is dead after a house fire in Butler County.",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "WSIL TV 3",
+        "link": "https://www.wsiltv.com/news/missouri/one-dead-after-house-fire-in-butler-county/article_95a9c285-5caa-49db-9737-3755d3312303.html",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "what-the-us-strike-in-venezuela-means-for-gas-pric",
+        "title": "What the US strike in Venezuela means for gas prices and the largest proven oil reserve on the planet",
+        "summary": "(CNN) \u2014 Venezuelan President Nicol\u00e1s Maduro has been captured and flown out of the country following a large-scale US strike on Caracas, leaving behind uncertainty for the country \u2014 and its massive oil reserves....",
+        "full_story": "(CNN) \u2014 Venezuelan President Nicol\u00e1s Maduro has been captured and flown out of the country following a large-scale US strike on Caracas, leaving behind uncertainty for the country \u2014 and its massive oil reserves.",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "WSIL TV 3",
+        "link": "https://www.wsiltv.com/news/what-the-us-strike-in-venezuela-means-for-gas-prices-and-the-largest-proven-oil/article_df73f5d6-0a39-50e7-8f93-16e07d9c3067.html",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "mr-bubble-celebrates-national-bubble-bath-day-and-",
+        "title": "Mr. Bubble Celebrates National Bubble Bath Day and 65 Years of Bubblin' Fun with Limited-Edition Launches & 30% Off Sitewide",
+        "summary": "EDEN PRAIRIE, Minn., Jan. 3, 2026 /PRNewswire/ -- America's favorite bath-time buddy, Mr. Bubble, is turning 65 this year, and his first order of business is celebrating his favorite holiday: National Bubble Bath Day on January 8. To mark the\u2026...",
+        "full_story": "EDEN PRAIRIE, Minn., Jan. 3, 2026 /PRNewswire/ -- America's favorite bath-time buddy, Mr. Bubble, is turning 65 this year, and his first order of business is celebrating his favorite holiday: National Bubble Bath Day on January 8. To mark the\u2026",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "WSIL TV 3",
+        "link": "https://www.wsiltv.com/online_features/press_releases/mr-bubble-celebrates-national-bubble-bath-day-and-65-years-of-bubblin-fun-with-limited/article_03ad68bd-60f6-5502-9525-af5fa12d5d2f.html",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "us-captures-venezuelan-leader-maduro-in-large-scal",
+        "title": "US captures Venezuelan leader Maduro in \u2018large scale\u2019 strike on country, Trump announces",
+        "summary": "Caracas (CNN) \u2014 President Donald Trump announced early Saturday morning that the US carried out a \u201clarge scale strike against Venezuela\u201d and that President Nicolas Maduro and his wife had been captured, a stunning development that plunged the country...",
+        "full_story": "Caracas (CNN) \u2014 President Donald Trump announced early Saturday morning that the US carried out a \u201clarge scale strike against Venezuela\u201d and that President Nicolas Maduro and his wife had been captured, a stunning development that plunged the country into\u2026",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "WSIL TV 3",
+        "link": "https://www.wsiltv.com/news/national/us-captures-venezuelan-leader-maduro-in-large-scale-strike-on-country-trump-announces/article_d0556502-957c-5c41-b878-ba889c071fee.html",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "gyms-busy-in-january-tips-to-stick-to-your-health-",
+        "title": "Gyms busy in January: tips to stick to your health resolutions",
+        "summary": "...",
+        "full_story": "",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "WSIL TV 3",
+        "link": "https://www.wsiltv.com/news/gyms-busy-in-january-tips-to-stick-to-your-health-resolutions/article_6e19265f-dac1-4a70-8af6-78ca700cd5d8.html",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "some-southern-illinois-scholarships-go-unclaimed-e",
+        "title": "Some Southern Illinois Scholarships Go Unclaimed Each Year as Applications Open for 2026",
+        "summary": "MARION, Ill. (WSIL) \u2014 The Southern Illinois Community Foundation is now accepting applications for its annual scholarship program, offering students across the region access to thousands of dollars in educational support, money foundation leaders say...",
+        "full_story": "MARION, Ill. (WSIL) \u2014 The Southern Illinois Community Foundation is now accepting applications for its annual scholarship program, offering students across the region access to thousands of dollars in educational support, money foundation leaders say often goes unused simply because\u2026",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "WSIL TV 3",
+        "link": "https://www.wsiltv.com/news/illinois/some-southern-illinois-scholarships-go-unclaimed-each-year-as-applications-open-for-2026/article_c0e1b717-f90e-4d4a-8388-77cc26d1019e.html",
+        "date": "2026-01-05"
+    },
+    {
+        "id": "gradual-warm-up-through-midweek",
+        "title": "Gradual Warm-Up Through Midweek",
+        "summary": "A noticeable shift in our weather pattern is underway across the WSIL viewing area, starting with a quiet but cool weekend and ending with a warmer, wetter finish to the week....",
+        "full_story": "A noticeable shift in our weather pattern is underway across the WSIL viewing area, starting with a quiet but cool weekend and ending with a warmer, wetter finish to the week.",
+        "tags": [
+            "Clay County"
+        ],
+        "source": "WSIL TV 3",
+        "link": "https://www.wsiltv.com/weather/forecast/gradual-warm-up-through-midweek/article_933e0602-cd90-5e82-9de6-ac7a9928205d.html",
         "date": "2026-01-05"
     }
 ]
