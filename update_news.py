@@ -28,11 +28,11 @@ async def get_full_content(url):
                           soup.find('article') or \
                           soup.find('div', class_='post-content')
                 if content:
-                    for noise in content(['script', 'style', 'a.more-link', 'div.sharedaddy', 'div.jp-relatedposts', 'div.wpcnt']):
+                    # UPDATED: Scrub out ALL links ('a' tags) so no WNOI URLs remain in text
+                    for noise in content(['script', 'style', 'a', 'div.sharedaddy', 'div.jp-relatedposts', 'div.wpcnt']):
                         noise.decompose()
-                    for a in content.find_all('a'):
-                        if "read more" in a.text.lower():
-                            a.decompose()
+                    
+                    # Return clean text only
                     return content.get_text(separator='\n', strip=True)
     except: pass
     return ""
@@ -64,13 +64,12 @@ async def process_news():
                     if any(loc in search_text for loc in CLAY_COUNTY_LOCATIONS):
                         tags = [t for t in TOWNS if t.lower() in search_text]
                         
-                        # DATA SAVED WITHOUT "SOURCE" NAME
+                        # UPDATED: Link is removed from the saved data entirely
                         final_news.append({
                             "id": slug,
                             "title": title,
                             "full_story": body, 
                             "tags": tags if tags else ["Clay County"],
-                            "link": link,
                             "date": datetime.now().strftime("%Y-%m-%d")
                         })
             except: pass
