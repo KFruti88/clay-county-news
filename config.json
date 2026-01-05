@@ -9,3 +9,31 @@
   "clay-county-events": "https://kfruti88.github.io/clay-county-news/county/events.html",
   "default": "https://kfruti88.github.io/clay-county-news/index.html"
 }
+{
+  "flora-news": "https://kfruti88.github.io/clay-county-news/flora/news.html",
+  "flora-gas": "https://kfruti88.github.io/Clay-County-Fuel/flora/index.html",
+  "flora-sports": "https://kfruti88.github.io/clay-county-news/flora/sports.html",
+  "flora-business": "https://kfruti88.github.io/clay-county-news/flora/business.html",
+  "flora-ads": "https://kfruti88.github.io/clay-county-news/flora/ads.html",
+  "flora-events": "https://kfruti88.github.io/clay-county-news/flora/events.html",
+
+  "louisville-news": "https://kfruti88.github.io/clay-county-news/louisville/news.html",
+  "louisville-gas": "https://kfruti88.github.io/Clay-County-Fuel/louisville/index.html",
+  "louisville-sports": "https://kfruti88.github.io/clay-county-news/louisville/sports.html",
+  "louisville-events": "https://kfruti88.github.io/clay-county-news/louisville/events.html",
+
+  "clay-city-news": "https://kfruti88.github.io/clay-county-news/clay-city/news.html",
+  "clay-city-gas": "https://kfruti88.github.io/Clay-County-Fuel/clay-city/index.html",
+  "clay-city-events": "https://kfruti88.github.io/clay-county-news/clay-city/events.html",
+
+  "xenia-news": "https://kfruti88.github.io/clay-county-news/xenia/news.html",
+  "xenia-gas": "https://kfruti88.github.io/Clay-County-Fuel/xenia/index.html",
+  "xenia-events": "https://kfruti88.github.io/clay-county-news/xenia/events.html",
+
+  "sailor-springs-news": "https://kfruti88.github.io/clay-county-news/sailor-springs/news.html",
+  "sailor-springs-events": "https://kfruti88.github.io/clay-county-news/sailor-springs/events.html",
+
+  "day-calendar": "https://kfruti88.github.io/Clay-County-All/Calendar/day-index.html",
+  "month-calendar": "https://kfruti88.github.io/Clay-County-All/Calendar/month-index.html",
+  "default": "https://kfruti88.github.io/clay-county-news/index.html"
+}
