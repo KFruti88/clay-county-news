@@ -1,0 +1,17 @@
+[
+    {
+        "name": "WNOI Radio",
+        "url": "https://www.wnoi.com/category/local/feed",
+        "type": "rss"
+    },
+    {
+        "name": "Clay County Republican",
+        "url": "https://www.claycountyrepublican.com/feed",
+        "type": "rss"
+    }
+  {
+    "name": "KSDK News (5 On Your Side)",
+    "url": "https://www.ksdk.com/feeds/rss/news/local/illinois",
+    "type": "rss"
+}
+]
