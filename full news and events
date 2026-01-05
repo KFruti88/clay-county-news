@@ -1,0 +1,221 @@
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+    /* --- SCOPED STYLING (Prevents breaking Divi) --- */
+    #clay-county-hub-wrapper {
+        background: #f4f4f4;
+        font-family: 'Inter', sans-serif;
+        color: #1a1a1a;
+        margin: 0 auto;
+        padding: 10px;
+    }
+
+    /* --- TOP INFO BAR --- */
+    .top-info-bar {
+        background: #1a1a1a;
+        color: white;
+        padding: 10px 20px;
+        font-size: 0.85rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .clock-display { font-weight: bold; color: #2ea3f2; display: flex; align-items: center; gap: 8px; }
+    .live-dot { width: 8px; height: 8px; background: #ff0000; border-radius: 50%; animation: hub-blink 1s infinite; }
+    @keyframes hub-blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+    /* --- HUB TABS (Mobile Optimized) --- */
+    .center-title { 
+        text-align: center; 
+        font-family: 'Playfair Display', serif; 
+        font-size: clamp(1.8rem, 5vw, 2.8rem); 
+        margin: 25px 0; 
+    }
+
+    .hub-tabs { 
+        display: flex; 
+        justify-content: center; 
+        gap: 8px; 
+        margin-bottom: 25px;
+        flex-wrap: wrap; 
+    }
+
+    .tab-btn { 
+        padding: 10px 18px; 
+        cursor: pointer; 
+        border: none; 
+        background: #ddd; 
+        font-weight: bold; 
+        border-radius: 25px; 
+        transition: 0.3s;
+        font-size: 0.9rem;
+    }
+
+    .tab-btn.active { background: #2ea3f2; color: #fff; box-shadow: 0 4px 12px rgba(46,163,242,0.3); }
+
+    /* --- CONTENT CARDS --- */
+    .content-section { display: none; }
+    .content-section.active { display: block; animation: hubFadeIn 0.5s ease; }
+    @keyframes hubFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .glass-card { 
+        background: #ffffff;
+        padding: 25px; 
+        margin-bottom: 20px;
+        border-radius: 12px; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border-left: 8px solid #ccc;
+        transition: transform 0.2s;
+    }
+    .glass-card:hover { transform: scale(1.01); }
+
+    .town-badge { 
+        display: inline-block; 
+        padding: 4px 10px; 
+        border-radius: 4px; 
+        color: #fff; 
+        font-size: 0.7rem; 
+        text-transform: uppercase; 
+        margin-bottom: 10px; 
+        font-weight: bold;
+    }
+
+    .content-body { font-size: 1.05rem; line-height: 1.6; color: #333; }
+
+    /* --- EVENT LAYOUT --- */
+    .event-layout { display: flex; gap: 20px; align-items: flex-start; }
+    .date-box { 
+        min-width: 70px; 
+        text-align: center; 
+        color: white; 
+        border-radius: 8px; 
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+    }
+    .date-month { font-size: 0.8rem; text-transform: uppercase; }
+    .date-day { font-size: 1.5rem; font-weight: 900; }
+
+    /* --- RESPONSIVE BREAKPOINTS --- */
+    @media (max-width: 600px) {
+        .top-info-bar { flex-direction: column; text-align: center; gap: 5px; }
+        .event-layout { flex-direction: column; }
+        .date-box { width: 100%; flex-direction: row; justify-content: center; gap: 10px; }
+        .tab-btn { width: 100%; }
+    }
+</style>
+
+<div id="clay-county-hub-wrapper">
+    <div class="top-info-bar">
+        <div id="hub-live-clock" class="clock-display">
+            <div class="live-dot"></div> 00:00:00 PM
+        </div>
+        <div id="hub-mini-weather">
+            <span id="hub-temp-val" style="font-weight:bold; color:#fe4f00;">--°F</span> 
+            <span id="hub-weather-desc">Loading Weather...</span>
+        </div>
+    </div>
+
+    <div style="margin: 20px 0;">
+        <a class="weatherwidget-io" href="https://forecast7.com/en/38base67minus88base48/62839/" data-label_1="FLORA / 62839" data-label_2="FORECAST" data-theme="pure">62839 Weather</a>
+        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';js.appendChild(fjs);}}(document,'script','weatherwidget-io-js');</script>
+    </div>
+
+    <h1 class="center-title">Community Hub</h1>
+
+    <div class="hub-tabs">
+        <button class="tab-btn active" onclick="hubShowSection('hub-news', this)">🗞️ News</button>
+        <button class="tab-btn" onclick="hubShowSection('hub-calendar', this)">📅 Events</button>
+    </div>
+
+    <div id="hub-news" class="content-section active">
+        <div id="hub-news-feed"><p style="text-align:center;">Syncing News...</p></div>
+    </div>
+
+    <div id="hub-calendar" class="content-section">
+        <div id="hub-calendar-feed"><p style="text-align:center;">Syncing Events...</p></div>
+    </div>
+</div>
+
+<script>
+    // Config
+    const hubNewsJson = './news_data.json'; 
+    const hubCalJson = 'https://raw.githubusercontent.com/KFruti88/Clay-County-All/main/Calendar/calendar_data.json';
+
+    // Clock
+    function hubUpdateClock() {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const clockEl = document.getElementById('hub-live-clock');
+        if(clockEl) clockEl.innerHTML = `<div class="live-dot"></div> ${timeStr}`;
+    }
+    setInterval(hubUpdateClock, 1000);
+
+    // Weather
+    async function hubGetWeather() {
+        try {
+            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=38.67&longitude=-88.48&current_weather=true&temperature_unit=fahrenheit`);
+            const data = await res.json();
+            document.getElementById('hub-temp-val').innerText = Math.round(data.current_weather.temperature) + "°F";
+            document.getElementById('hub-weather-desc').innerText = "Flora, IL";
+        } catch (e) { console.log("Weather error"); }
+    }
+    hubGetWeather();
+
+    // Navigation
+    function hubShowSection(id, btn) {
+        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    function getHubBranding(town) {
+        const t = town ? town.toLowerCase() : "";
+        if (t.includes('flora')) return { bg: '#0c0b82', accent: '#fe4f00', name: 'Flora' };
+        if (t.includes('louisville')) return { bg: '#990000', accent: '#d61a21', name: 'Louisville' };
+        if (t.includes('clay city')) return { bg: '#0c30f0', accent: '#0c30f0', name: 'Clay City' };
+        return { bg: '#1a1a1a', accent: '#2ea3f2', name: 'Clay County' };
+    }
+
+    // Load News
+    fetch(hubNewsJson).then(res => res.json()).then(data => {
+        const container = document.getElementById('hub-news-feed');
+        container.innerHTML = '';
+        data.forEach(item => {
+            const b = getHubBranding(item.tags ? item.tags[0] : "");
+            container.innerHTML += `
+                <article class="glass-card" style="border-left-color: ${b.bg}">
+                    <div class="town-badge" style="background:${b.accent}">${b.name}</div>
+                    <h3 style="margin:5px 0 15px 0;">${item.title}</h3>
+                    <div class="content-body">${item.full_story}</div>
+                </article>`;
+        });
+    }).catch(() => { document.getElementById('hub-news-feed').innerHTML = "Check back later for updates."; });
+
+    // Load Calendar
+    fetch(hubCalJson).then(res => res.json()).then(data => {
+        const container = document.getElementById('hub-calendar-feed');
+        container.innerHTML = '';
+        data.sort((a,b) => new Date(a.start_date) - new Date(b.start_date)).forEach(ev => {
+            const b = getHubBranding(ev.town);
+            const d = new Date(ev.start_date + 'T00:00:00');
+            container.innerHTML += `
+                <div class="glass-card" style="border-left-color: ${b.bg}">
+                    <div class="event-layout">
+                        <div class="date-box" style="background:${b.bg}">
+                            <span class="date-month">${d.toLocaleString('default',{month:'short'})}</span>
+                            <span class="date-day">${d.getDate()}</span>
+                        </div>
+                        <div class="event-info">
+                            <div class="town-badge" style="background:${b.accent}">${ev.town}</div>
+                            <h3 style="margin:5px 0;">${ev.title}</h3>
+                            <div class="content-body">${ev.description}</div>
+                        </div>
+                    </div>
+                </div>`;
+        });
+    });
+</script>
