@@ -9,7 +9,9 @@ from bs4 import BeautifulSoup
 # --- CONFIGURATION ---
 NEWS_DATA_FILE = 'news_data.json'
 SOURCES_FILE = 'sources.json'
+# These are the towns used for tagging and the mandatory filter
 TOWNS = ["Flora", "Louisville", "Clay City", "Xenia", "Sailor Springs"]
+CLAY_COUNTY_LOCATIONS = ["clay county", "flora", "xenia", "sailor springs", "louisville", "clay city"]
 
 def create_slug(text):
     """Turns a title into a clean ID for bookmarking"""
@@ -37,11 +39,10 @@ async def get_full_content(url):
 
                 if content:
                     # REMOVE "READ MORE" AND SOURCE NOISE
-                    # This targets specific WordPress and news-site clutter
                     for noise in content(['script', 'style', 'a.more-link', 'div.sharedaddy', 'div.jp-relatedposts', 'div.wpcnt']):
                         noise.decompose()
                     
-                    # Specifically find and remove any text matching "Read More"
+                    # Specifically remove any links matching "Read More" text
                     for a in content.find_all('a'):
                         if "read more" in a.text.lower():
                             a.decompose()
@@ -80,29 +81,37 @@ async def process_news():
                     # FETCH ACTUAL FULL STORY
                     full_text = await get_full_content(link)
                     
-                    # Ensure we have the full text, not just the snippet
+                    # Ensure we have the full text, fallback to description if scrape fails
                     body = full_text if len(full_text) > 150 else (item.find("description").text or "")
                     
-                    # Tagging logic
-                    found_towns = [t for t in TOWNS if t.lower() in (title + body).lower()]
-                    tags = found_towns if found_towns else ["Clay County"]
+                    # --- NEW FILTER LOGIC ---
+                    # Combine title and body to search for your mandatory locations
+                    search_text = (title + " " + body).lower()
+                    
+                    # ONLY proceed if the story mentions Clay County or the specific towns
+                    if any(location in search_text for location in CLAY_COUNTY_LOCATIONS):
+                        # Tagging logic for town pages
+                        found_towns = [t for t in TOWNS if t.lower() in search_text]
+                        tags = found_towns if found_towns else ["Clay County"]
 
-                    # SOURCE REMOVED HERE AS REQUESTED
-                    final_news.append({
-                        "id": slug,
-                        "title": title,
-                        "full_story": body, 
-                        "tags": tags,
-                        "link": link,
-                        "date": datetime.now().strftime("%Y-%m-%d")
-                    })
-                    print(f"Processed: {title[:50]}...")
+                        final_news.append({
+                            "id": slug,
+                            "title": title,
+                            "full_story": body, 
+                            "tags": tags,
+                            "link": link,
+                            "date": datetime.now().strftime("%Y-%m-%d")
+                        })
+                        print(f"Kept (Local): {title[:50]}...")
+                    else:
+                        print(f"Skipped (Not Local): {title[:50]}...")
+                        
             except Exception as e: 
                 print(f"Error: {e}")
 
     with open(NEWS_DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(final_news, f, indent=4, ensure_ascii=False)
-    print(f"Success! Full stories saved to {NEWS_DATA_FILE}")
+    print(f"Success! {len(final_news)} local stories saved to {NEWS_DATA_FILE}")
 
 if __name__ == "__main__":
     asyncio.run(process_news())
