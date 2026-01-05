@@ -12,39 +12,43 @@ SOURCES_FILE = 'sources.json'
 TOWNS = ["Flora", "Louisville", "Clay City", "Xenia", "Sailor Springs"]
 
 def create_slug(text):
-    """Turns a title into a clean ID for bookmarking (e.g., #local-news)"""
+    """Turns a title into a clean ID for bookmarking"""
     slug = text.lower()
     slug = re.sub(r'[^a-z0-9\s-]', '', slug)
     return re.sub(r'\s+', '-', slug).strip('-')[:50]
 
 async def get_full_content(url):
     """
-    Navigates to the actual news site to grab the full text 
-    so you don't get 'Read More' snippets.
+    Navigates to the source, grabs ONLY the article body, 
+    and deletes 'Read More' or social links.
     """
     try:
         async with httpx.AsyncClient() as client:
-            # User-Agent makes the request look like a real browser to bypass blocks
             headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
             resp = await client.get(url, timeout=15, headers=headers, follow_redirects=True)
             
             if resp.status_code == 200:
                 soup = BeautifulSoup(resp.text, 'html.parser')
                 
-                # Specifically targets the full article container
+                # Target the main article body
                 content = soup.find('div', class_='entry-content') or \
                           soup.find('article') or \
                           soup.find('div', class_='post-content')
 
                 if content:
-                    # Remove the 'Read More' buttons, scripts, and ads from the HTML
-                    for element in content(['script', 'style', 'a.more-link', 'div.sharedaddy', 'div.jp-relatedposts']):
-                        element.decompose()
+                    # REMOVE "READ MORE" AND SOURCE NOISE
+                    # This targets specific WordPress and news-site clutter
+                    for noise in content(['script', 'style', 'a.more-link', 'div.sharedaddy', 'div.jp-relatedposts', 'div.wpcnt']):
+                        noise.decompose()
                     
-                    # Return clean text with line breaks for readability
+                    # Specifically find and remove any text matching "Read More"
+                    for a in content.find_all('a'):
+                        if "read more" in a.text.lower():
+                            a.decompose()
+                    
                     return content.get_text(separator='\n', strip=True)
     except Exception as e:
-        print(f"Error grabbing full content at {url}: {e}")
+        print(f"Error grabbing content: {e}")
     return ""
 
 async def process_news():
@@ -76,31 +80,29 @@ async def process_news():
                     # FETCH ACTUAL FULL STORY
                     full_text = await get_full_content(link)
                     
-                    # If the scraper finds content, use it. Otherwise, use RSS description.
-                    # This prevents the 'Read More' issue.
+                    # Ensure we have the full text, not just the snippet
                     body = full_text if len(full_text) > 150 else (item.find("description").text or "")
                     
                     # Tagging logic
                     found_towns = [t for t in TOWNS if t.lower() in (title + body).lower()]
                     tags = found_towns if found_towns else ["Clay County"]
 
+                    # SOURCE REMOVED HERE AS REQUESTED
                     final_news.append({
                         "id": slug,
                         "title": title,
-                        "summary": body[:250] + "...", 
                         "full_story": body, 
                         "tags": tags,
-                        "source": source['name'],
                         "link": link,
                         "date": datetime.now().strftime("%Y-%m-%d")
                     })
                     print(f"Processed: {title[:50]}...")
             except Exception as e: 
-                print(f"Error processing source: {e}")
+                print(f"Error: {e}")
 
     with open(NEWS_DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(final_news, f, indent=4, ensure_ascii=False)
-    print(f"Done! Saved {len(final_news)} articles to {NEWS_DATA_FILE}")
+    print(f"Success! Full stories saved to {NEWS_DATA_FILE}")
 
 if __name__ == "__main__":
     asyncio.run(process_news())
