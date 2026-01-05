@@ -1,17 +1,11 @@
 [
-    {
-        "name": "WNOI Radio",
-        "url": "https://www.wnoi.com/category/local/feed",
-        "type": "rss"
-    },
-    {
-        "name": "Clay County Republican",
-        "url": "https://www.claycountyrepublican.com/feed",
-        "type": "rss"
-    }
-  {
-    "name": "KSDK News (5 On Your Side)",
-    "url": "https://www.ksdk.com/feeds/rss/news/local/illinois",
-    "type": "rss"
-}
+    { "name": "WNOI Radio", "url": "https://www.wnoi.com/category/local/feed", "type": "rss" },
+    { "name": "Effingham Radio", "url": "https://www.effinghamradio.com/local-news/feed/", "type": "rss" },
+    { "name": "Freedom 92.9", "url": "https://freedom929.com/category/local-news/feed/", "type": "rss" },
+    { "name": "WFIW Radio", "url": "https://www.wfiwradio.com/local-news/feed/", "type": "rss" },
+    { "name": "WMIX 94", "url": "https://www.wmix94.com/local-news/feed/", "type": "rss" },
+    { "name": "Southern Illinois Now", "url": "https://southernillinoisnow.com/local-news/feed/", "type": "rss" },
+    { "name": "WSIL TV 3", "url": "https://www.wsiltv.com/search/?f=rss&t=article&l=50&s=start_time&sd=desc", "type": "rss" },
+    { "name": "Flora City Official", "url": "https://florail.govoffice2.com/index.asp?SEC=A8C9DDA7-E259-48EE-AD30-63ADE2D6CAD9", "type": "html" },
+    { "name": "Olney Gazette", "url": "https://olneygazettenews.com/", "type": "html" }
 ]
