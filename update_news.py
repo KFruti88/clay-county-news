@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 
 # --- CONFIGURATION ---
 NEWS_DATA_FILE = 'news_data.json'
-SOURCES_FILE = 'sources.json' # KEEPING THIS FILE AS REQUESTED
+SOURCES_FILE = 'sources.json' 
 TOWNS = ["Flora", "Louisville", "Clay City", "Xenia", "Sailor Springs"]
 CLAY_COUNTY_LOCATIONS = ["clay county", "flora", "xenia", "sailor springs", "louisville", "clay city"]
 
@@ -28,11 +28,9 @@ async def get_full_content(url):
                           soup.find('article') or \
                           soup.find('div', class_='post-content')
                 if content:
-                    # UPDATED: Scrub out ALL links ('a' tags) so no WNOI URLs remain in text
+                    # Scrub ALL links and source noise (Removed all <a> tags)
                     for noise in content(['script', 'style', 'a', 'div.sharedaddy', 'div.jp-relatedposts', 'div.wpcnt']):
                         noise.decompose()
-                    
-                    # Return clean text only
                     return content.get_text(separator='\n', strip=True)
     except: pass
     return ""
@@ -40,8 +38,6 @@ async def get_full_content(url):
 async def process_news():
     final_news = []
     seen_ids = set()
-    
-    # Reads from your sources.json to find where to scrape
     with open(SOURCES_FILE, 'r') as f:
         sources = json.load(f)
 
@@ -64,7 +60,7 @@ async def process_news():
                     if any(loc in search_text for loc in CLAY_COUNTY_LOCATIONS):
                         tags = [t for t in TOWNS if t.lower() in search_text]
                         
-                        # UPDATED: Link is removed from the saved data entirely
+                        # DATA SAVED WITHOUT SOURCE NAME OR LINK
                         final_news.append({
                             "id": slug,
                             "title": title,
