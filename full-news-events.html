@@ -1,1 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clay County News Center | Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Georgia&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- GLOBAL STYLING --- */
+        body { margin: 0; background: #f4f4f4; font-family: 'Playfair Display', serif; color: #1a1a1a; overflow-x: hidden; }
+        .master-wrapper { max-width: 1100px; margin: 0 auto; padding: 20px; }
 
+        /* --- 100VW SMART NAVIGATION BAR --- */
+        .custom-city-menu {
+            width: 100vw;
+            background: #ffffff;
+            padding: 20px 0;
+            font-family: sans-serif;
+            border-bottom: 2px solid #eee;
+            position: sticky;
+            top: 0;
+            z-index: 10000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .header-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            margin-bottom: 15px;
+        }
+
+        /* COLOR INVERSION LOGIC for Date & Time */
+        .invert-me {
+            mix-blend-mode: difference;
+            color: #ffffff; /* Inverts against white BG to become Black */
+            font-weight: 900;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        .live-dot { width: 8px; height: 8px; background: #ff0000; border-radius: 50%; animation: blink 1s infinite; display: inline-block; margin-right: 5px; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* DYNAMIC WEATHER COLORS */
+        .weather-clear { color: #FDB813 !important; font-weight: bold; }
+        .weather-cloudy { color: #939BA4 !important; font-weight: bold; }
+        .weather-rainy { color: #395877 !important; font-weight: bold; }
+        .weather-snow { mix-blend-mode: difference; color: #ffffff; font-weight: 900; }
+
+        .city-nav {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 35px;
+            margin: 0; padding: 0;
+        }
+
+        .city-nav li a {
+            text-decoration: none;
+            font-weight: bold;
+            padding: 10px 22px;
+            border-radius: 6px;
+            transition: all 0.4s ease; /* Smooth Color Flip */
+        }
+
+        /* COLOR FLIPS */
+        .btn-flora a { background-color: #00205b; color: #fe4f00; }
+        .btn-flora a:hover { background-color: #fe4f00; color: #00205b; }
+
+        .btn-louisville a { background-color: #060404; color: #d61a21; }
+        .btn-louisville a:hover { background-color: #d61a21; color: #060404; }
+
+        .btn-claycity a { background-color: #0c30f0; color: #fff; }
+        .btn-claycity a:hover { background-color: #fff; color: #0c30f0; outline: 2px solid #0c30f0; }
+
+        .btn-xenia a { background-color: #1b5e20; color: #fff; }
+        .btn-xenia a:hover { background-color: #fff; color: #1b5e20; outline: 2px solid #1b5e20; }
+
+        /* --- NEWS CARDS --- */
+        .glass-card { 
+            background: white; padding: 40px; margin-top: 40px; border-radius: 15px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.05); transition: 0.5s; scroll-margin-top: 150px; 
+        }
+        .jump-highlight { border-left: 12px solid #2ea3f2 !important; animation: highlightPulse 2s ease-out; }
+        @keyframes highlightPulse { 0% { background: #fff; } 50% { background: #f0f7ff; } 100% { background: #fff; } }
+
+        .town-badge { display: inline-block; padding: 6px 15px; border-radius: 4px; color: #fff; font-size: 0.8rem; font-weight: bold; margin-bottom: 15px; text-transform: uppercase; font-family: sans-serif; }
+        .content-body { font-family: 'Georgia', serif; font-size: 1.25rem; line-height: 1.9; color: #222; text-align: justify; white-space: pre-line; }
+
+        @media (max-width: 850px) {
+            .city-nav { flex-direction: column; gap: 12px; }
+            .header-info { flex-direction: column; gap: 5px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="custom-city-menu">
+    <div class="header-info">
+        <span id="header-date" class="invert-me">Loading Date...</span>
+        <span id="header-clock" class="invert-me"><div class="live-dot"></div> 00:00:00 PM</span>
+        <span id="header-weather">Flora Weather...</span>
+    </div>
+    <ul class="city-nav">
+        <li><a href="index.html" style="color:#333;">Home</a></li>
+        <li class="btn-claycity"><a href="#">Clay City</a></li>
+        <li class="btn-xenia"><a href="#">Xenia</a></li>
+        <li class="btn-flora"><a href="#">Flora</a></li>
+        <li class="btn-louisville"><a href="#">Louisville</a></li>
+    </ul>
+</div>
+
+<div class="master-wrapper">
+    <h1 style="text-align:center; font-size: 3.5rem;">County News Archive</h1>
+    <div id="full-news-container">🗞️ Fetching the Latest Articles...</div>
+</div>
+
+<script>
+    const newsJson = 'news_data.json';
+
+    // 1. CLOCK & INVERSION LOGIC
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('header-date').innerText = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        document.getElementById('header-clock').innerHTML = `<div class="live-dot"></div> ` + now.toLocaleTimeString();
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // 2. DYNAMIC WEATHER COLORS
+    async function updateWeather() {
+        try {
+            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=38.67&longitude=-88.48&current_weather=true&temperature_unit=fahrenheit`);
+            const data = await res.json();
+            const temp = Math.round(data.current_weather.temperature);
+            const code = data.current_weather.weathercode;
+            const wElem = document.getElementById('header-weather');
+
+            wElem.className = ''; // Reset
+            let desc = "Weather";
+
+            if (code === 0) { desc = "Clear Skies"; wElem.classList.add('weather-clear'); }
+            else if (code <= 3) { desc = "Cloudy"; wElem.classList.add('weather-cloudy'); }
+            else if (code >= 51 && code <= 67) { desc = "Rainy"; wElem.classList.add('weather-rainy'); }
+            else if (code >= 71 && code <= 77) { desc = "Snow"; wElem.classList.add('weather-snow'); }
+
+            wElem.innerText = `${temp}°F • ${desc}`;
+        } catch (e) { console.log("Weather error"); }
+    }
+    updateWeather();
+
+    // 3. NEWS LOADER (with Emoji Logic)
+    function getEmoji(item) {
+        const text = (item.title + " " + item.full_story).toLowerCase();
+        if (text.includes("fire")) return "🚒";
+        if (text.includes("police") || text.includes("arrest")) return "🚔";
+        if (text.includes("obituary")) return "🕊️";
+        if (text.includes("basketball") || text.includes("football")) return "🏀";
+        if (text.includes("school")) return "🚌";
+        return "📰";
+    }
+
+    fetch(newsJson).then(res => res.json()).then(data => {
+        const container = document.getElementById('full-news-container');
+        container.innerHTML = '';
+        data.forEach(item => {
+            const icon = getEmoji(item);
+            container.innerHTML += `
+                <article class="glass-card" id="${item.id}">
+                    <h2><span>${icon}</span> ${item.title}</h2>
+                    <div class="content-body">${item.full_story}</div>
+                    <p style="font-size:0.8rem; color:#888; margin-top:20px;">Source: ${item.source} | ${item.date}</p>
+                </article>`;
+        });
+        
+        if (window.location.hash) {
+            const target = document.getElementById(window.location.hash.substring(1));
+            if (target) { setTimeout(() => { target.scrollIntoView({ behavior: 'smooth' }); target.classList.add('jump-highlight'); }, 800); }
+        }
+    });
+</script>
+</body>
+</html>
