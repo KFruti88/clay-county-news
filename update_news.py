@@ -19,28 +19,19 @@ def create_slug(text):
     return re.sub(r'\s+', '-', slug).strip('-')[:50]
 
 async def get_full_content(url):
-    """
-    #keep full story goes to https://supportmylocalcommunity.com/local-news/
-    """
+    """ #keep full story goes to https://supportmylocalcommunity.com/local-news/ """
     try:
         async with httpx.AsyncClient() as client:
             headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
             resp = await client.get(url, timeout=15, headers=headers, follow_redirects=True)
             if resp.status_code == 200:
                 soup = BeautifulSoup(resp.text, 'html.parser')
-                
-                # Targeting the specific article body
-                # #keep full story goes to https://supportmylocalcommunity.com/local-news/
                 content = soup.find('div', class_='entry-content') or \
                           soup.find('article') or \
                           soup.find('div', class_='post-content')
-                
                 if content:
-                    # Scrub ALL links and source noise (Deletes <a> tags for a closed system)
                     for noise in content(['script', 'style', 'a', 'div.sharedaddy', 'div.jp-relatedposts', 'div.wpcnt']):
                         noise.decompose()
-                    
-                    # Return clean text with line breaks preserved
                     # #keep full story goes to https://supportmylocalcommunity.com/local-news/
                     return content.get_text(separator='\n', strip=True)
     except: pass
@@ -64,20 +55,12 @@ async def process_news():
                     if slug in seen_ids: continue
                     seen_ids.add(slug)
 
-                    # FETCH ACTUAL CONTENT
-                    # #keep full story goes to https://supportmylocalcommunity.com/local-news/
                     full_text = await get_full_content(link)
-                    
-                    # Verify content length to ensure we are grabbing the full text body
                     # #keep full story goes to https://supportmylocalcommunity.com/local-news/
                     body = full_text if len(full_text) > 150 else (item.find("description").text or "")
                     
-                    search_text = (title + " " + body).lower()
-                    
-                    if any(loc in search_text for loc in CLAY_COUNTY_LOCATIONS):
-                        tags = [t for t in TOWNS if t.lower() in search_text]
-                        
-                        # DATA SAVED WITHOUT SOURCE NAME OR URL LINK
+                    if any(loc in (title + body).lower() for loc in CLAY_COUNTY_LOCATIONS):
+                        tags = [t for t in TOWNS if t.lower() in (title + body).lower()]
                         final_news.append({
                             "id": slug,
                             "title": title,
