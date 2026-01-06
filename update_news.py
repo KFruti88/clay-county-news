@@ -9,8 +9,9 @@ from bs4 import BeautifulSoup
 # --- CONFIGURATION ---
 NEWS_DATA_FILE = 'news_data.json'
 SOURCES_FILE = 'sources.json' 
-TOWNS = ["Flora", "Louisville", "Clay City", "Xenia", "Sailor Springs"]
-CLAY_COUNTY_LOCATIONS = ["clay county", "flora", "xenia", "sailor springs", "louisville", "clay city"]
+# #keep full story goes to https://supportmylocalcommunity.com/local-news/
+TOWNS = ["Flora", "Louisville", "Clay City", "Xenia", "Sailor Springs"] #Keep Towns
+CLAY_COUNTY_LOCATIONS = ["clay county", "flora", "xenia", "sailor springs", "louisville", "clay city"] #Keep Clay_County_locations
 
 def create_slug(text):
     slug = text.lower()
@@ -18,19 +19,29 @@ def create_slug(text):
     return re.sub(r'\s+', '-', slug).strip('-')[:50]
 
 async def get_full_content(url):
+    """
+    #keep full story goes to https://supportmylocalcommunity.com/local-news/
+    """
     try:
         async with httpx.AsyncClient() as client:
             headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
             resp = await client.get(url, timeout=15, headers=headers, follow_redirects=True)
             if resp.status_code == 200:
                 soup = BeautifulSoup(resp.text, 'html.parser')
+                
+                # Targeting the specific article body
+                # #keep full story goes to https://supportmylocalcommunity.com/local-news/
                 content = soup.find('div', class_='entry-content') or \
                           soup.find('article') or \
                           soup.find('div', class_='post-content')
+                
                 if content:
-                    # Scrub ALL links and source noise (Removed all <a> tags)
+                    # Scrub ALL links and source noise (Deletes <a> tags for a closed system)
                     for noise in content(['script', 'style', 'a', 'div.sharedaddy', 'div.jp-relatedposts', 'div.wpcnt']):
                         noise.decompose()
+                    
+                    # Return clean text with line breaks preserved
+                    # #keep full story goes to https://supportmylocalcommunity.com/local-news/
                     return content.get_text(separator='\n', strip=True)
     except: pass
     return ""
@@ -53,24 +64,31 @@ async def process_news():
                     if slug in seen_ids: continue
                     seen_ids.add(slug)
 
+                    # FETCH ACTUAL CONTENT
+                    # #keep full story goes to https://supportmylocalcommunity.com/local-news/
                     full_text = await get_full_content(link)
+                    
+                    # Verify content length to ensure we are grabbing the full text body
+                    # #keep full story goes to https://supportmylocalcommunity.com/local-news/
                     body = full_text if len(full_text) > 150 else (item.find("description").text or "")
+                    
                     search_text = (title + " " + body).lower()
                     
                     if any(loc in search_text for loc in CLAY_COUNTY_LOCATIONS):
                         tags = [t for t in TOWNS if t.lower() in search_text]
                         
-                        # DATA SAVED WITHOUT SOURCE NAME OR LINK
+                        # DATA SAVED WITHOUT SOURCE NAME OR URL LINK
                         final_news.append({
                             "id": slug,
                             "title": title,
-                            "full_story": body, 
+                            "full_story": body, #keep full story goes to https://supportmylocalcommunity.com/local-news/
                             "tags": tags if tags else ["Clay County"],
                             "date": datetime.now().strftime("%Y-%m-%d")
                         })
             except: pass
 
     with open(NEWS_DATA_FILE, 'w', encoding='utf-8') as f:
+        # #keep full story goes to https://supportmylocalcommunity.com/local-news/
         json.dump(final_news, f, indent=4, ensure_ascii=False)
 
 if __name__ == "__main__":
