@@ -1,0 +1,44 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const summaryContainer = document.getElementById('town-summaries');
+    const fullContainer = document.getElementById('full-news-feed');
+
+    // Load the data from your news_data.json
+    fetch('news_data.json')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            data.forEach(item => {
+                // 1. Create the Summary (Top of page or Town pages)
+                const summaryHTML = `
+                    <div class="summary-box">
+                        <h3>${item.title} <span class="tag">${item.tags[0]}</span></h3>
+                        <p>${item.summary}</p>
+                        <a class="bookmark-link" href="#${item.id}">Read Full Story ↓</a>
+                    </div>
+                `;
+                summaryContainer.innerHTML += summaryHTML;
+
+                // 2. Create the Full Content (The "Bookmark" destination)
+                const fullHTML = `
+                    <div class="full-story" id="${item.id}">
+                        <h2>${item.title}</h2>
+                        <p><strong>Source:</strong> ${item.source} | <strong>Date:</strong> ${item.date}</p>
+                        <div class="story-body">
+                            ${item.full_story}
+                        </div>
+                        <p><a href="${item.link}" target="_blank">View Original Source</a></p>
+                        <a href="#">Back to top ↑</a>
+                    </div>
+                `;
+                fullContainer.innerHTML += fullHTML;
+            });
+        })
+        .catch(error => {
+            console.error('Error loading news data:', error);
+            summaryContainer.innerHTML = '<p>Unable to load news at this time.</p>';
+        });
+});
