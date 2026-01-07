@@ -3,61 +3,67 @@ document.addEventListener('DOMContentLoaded', () => {
     const fullContainer = document.getElementById('full-news-feed');
     const summariesSection = document.getElementById('summaries-section');
     const articlesSection = document.getElementById('articles-section');
-    const processedIds = new Set();
 
-    // 1. CONFIGURATION (Locked to the folder path to avoid 404s)
+    // 1. MASTER SETTINGS
     const jsonUrl = "https://kfruti88.github.io/clay-county-news/news_data.json";
-    const hubUrl = "https://supportmylocalcommunity.com/local-news/"; 
+    const hubUrl = "https://supportmylocalcommunity.com/local-news/";
 
-    // 2. SMART SWITCH LOGIC
+    // 2. DETECTION
     const params = new URLSearchParams(window.location.search);
     const storyId = params.get('id');
+    const path = window.location.href.toLowerCase();
+    const isHubPage = path.includes('/local-news/');
 
     const townColors = {
         "Flora": { bg: "#0c0b82", text: "#fe4f00" },
         "Louisville": { bg: "#010101", text: "#eb1c24" },
-        "North Clay": { bg: "#010101", text: "#eb1c24" },
         "Clay City": { bg: "#0c30f0", text: "#8a8a88" },
         "Xenia": { bg: "#000000", text: "#fdb813" },
         "Sailor Springs": { bg: "#000000", text: "#a020f0" },
         "Clay County": { bg: "#333333", text: "#ffffff" }
     };
 
-    // 3. FETCH AND RENDER
+    // 3. FETCH AND RENDER LOGIC
     fetch(jsonUrl)
-        .then(response => response.json())
+        .then(res => res.json())
         .then(data => {
-            if (storyId) {
-                // --- FULL ARTICLE MODE ---
+            if (isHubPage && storyId) {
+                // --- FULL ARTICLE MODE (HUB ONLY) ---
                 const story = data.find(item => item.id === storyId);
                 if (story) {
                     if (summariesSection) summariesSection.style.display = 'none';
                     if (articlesSection) articlesSection.style.display = 'block';
                     renderFullStory(story);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    window.scrollTo(0, 0); 
                 }
             } else {
-                // --- SUMMARY LIST MODE ---
-                data.forEach(item => {
-                    if (processedIds.has(item.id)) return;
-                    processedIds.add(item.id);
-                    renderSummary(item);
+                // --- TOWN FILTER MODE ---
+                let currentTown = "";
+                if (path.includes('flora')) currentTown = "Flora";
+                else if (path.includes('clay-city')) currentTown = "Clay City";
+                else if (path.includes('louisville')) currentTown = "Louisville";
+                else if (path.includes('xenia')) currentTown = "Xenia";
+                else if (path.includes('sailor-springs')) currentTown = "Sailor Springs";
+
+                const filtered = data.filter(item => {
+                    if (!currentTown) return true; // Show everything on main home
+                    // Show town news OR General News (Clay County)
+                    return item.tags.includes(currentTown) || item.tags.includes("Clay County");
                 });
+
+                filtered.forEach(item => renderSummary(item));
             }
         })
-        .catch(err => console.error("Error loading news:", err));
+        .catch(err => console.error("News Load Error:", err));
 
     function renderSummary(item) {
         if (!summaryContainer) return;
         const mainBG = townColors[item.tags[0]]?.bg || "#333333";
-        const tagsHTML = item.tags.map(t => `<span class="tag" style="background:${townColors[t]?.bg || '#333'}; color:${townColors[t]?.text || '#fff'}; border:1px solid ${townColors[t]?.text || '#fff'}; padding:2px 8px; border-radius:4px; margin-right:5px; font-size:0.8em; font-weight:bold;">${t}</span>`).join('');
-        
         summaryContainer.innerHTML += `
-            <div class="summary-box" style="border-top: 10px solid ${mainBG}; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); padding: 30px; margin-bottom: 30px; border-radius: 15px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); font-family: serif; transition: 0.3s;" onmouseover="this.style.transform='translateY(-5px)';" onmouseout="this.style.transform='translateY(0)';">
-                <h3 style="text-transform: uppercase; margin-top: 0; font-size: 1.5rem; color: #111; font-weight: 900;">${item.title}</h3>
-                <div style="margin-bottom: 15px;">${tagsHTML}</div>
-                <p style="font-size: 1.15rem; color: #333; line-height: 1.6;">${item.summary || (item.full_story.substring(0, 160) + "...")}</p>
-                <a href="${hubUrl}?id=${item.id}" style="display: inline-block; background: #222; color: #fff; padding: 10px 25px; border-radius: 50px; text-decoration: none; font-weight: bold;">Read Full Story ↓</a>
+            <div class="summary-box" style="border-top:10px solid ${mainBG}; background:rgba(255,255,255,0.8); backdrop-filter:blur(10px); padding:30px; margin-bottom:30px; border-radius:15px; box-shadow:0 8px 32px rgba(0,0,0,0.1);">
+                <h3 style="text-transform:uppercase; margin-top:0; font-weight:900;">${item.title}</h3>
+                <p style="font-size:1.1rem; line-height:1.6;">${item.summary || item.full_story.substring(0, 150) + "..."}</p>
+                <a href="${hubUrl}?id=${item.id}" style="display:inline-block; background:#222; color:#fff; padding:10px 25px; border-radius:50px; text-decoration:none; font-weight:bold;">Read Full Story ↓</a>
             </div>`;
     }
 
@@ -65,11 +71,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!fullContainer) return;
         const mainColor = townColors[item.tags[0]]?.bg || "#333333";
         fullContainer.innerHTML = `
-            <div style="border-left: 15px solid ${mainColor}; padding: 40px; background: #fff; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.1);">
-                <h1 style="color: ${mainColor}; font-size: 2.8rem; text-transform: uppercase; margin-top: 0; font-weight: 900;">${item.title}</h1>
-                <div style="white-space: pre-wrap; font-size: 1.35rem; line-height: 2; font-family: serif; color: #222;">${item.full_story}</div>
-                <hr style="margin: 40px 0; opacity: 0.1;">
-                <a href="${hubUrl}" style="display: inline-block; color: #444; font-weight: bold; text-decoration: none; border: 2px solid #444; padding: 10px 25px; border-radius: 50px;">← Back to All News</a>
+            <div style="border-left:15px solid ${mainColor}; padding:40px; background:#fff; border-radius:20px; box-shadow:0 20px 50px rgba(0,0,0,0.1);">
+                <h1 style="color:${mainColor}; font-size:2.8rem; text-transform:uppercase; margin-top:0;">${item.title}</h1>
+                <div style="white-space:pre-wrap; font-size:1.35rem; line-height:2; font-family:serif;">${item.full_story}</div>
+                <hr style="margin:40px 0; opacity:0.1;">
+                <a href="${hubUrl}" style="display:inline-block; border:2px solid #444; padding:10px 25px; border-radius:50px; color:#444; text-decoration:none; font-weight:bold;">← Back to All News</a>
             </div>`;
     }
 });
