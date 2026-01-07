@@ -39,43 +39,55 @@ document.addEventListener('DOMContentLoaded', () => {
             filteredNews.forEach(item => {
                 // Safety defaults to hide "undefined"
                 const title = item.title || "Untitled Report";
-                const mainTag = (item.tags && item.tags[0]) ? item.tags[0] : "General";
-                const accentColor = townColors[mainTag] || "#555555";
+                const tags = item.tags || ["General"];
+                const isMultiTown = tags.length > 1;
+                
+                // COLOR LOGIC: If multi-town, use Grey. If single town, use that town's color.
+                const mainAccentColor = isMultiTown ? "#555555" : (townColors[tags[0]] || "#555555");
+
                 const source = item.source || "";
                 const date = item.date || "";
                 const story = item.full_story || "";
                 const link = item.link || "";
 
-                // Logic: Create a snippet for the summary if one isn't provided
+                // Generate HTML for the Tags with their specific colors
+                const tagsHTML = tags.map(t => {
+                    const tColor = townColors[t] || "#555555";
+                    return `<span class="tag" style="background: ${tColor}; color: white; padding: 2px 8px; border-radius: 4px; margin-right: 5px; font-size: 0.8em;">${t}</span>`;
+                }).join('');
+
+                // Create a snippet for the summary if one isn't provided
                 let briefSnippet = item.summary;
                 if (!briefSnippet && story) {
                     briefSnippet = story.substring(0, 160).trim() + "...";
                 } else if (!briefSnippet) {
-                    briefSnippet = "Click below to read the full details of this report.";
+                    briefSnippet = "Click below to read the full report.";
                 }
 
                 // 5. Inject Summary Card (Newspaper Style)
                 summaryContainer.innerHTML += `
-                    <div class="summary-box" style="--town-color: ${accentColor}">
-                        <h3>${title} <span class="tag">${mainTag}</span></h3>
-                        <p class="story-snippet">${briefSnippet}</p>
-                        <a class="bookmark-link" href="#${item.id}">Read Full Story ↓</a>
+                    <div class="summary-box" style="--town-color: ${mainAccentColor}; border-top: 5px solid ${mainAccentColor}; background: #fdfdfb; padding: 20px; margin-bottom: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.1); font-family: serif;">
+                        <h3 style="text-transform: uppercase; margin-top: 0;">${title}</h3>
+                        <div style="margin-bottom: 10px;">${tagsHTML}</div>
+                        <p class="story-snippet" style="font-size: 1.1rem; color: #444;">${briefSnippet}</p>
+                        <a class="bookmark-link" href="#${item.id}" style="color: ${mainAccentColor}; font-weight: bold;">Read Full Story ↓</a>
                     </div>`;
 
                 // 6. Inject Full Article Section
                 fullContainer.innerHTML += `
-                    <div class="full-story" id="${item.id}" style="border-left: 10px solid ${accentColor}; padding-left: 20px;">
-                        <h2 style="color: ${accentColor}">${title}</h2>
+                    <div class="full-story" id="${item.id}" style="border-left: 10px solid ${mainAccentColor}; padding-left: 20px; margin-top: 50px;">
+                        <h2 style="color: ${mainAccentColor}; font-family: serif;">${title}</h2>
+                        <div style="margin-bottom: 15px;">${tagsHTML}</div>
                         ${(source || date) ? `
                             <p style="font-size: 0.9rem; color: #666;">
                                 ${source ? `<strong>Source:</strong> ${source}` : ''} 
                                 ${source && date ? ' | ' : ''} 
                                 ${date ? `<strong>Date:</strong> ${date}` : ''}
                             </p>` : ''}
-                        <div class="story-body" style="white-space: pre-wrap; font-family: serif; margin-bottom: 20px;">${story}</div>
+                        <div class="story-body" style="white-space: pre-wrap; font-family: serif; margin-bottom: 20px; font-size: 1.1rem; line-height: 1.6;">${story}</div>
                         <div style="margin-top: 20px;">
-                             ${link ? `<a href="${link}" target="_blank" style="margin-right: 20px; font-weight: bold;">Original Source</a>` : ''}
-                             <a href="#summaries-section" style="text-decoration: none; color: #666;">↑ Back to Town Summaries</a>
+                             ${link ? `<a href="${link}" target="_blank" style="margin-right: 20px; font-weight: bold; color: ${mainAccentColor};">Original Source</a>` : ''}
+                             <a href="#town-summaries" style="text-decoration: none; color: #666;">↑ Back to Town Summaries</a>
                         </div>
                     </div>`;
             });
