@@ -1,22 +1,21 @@
 /* --- Base Page Layout --- */
 html {
-    scroll-behavior: smooth; /* Makes the "Read Full Story" jump look professional */
+    scroll-behavior: smooth;
 }
 
 body { 
     font-family: sans-serif; 
     line-height: 1.6; 
-    max-width: 900px; /* Slightly wider for that newspaper feel */
+    max-width: 900px; 
     margin: auto; 
     padding: 20px;
-    background-color: #f4f4f4; /* Light grey background to make cards pop */
+    background-color: #f4f4f4;
 }
 
 /* --- Newspaper Summary Boxes --- */
 .summary-box { 
-    /* Uses the color variable set in java.script */
-    border-top: 5px solid var(--town-color, #333); 
-    background: #fdfdfb; /* Newsprint paper color */
+    border-top: 10px solid var(--town-color, #333); /* Thicker border for better branding */
+    background: #fdfdfb; 
     padding: 25px;
     margin-bottom: 30px;
     box-shadow: 2px 4px 12px rgba(0,0,0,0.08);
@@ -31,9 +30,6 @@ body {
     color: #111;
     border-bottom: 1px solid #eee;
     padding-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 }
 
 .summary-box p {
@@ -50,46 +46,60 @@ body {
     padding: 4px 12px;
     border-radius: 3px;
     font-size: 0.65em;
-    font-family: sans-serif; /* Keeps tags clean and modern */
+    font-family: sans-serif;
     text-transform: none;
     letter-spacing: 1px;
 }
 
-.bookmark-link { 
+.read-more-btn { 
     color: var(--town-color, #007bff);
     text-decoration: underline;
     font-weight: bold;
     font-size: 0.95rem;
     font-family: sans-serif;
+    cursor: pointer;
 }
 
-/* --- Full Article Section --- */
+/* --- Full Article Section (Hidden by default) --- */
 .full-story { 
+    display: none; /* Keeps it off the page initially */
+    opacity: 0;
     background: #fff;
     padding: 30px;
-    margin-top: 60px;
+    margin-top: 40px;
     border-radius: 8px;
-    border-top: 1px solid #ddd;
-    scroll-margin-top: 20px; /* Prevents title from hitting the very top of the screen */
+    border-left: 15px solid var(--town-color, #333); /* Vertical town stripe */
+    scroll-margin-top: 50px;
+    transition: opacity 0.5s ease;
+}
+
+/* Show the story when the .active class is added */
+.full-story.active {
+    display: block;
+    opacity: 1;
 }
 
 .full-story h2 {
     font-family: "Georgia", serif;
-    font-size: 2rem;
+    font-size: 2.2rem;
     margin-bottom: 10px;
+    text-transform: uppercase;
 }
 
 .story-body {
     font-family: "Georgia", serif;
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     line-height: 1.8;
     color: #222;
+    white-space: pre-wrap; /* Keeps your news line-breaks */
 }
 
-.back-to-top {
+.back-link {
     display: inline-block;
-    margin-top: 20px;
-    font-size: 0.9rem;
+    margin-top: 25px;
+    font-size: 1rem;
+    font-weight: bold;
     color: #666;
     text-decoration: none;
+    cursor: pointer;
 }
