@@ -2,27 +2,48 @@ document.addEventListener('DOMContentLoaded', () => {
     const summaryContainer = document.getElementById('town-summaries');
     const fullContainer = document.getElementById('full-news-feed');
 
-    // Load the data from your news_data.json
+    // 1. Get the town from the URL (e.g., yourpage.com/index.html?town=OrangePark)
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentTown = urlParams.get('town'); 
+
+    // 2. Fetch the news data
     fetch('news_data.json')
         .then(response => {
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error('Could not find news_data.json file');
             }
             return response.json();
         })
         .then(data => {
-            data.forEach(item => {
-                // 1. Create the Summary (Top of page or Town pages)
+            // 3. Filter the data based on the town slug
+            const filteredNews = data.filter(item => {
+                // Logic: Show if no town is selected, OR if item is "General", 
+                // OR if the item tags include the current town.
+                if (!currentTown) return true; 
+                return item.tags.includes(currentTown) || 
+                       item.tags.includes("General") || 
+                       item.tags.length === 0;
+            });
+
+            // 4. Handle case where no news matches
+            if (filteredNews.length === 0) {
+                summaryContainer.innerHTML = '<p>No news available for this location.</p>';
+                return;
+            }
+
+            // 5. Build the HTML for each story
+            filteredNews.forEach(item => {
+                // Create the Summary Card
                 const summaryHTML = `
                     <div class="summary-box">
-                        <h3>${item.title} <span class="tag">${item.tags[0]}</span></h3>
+                        <h3>${item.title} <span class="tag">${item.tags[0] || 'General'}</span></h3>
                         <p>${item.summary}</p>
                         <a class="bookmark-link" href="#${item.id}">Read Full Story ↓</a>
                     </div>
                 `;
                 summaryContainer.innerHTML += summaryHTML;
 
-                // 2. Create the Full Content (The "Bookmark" destination)
+                // Create the Full Article
                 const fullHTML = `
                     <div class="full-story" id="${item.id}">
                         <h2>${item.title}</h2>
@@ -38,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         })
         .catch(error => {
-            console.error('Error loading news data:', error);
-            summaryContainer.innerHTML = '<p>Unable to load news at this time.</p>';
+            console.error('Error:', error);
+            summaryContainer.innerHTML = `<p style="color:red;">Error loading news: ${error.message}</p>`;
         });
 });
