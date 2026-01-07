@@ -3,10 +3,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const fullContainer = document.getElementById('full-news-feed');
     const processedIds = new Set();
 
-    // The strictly allowed list of towns for Clay County
+    // 1. SET THE HUB URL
+    // This tells the town sites where the full stories live
+    const articleBaseUrl = "https://supportmylocalcommunity.com/local-news/";
+
     const allowedTowns = ["Clay City", "Xenia", "Louisville", "Flora", "Sailor Springs", "Clay County", "North Clay"];
 
-    // COLOR LOCK MAPPING: Background and Text combinations
     const townColors = {
         "Flora": { bg: "#0c0b82", text: "#fe4f00" },
         "Louisville": { bg: "#010101", text: "#eb1c24" },
@@ -23,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return response.json();
         })
         .then(data => {
-            // STRICT FILTER: Only show stories belonging to the Clay County town list
             const filteredNews = data.filter(item => {
                 const tags = item.tags || [];
                 return tags.some(tag => allowedTowns.includes(tag));
@@ -35,7 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             filteredNews.forEach(item => {
-                // DE-DUPLICATION: Skip if we've already rendered this ID
                 if (processedIds.has(item.id)) return;
                 processedIds.add(item.id);
 
@@ -44,20 +44,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const validTags = allTags.filter(t => allowedTowns.includes(t));
                 const isMultiTown = validTags.length > 1;
 
-                // COLOR LOGIC: If it's more than one town, use Charcoal Grey. 
-                // If single town, use that town's specific background color.
                 const mainBG = isMultiTown ? "#333333" : (townColors[validTags[0]]?.bg || "#333333");
-                const mainText = isMultiTown ? "#ffffff" : (townColors[validTags[0]]?.text || "#ffffff");
 
-                // Generate HTML for individual tags using the Color Lock
                 const tagsHTML = validTags.map(t => {
                     const colors = townColors[t] || { bg: "#333333", text: "#ffffff" };
                     return `<span class="tag" style="background: ${colors.bg}; color: ${colors.text}; border: 1px solid ${colors.text}; padding: 2px 8px; border-radius: 4px; margin-right: 5px; font-size: 0.8em; display: inline-block; font-family: sans-serif; font-weight: bold;">${t}</span>`;
                 }).join('');
 
-                let briefSnippet = item.summary || (item.full_story ? item.full_story.substring(0, 160).trim() + "..." : "Click below to read the full report.");
+                let briefSnippet = item.summary || (item.full_story ? item.full_story.substring(0, 160).trim() + "..." : "Click below to read more.");
 
-                // 1. Inject Summary Newspaper Clip with Hover Effect
+                // 2. SUMMARY CARD (Updated with External Hub Link)
                 summaryContainer.innerHTML += `
                     <div class="summary-box" 
                          style="border-top: 10px solid ${mainBG}; background: #fdfdfb; padding: 20px; margin-bottom: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.1); font-family: serif; transition: 0.3s;"
@@ -67,22 +63,24 @@ document.addEventListener('DOMContentLoaded', () => {
                         <h3 style="text-transform: uppercase; margin-top: 0; font-size: 1.4rem; color: #111;">${title}</h3>
                         <div style="margin-bottom: 12px;">${tagsHTML}</div>
                         <p style="font-size: 1.1rem; color: #444; line-height: 1.4;">${briefSnippet}</p>
-                        <a class="bookmark-link" href="#${item.id}" style="color: ${mainBG}; font-weight: bold; text-decoration: underline;">Read Full Story ↓</a>
+                        
+                        <a class="bookmark-link" 
+                           href="${articleBaseUrl}?id=${item.id}" 
+                           style="color: ${mainBG}; font-weight: bold; text-decoration: underline;">
+                           Read Full Story ↓
+                        </a>
                     </div>`;
 
-                // 2. Inject Full Article Section
-                fullContainer.innerHTML += `
-                    <div class="full-story" id="${item.id}" style="border-left: 15px solid ${mainBG}; padding-left: 20px; margin-top: 60px; scroll-margin-top: 50px; background: #fff; padding-bottom: 30px;">
-                        <h2 style="color: ${mainBG}; font-family: serif; font-size: 2.2rem; margin-bottom: 5px; text-transform: uppercase;">${title}</h2>
-                        <div style="margin-bottom: 15px;">${tagsHTML}</div>
-                        <p style="font-size: 0.9rem; color: #666;">
-                            <strong>Source:</strong> ${item.source || 'Local News'} | <strong>Date:</strong> ${item.date || ''}
-                        </p>
-                        <div class="story-body" style="white-space: pre-wrap; font-family: serif; margin-bottom: 25px; font-size: 1.2rem; line-height: 1.7; color: #222;">${item.full_story || ''}</div>
-                        <div style="border-top: 1px solid #eee; padding-top: 15px;">
-                             <a href="#town-summaries" style="text-decoration: none; color: #666; font-size: 0.9rem; font-weight: bold;">↑ Back to Town Summaries</a>
-                        </div>
-                    </div>`;
+                // 3. (Optional) LOCAL FULL STORY
+                // We keep this here just in case you want the full story to also load on the town site
+                // but the link above will now send users to the main hub page instead.
+                if (fullContainer) {
+                    fullContainer.innerHTML += `
+                        <div class="full-story" id="${item.id}" style="border-left: 15px solid ${mainBG}; padding-left: 20px; margin-top: 60px; display:none;">
+                            <h2 style="color: ${mainBG}; font-family: serif; text-transform: uppercase;">${title}</h2>
+                            <div class="story-body">${item.full_story || ''}</div>
+                        </div>`;
+                }
             });
         })
         .catch(error => {
