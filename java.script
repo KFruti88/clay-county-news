@@ -1,13 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
     const summaryContainer = document.getElementById('town-summaries');
     const fullContainer = document.getElementById('full-news-feed');
+    const summariesSection = document.getElementById('summaries-section');
+    const articlesSection = document.getElementById('articles-section');
     const processedIds = new Set();
 
-    // 1. SET THE HUB URL
-    // This MUST match the new file you created on supportmylocalcommunity.com
-    const articleBaseUrl = "https://supportmylocalcommunity.com/local-news.html";
+    // 1. CONFIGURATION (Locked to the folder path to avoid 404s)
+    const jsonUrl = "https://kfruti88.github.io/clay-county-news/news_data.json";
+    const hubUrl = "https://supportmylocalcommunity.com/local-news/"; 
 
-    const allowedTowns = ["Clay City", "Xenia", "Louisville", "Flora", "Sailor Springs", "Clay County", "North Clay"];
+    // 2. SMART SWITCH LOGIC
+    const params = new URLSearchParams(window.location.search);
+    const storyId = params.get('id');
 
     const townColors = {
         "Flora": { bg: "#0c0b82", text: "#fe4f00" },
@@ -19,58 +23,53 @@ document.addEventListener('DOMContentLoaded', () => {
         "Clay County": { bg: "#333333", text: "#ffffff" }
     };
 
-    // Use absolute URL for the JSON so town sites can find it
-    fetch('https://kfruti88.github.io/clay-county-news/news_data.json')
-        .then(response => {
-            if (!response.ok) throw new Error('Could not find news_data.json');
-            return response.json();
-        })
+    // 3. FETCH AND RENDER
+    fetch(jsonUrl)
+        .then(response => response.json())
         .then(data => {
-            const filteredNews = data.filter(item => {
-                const tags = item.tags || [];
-                return tags.some(tag => allowedTowns.includes(tag));
-            });
-
-            if (filteredNews.length === 0) {
-                summaryContainer.innerHTML = '<p>No local news currently found.</p>';
-                return;
+            if (storyId) {
+                // --- FULL ARTICLE MODE ---
+                const story = data.find(item => item.id === storyId);
+                if (story) {
+                    if (summariesSection) summariesSection.style.display = 'none';
+                    if (articlesSection) articlesSection.style.display = 'block';
+                    renderFullStory(story);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            } else {
+                // --- SUMMARY LIST MODE ---
+                data.forEach(item => {
+                    if (processedIds.has(item.id)) return;
+                    processedIds.add(item.id);
+                    renderSummary(item);
+                });
             }
-
-            filteredNews.forEach(item => {
-                if (processedIds.has(item.id)) return;
-                processedIds.add(item.id);
-
-                const title = item.title || "Untitled Report";
-                const validTags = (item.tags || []).filter(t => allowedTowns.includes(t));
-                const mainBG = validTags.length > 1 ? "#333333" : (townColors[validTags[0]]?.bg || "#333333");
-
-                const tagsHTML = validTags.map(t => {
-                    const colors = townColors[t] || { bg: "#333333", text: "#ffffff" };
-                    return `<span class="tag" style="background:${colors.bg}; color:${colors.text}; border:1px solid ${colors.text}; padding:2px 8px; border-radius:4px; margin-right:5px; font-size:0.8em; display:inline-block; font-family:sans-serif; font-weight:bold;">${t}</span>`;
-                }).join('');
-
-                let briefSnippet = item.summary || (item.full_story ? item.full_story.substring(0, 160).trim() + "..." : "Click below to read more.");
-
-                // 2. GLOSSY SUMMARY CARD
-                summaryContainer.innerHTML += `
-                    <div class="summary-box" 
-                         style="border-top: 10px solid ${mainBG}; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); padding: 30px; margin-bottom: 30px; border-radius: 15px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); font-family: serif; transition: 0.3s;"
-                         onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 40px rgba(0,0,0,0.15)';"
-                         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 32px rgba(0,0,0,0.1)';"
-                    >
-                        <h3 style="text-transform: uppercase; margin-top: 0; font-size: 1.5rem; color: #111; font-weight: 900;">${title}</h3>
-                        <div style="margin-bottom: 15px;">${tagsHTML}</div>
-                        <p style="font-size: 1.15rem; color: #333; line-height: 1.6;">${briefSnippet}</p>
-                        
-                        <a href="${articleBaseUrl}?id=${item.id}" 
-                           style="display: inline-block; background: #222; color: #fff; padding: 10px 25px; border-radius: 50px; text-decoration: none; font-weight: bold; font-family: sans-serif; font-size: 0.9rem;">
-                           Read Full Story ↓
-                        </a>
-                    </div>`;
-            });
         })
-        .catch(error => {
-            console.error('Error:', error);
-            if(summaryContainer) summaryContainer.innerHTML = `<p style="color:red;">Error loading news.</p>`;
-        });
+        .catch(err => console.error("Error loading news:", err));
+
+    function renderSummary(item) {
+        if (!summaryContainer) return;
+        const mainBG = townColors[item.tags[0]]?.bg || "#333333";
+        const tagsHTML = item.tags.map(t => `<span class="tag" style="background:${townColors[t]?.bg || '#333'}; color:${townColors[t]?.text || '#fff'}; border:1px solid ${townColors[t]?.text || '#fff'}; padding:2px 8px; border-radius:4px; margin-right:5px; font-size:0.8em; font-weight:bold;">${t}</span>`).join('');
+        
+        summaryContainer.innerHTML += `
+            <div class="summary-box" style="border-top: 10px solid ${mainBG}; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); padding: 30px; margin-bottom: 30px; border-radius: 15px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); font-family: serif; transition: 0.3s;" onmouseover="this.style.transform='translateY(-5px)';" onmouseout="this.style.transform='translateY(0)';">
+                <h3 style="text-transform: uppercase; margin-top: 0; font-size: 1.5rem; color: #111; font-weight: 900;">${item.title}</h3>
+                <div style="margin-bottom: 15px;">${tagsHTML}</div>
+                <p style="font-size: 1.15rem; color: #333; line-height: 1.6;">${item.summary || (item.full_story.substring(0, 160) + "...")}</p>
+                <a href="${hubUrl}?id=${item.id}" style="display: inline-block; background: #222; color: #fff; padding: 10px 25px; border-radius: 50px; text-decoration: none; font-weight: bold;">Read Full Story ↓</a>
+            </div>`;
+    }
+
+    function renderFullStory(item) {
+        if (!fullContainer) return;
+        const mainColor = townColors[item.tags[0]]?.bg || "#333333";
+        fullContainer.innerHTML = `
+            <div style="border-left: 15px solid ${mainColor}; padding: 40px; background: #fff; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.1);">
+                <h1 style="color: ${mainColor}; font-size: 2.8rem; text-transform: uppercase; margin-top: 0; font-weight: 900;">${item.title}</h1>
+                <div style="white-space: pre-wrap; font-size: 1.35rem; line-height: 2; font-family: serif; color: #222;">${item.full_story}</div>
+                <hr style="margin: 40px 0; opacity: 0.1;">
+                <a href="${hubUrl}" style="display: inline-block; color: #444; font-weight: bold; text-decoration: none; border: 2px solid #444; padding: 10px 25px; border-radius: 50px;">← Back to All News</a>
+            </div>`;
+    }
 });
