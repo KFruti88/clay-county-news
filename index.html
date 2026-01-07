@@ -3,34 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clay County Local News</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Clay County Local News Hub</title>
+    
+    <link rel="stylesheet" href="https://kfruti88.github.io/clay-county-news/style.css">
+    
+    <style>
+        /* Ensures the hub looks good on both OurFlora and SupportMyLocalCommunity */
+        body {
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: #333;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            font-family: serif;
+            border-bottom: 5px solid #555;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .section-title {
+            font-family: serif;
+            text-transform: uppercase;
+            border-bottom: 2px solid #ccc;
+            margin-bottom: 20px;
+            color: #444;
+        }
+        /* Safety: Hide the full article container if it's empty to keep the page clean */
+        #full-news-feed:empty { display: none; }
+    </style>
 </head>
 <body>
 
     <header>
-        <h1>Clay County News Hub</h1>
-        <p>Select a town to see local updates</p>
+        <h1>CLAY COUNTY NEWS HUB</h1>
+        <p>Flora • Clay City • Louisville • Xenia • Sailor Springs</p>
     </header>
 
-    <section id="summaries-section">
-        <div class="container">
-            <h2>Town Summaries</h2>
+    <div class="container">
+        <section id="summaries-section">
+            <h2 class="section-title">Latest Local Updates</h2>
             <div id="town-summaries">
                 </div>
-        </div>
-    </section>
+        </section>
 
-    <div class="divider"></div>
-
-    <section id="articles-section">
-        <div class="container">
-            <h2>Full Local Articles</h2>
+        <section id="articles-section">
             <div id="full-news-feed">
                 </div>
-        </div>
-    </section>
+        </section>
+    </div>
 
-    <script src="java.script"></script>
+    <script src="https://kfruti88.github.io/clay-county-news/news-engine.js"></script>
+
 </body>
 </html>
