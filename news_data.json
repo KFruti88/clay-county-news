@@ -1,42 +1,30 @@
 [
-  {
-    "id": "clay-city-board-meets",
-    "title": "Clay City Board Meets",
-    "summary": "Village trustees approve a 5% pay increase for all employees and transition to an 8-hour workday without paid lunches.",
-    "source": "WNOI / Beth Fancher",
-    "tags": ["Clay City", "Flora"],
-    "date": "2026-01-07",
-    "full_story": "1/7/25\nBy Beth Fancher\nClay City village trustees met last night, dealing with a continuing employee benefits matter... [Full text continues]",
-    "link": "#"
-  },
-  {
-    "id": "gingerbread-house-winners",
-    "title": "Gingerbread House Winners Announced",
-    "summary": "Flora High School Foods Class reveals the winners of the Annual Gingerbread House Competition featuring 117 students.",
-    "source": "Flora High School",
-    "tags": ["Flora"],
-    "date": "2026-01-07",
-    "full_story": "The Flora High School Foods Class has announced the winners of the Annual Gingerbread House Competition...",
-    "link": "#"
-  },
-  {
-    "id": "weather-2025",
-    "title": "Clay County 2025 Weather Review",
-    "summary": "Annual stats show a high of 100°F in September and a total of 50.33 inches of precipitation for the year.",
-    "source": "US Weather Bureau",
-    "tags": ["General"],
-    "date": "2026-01-07",
-    "full_story": "Weather statistics kept at WNOI the US Weather Bureau Station in Clay County for 2025 have been compiled...",
-    "link": "#"
-  },
-  {
-    "id": "road-closure-123",
-    "title": "Blanding Blvd Construction",
-    "tags": ["Orange Park"],
-    "summary": "Expect delays near the mall due to ongoing road improvements.",
-    "source": "Public Works",
-    "date": "2026-01-07",
-    "full_story": "Construction crews will be working on Blanding Blvd throughout the week...",
-    "link": "#"
-  }
+    {
+        "id": "clay-city-board-meets",
+        "title": "CLAY CITY BOARD MEETS",
+        "full_story": "1/7/25\nBy Beth Fancher\nClay City village trustees met last night, dealing with a continuing employee benefits matter that has been under discussion for several months.  Board members expressed concern regarding the disparity in benefits provided to office personnel compared to other village employees.  Village trustees unanimously voted for all village employees to receive a five percent pay increase, though discussions about work hours with Village Attorney Barry Bright became heated.  Trustee Beth Prosser presented these recommendations by Zoom.\nTrustee Sue Lindeman said she was concerned the employes handbook was incorrect and questioned how Attorney Bright and a past mayor had allowed office personnel to work from 8 am to 4 pm and take an hour paid lunch break.  Attorney Bright said they were not given a raise at that time.  Trustee Lindeman asked why this was never voted on by the board and wanted to see this agreement on paper.  Attorney Bright said there was an oral agreement made several years ago, before Shannon Hall was employed by the village.\nTrustees approved an eight-hour workday with no paid lunch for all village employees.  Trustee Travis Strasbaugh voted no.  Strasbaugh later said he was concerned about a lawsuit.\nAfter an explanation on selling village owned property next to the Clay City Fellowship Church, Village President Mike Delonshaw was instructed to present an offer to the church and sell it as surplus property, to avoid legal paperwork and financial costs.\nTrustees approved purchasing a Chlorine Pocket Chlorometer replacing the current one that is not accurate at a cost of, $711.\nThey approved and signed of a lease with GFI (formerly Miller’s) for a new copy machine for $78.03 per month, plus $54.75 for maintenance and toner.  The second cost will only be as needed.\nSheriff Andy Myers presented the December sheriff’s report for the village.  Sheriff Myers said they are dealing with the Safety Act issues.\nHe also talked a little about the new body scan machine and that he is teaching a college credit course for all three schools in criminal justice.  He said last year he had 13 students and said there were 15 or 16 students this semester at Flora High School.",
+        "tags": [
+            "Flora",
+            "Clay City"
+        ],
+        "date": "2026-01-07"
+    },
+    {
+        "id": "gingerbread-house-winners",
+        "title": "GINGERBREAD HOUSE WINNERS",
+        "full_story": "1/7/26\nThe Flora High School Foods Class has announced the winners of the Annual Gingerbread House Competition.  There were 117 students that competed in 30 different groups.  All of the houses were based off a Children’s Christmas book.\nThe 4\nth\nplace winner was titled “‘Twas the Night before Christmas” and created by Adilynn O’Connor, Breta Heuerman, and Nicole Menghi.  The 3\nrd\nplace winner was titled “Christmas in the Cabin” and was created by Isham Lusk, Benny Allen, Parker Burmeister, Payton Herman, and Zaelin Welty.  The 2\nnd\nplace winner is the house titled “Christmas in the Big Woods” made by Phillip Smith, Jazzlyn Yates, and Kenet Banta.  And the 1st place entry titled “The Feeding & Care of the Grinch” was created by Makhara Spitzner, Neveah Alaniz, Maryssa Eldridge, and Makynlee Highsmith.\nThe foods class would like to thank everyone who stopped by the library to vote on the Gingerbread Houses.",
+        "tags": [
+            "Flora"
+        ],
+        "date": "2026-01-07"
+    },
+    {
+        "id": "weather-2025",
+        "title": "WEATHER 2025",
+        "full_story": "1/7/25\nWeather statistics kept at WNOI the US Weather Bureau Station in Clay County for 2025 have been compiled.\nThe average high for the year was 84.75 and the average low was 30.5.  We recorded 50.33 total inches of precipitation during the year.\nThe hottest day of 2025 happened on September 15\nth\nwhen the temperature reached 100.  The coldest day of the year was on January 16\nth\nwhen the thermometer read 1.  The day with the most rain was July 20\nth\nwhen we recorded 3.8 inches of rain.  The month with the most rainfall was April when the total rainfall was 11.2 inches.  December was the month with the least amount of rainfall with only 1.44 recorded.  January had the most snowfall with a total of 11 inches.  The most snowfall happened on January 6\nth\nwhen 6 inches of snow was measured.\nJuly was the hottest month with an average high temperature of 92.2 and January was the coldest month with an average high temperature of 34.3.",
+        "tags": [
+            "Clay County"
+        ],
+        "date": "2026-01-07"
+    }
 ]
