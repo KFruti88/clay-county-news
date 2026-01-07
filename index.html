@@ -2,61 +2,35 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clay County Local News</title>
-    <style>
-        body { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: auto; padding: 20px; }
-        .summary-box { border-left: 4px solid #007bff; padding: 10px; margin-bottom: 20px; background: #f9f9f9; }
-        .full-story { border-top: 2px solid #eee; margin-top: 50px; padding-top: 20px; }
-        .tag { background: #eee; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; }
-        .bookmark-link { color: #007bff; text-decoration: none; font-weight: bold; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <h1>Clay County News: Town Summaries</h1>
-    <div id="town-summaries">
+    <header>
+        <h1>Clay County News Hub</h1>
+        <p>Select a town to see local updates</p>
+    </header>
+
+    <section id="summaries-section">
+        <div class="container">
+            <h2>Town Summaries</h2>
+            <div id="town-summaries">
+                </div>
         </div>
+    </section>
 
-    <hr>
+    <div class="divider"></div>
 
-    <h1>Full Articles</h1>
-    <div id="full-news-feed">
+    <section id="articles-section">
+        <div class="container">
+            <h2>Full Local Articles</h2>
+            <div id="full-news-feed">
+                </div>
         </div>
+    </section>
 
-    <script>
-        // Load the data from your news_data.json
-        fetch('news_data.json')
-            .then(response => response.json())
-            .then(data => {
-                const summaryContainer = document.getElementById('town-summaries');
-                const fullContainer = document.getElementById('full-news-feed');
-
-                data.forEach(item => {
-                    // 1. Create the Summary (Top of page or Town pages)
-                    const summaryHTML = `
-                        <div class="summary-box">
-                            <h3>${item.title} <span class="tag">${item.tags[0]}</span></h3>
-                            <p>${item.summary}</p>
-                            <a class="bookmark-link" href="#${item.id}">Read Full Story ↓</a>
-                        </div>
-                    `;
-                    summaryContainer.innerHTML += summaryHTML;
-
-                    // 2. Create the Full Content (The "Bookmark" destination)
-                    const fullHTML = `
-                        <div class="full-story" id="${item.id}">
-                            <h2>${item.title}</h2>
-                            <p><strong>Source:</strong> ${item.source} | <strong>Date:</strong> ${item.date}</p>
-                            <div class="story-body">
-                                ${item.full_story}
-                            </div>
-                            <p><a href="${item.link}" target="_blank">View Original Source</a></p>
-                            <a href="#">Back to top ↑</a>
-                        </div>
-                    `;
-                    fullContainer.innerHTML += fullHTML;
-                });
-            });
-    </script>
+    <script src="java.script"></script>
 </body>
 </html>
