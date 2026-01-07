@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local News Center | Full Story</title>
+    
+    <link rel="stylesheet" href="https://kfruti88.github.io/clay-county-news/style.css">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #e0e0e0 0%, #f4f4f4 100%);
+            margin: 0;
+            padding: 0;
+        }
+        /* Header for the News Hub */
+        .news-header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .news-header h1 {
+            margin: 0;
+            font-family: serif;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        /* The container for the full article */
+        .article-wrapper {
+            width: 95%;
+            margin: 0 auto;
+            max-width: 1400px; /* Ultra-wide reading comfort */
+        }
+        /* Hide the summary section on this page because we only want the full story */
+        #summaries-section { display: none; }
+    </style>
+</head>
+<body>
+
+    <header class="news-header">
+        <h1>Local Community News Hub</h1>
+        <a href="https://supportmylocalcommunity.com" style="text-decoration: none; color: #666; font-weight: bold;">← Back to Home</a>
+    </header>
+
+    <div class="article-wrapper">
+        <section id="articles-section">
+            <div id="full-news-feed"></div>
+        </section>
+    </div>
+
+    <script src="https://kfruti88.github.io/clay-county-news/news-engine.js"></script>
+
+</body>
+</html>
