@@ -1,8 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     const summaryContainer = document.getElementById('town-summaries');
     const fullContainer = document.getElementById('full-news-feed');
+    
+    // Safety check to prevent duplicate stories
+    const processedIds = new Set();
 
-    // 1. Town Color Mapping
+    // Mapping town slugs to their official colors
     const townColors = {
         "Flora": "#0000FF",
         "Clay City": "#FF0000",
@@ -16,14 +19,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const currentTown = urlParams.get('town'); 
 
-    // 2. Fetch the news data
     fetch('news_data.json')
         .then(response => {
             if (!response.ok) throw new Error('Could not find news_data.json');
             return response.json();
         })
         .then(data => {
-            // 3. Filter news based on town slug or General status
+            // 1. Filter based on town selection
             const filteredNews = data.filter(item => {
                 if (!currentTown) return true; 
                 const tags = item.tags || [];
@@ -35,14 +37,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // 4. Build the page
+            // 2. Build the Page
             filteredNews.forEach(item => {
-                // Safety defaults to hide "undefined"
+                // SKIP DUPLICATES: If ID exists in Set, don't run the rest of the loop for this item
+                if (processedIds.has(item.id)) return;
+                processedIds.add(item.id);
+
                 const title = item.title || "Untitled Report";
                 const tags = item.tags || ["General"];
                 const isMultiTown = tags.length > 1;
                 
-                // COLOR LOGIC: If multi-town, use Grey. If single town, use that town's color.
+                // COLOR LOGIC: Single town gets themed card; Multi-town stays neutral Grey
                 const mainAccentColor = isMultiTown ? "#555555" : (townColors[tags[0]] || "#555555");
 
                 const source = item.source || "";
@@ -50,50 +55,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 const story = item.full_story || "";
                 const link = item.link || "";
 
-                // Generate HTML for the Tags with their specific colors
+                // Generate individual colorful tags
                 const tagsHTML = tags.map(t => {
                     const tColor = townColors[t] || "#555555";
-                    return `<span class="tag" style="background: ${tColor}; color: white; padding: 2px 8px; border-radius: 4px; margin-right: 5px; font-size: 0.8em;">${t}</span>`;
+                    return `<span class="tag" style="background: ${tColor}; color: white; padding: 2px 8px; border-radius: 4px; margin-right: 5px; font-size: 0.8em; display: inline-block; font-family: sans-serif;">${t}</span>`;
                 }).join('');
 
-                // Create a snippet for the summary if one isn't provided
-                let briefSnippet = item.summary;
-                if (!briefSnippet && story) {
-                    briefSnippet = story.substring(0, 160).trim() + "...";
-                } else if (!briefSnippet) {
-                    briefSnippet = "Click below to read the full report.";
-                }
+                // Create engagement snippet
+                let briefSnippet = item.summary || (story ? story.substring(0, 160).trim() + "..." : "Click to read more.");
 
-                // 5. Inject Summary Card (Newspaper Style)
+                // 3. Inject Summary Card
                 summaryContainer.innerHTML += `
-                    <div class="summary-box" style="--town-color: ${mainAccentColor}; border-top: 5px solid ${mainAccentColor}; background: #fdfdfb; padding: 20px; margin-bottom: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.1); font-family: serif;">
-                        <h3 style="text-transform: uppercase; margin-top: 0;">${title}</h3>
-                        <div style="margin-bottom: 10px;">${tagsHTML}</div>
-                        <p class="story-snippet" style="font-size: 1.1rem; color: #444;">${briefSnippet}</p>
-                        <a class="bookmark-link" href="#${item.id}" style="color: ${mainAccentColor}; font-weight: bold;">Read Full Story ↓</a>
+                    <div class="summary-box" style="border-top: 5px solid ${mainAccentColor}; background: #fdfdfb; padding: 20px; margin-bottom: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.1); font-family: serif;">
+                        <h3 style="text-transform: uppercase; margin-top: 0; font-size: 1.4rem;">${title}</h3>
+                        <div style="margin-bottom: 12px;">${tagsHTML}</div>
+                        <p style="font-size: 1.1rem; color: #444; line-height: 1.4;">${briefSnippet}</p>
+                        <a class="bookmark-link" href="#${item.id}" style="color: ${mainAccentColor}; font-weight: bold; text-decoration: underline;">Read Full Story ↓</a>
                     </div>`;
 
-                // 6. Inject Full Article Section
+                // 4. Inject Full Article
                 fullContainer.innerHTML += `
-                    <div class="full-story" id="${item.id}" style="border-left: 10px solid ${mainAccentColor}; padding-left: 20px; margin-top: 50px;">
-                        <h2 style="color: ${mainAccentColor}; font-family: serif;">${title}</h2>
+                    <div class="full-story" id="${item.id}" style="border-left: 10px solid ${mainAccentColor}; padding-left: 20px; margin-top: 60px; scroll-margin-top: 30px;">
+                        <h2 style="color: ${mainAccentColor}; font-family: serif; font-size: 2rem; margin-bottom: 5px;">${title}</h2>
                         <div style="margin-bottom: 15px;">${tagsHTML}</div>
                         ${(source || date) ? `
-                            <p style="font-size: 0.9rem; color: #666;">
+                            <p style="font-size: 0.9rem; color: #666; margin-bottom: 20px;">
                                 ${source ? `<strong>Source:</strong> ${source}` : ''} 
                                 ${source && date ? ' | ' : ''} 
                                 ${date ? `<strong>Date:</strong> ${date}` : ''}
                             </p>` : ''}
-                        <div class="story-body" style="white-space: pre-wrap; font-family: serif; margin-bottom: 20px; font-size: 1.1rem; line-height: 1.6;">${story}</div>
-                        <div style="margin-top: 20px;">
-                             ${link ? `<a href="${link}" target="_blank" style="margin-right: 20px; font-weight: bold; color: ${mainAccentColor};">Original Source</a>` : ''}
-                             <a href="#town-summaries" style="text-decoration: none; color: #666;">↑ Back to Town Summaries</a>
+                        <div class="story-body" style="white-space: pre-wrap; font-family: serif; margin-bottom: 25px; font-size: 1.15rem; line-height: 1.7;">${story}</div>
+                        <div style="border-top: 1px solid #eee; padding-top: 15px;">
+                             ${link ? `<a href="${link}" target="_blank" style="margin-right: 20px; font-weight: bold; color: ${mainAccentColor};">View Original Source</a>` : ''}
+                             <a href="#town-summaries" style="text-decoration: none; color: #666; font-size: 0.9rem;">↑ Back to Town Summaries</a>
                         </div>
                     </div>`;
             });
         })
         .catch(error => {
-            console.error('Error:', error);
-            summaryContainer.innerHTML = `<p style="color:red;">Error loading news: ${error.message}</p>`;
+            console.error('Error loading data:', error);
+            summaryContainer.innerHTML = `<p style="color:red;">Unable to load news data.</p>`;
         });
 });
