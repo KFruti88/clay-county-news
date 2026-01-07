@@ -1,38 +1,95 @@
-/* General page styling */
+/* --- Base Page Layout --- */
+html {
+    scroll-behavior: smooth; /* Makes the "Read Full Story" jump look professional */
+}
+
 body { 
     font-family: sans-serif; 
     line-height: 1.6; 
-    max-width: 800px; 
+    max-width: 900px; /* Slightly wider for that newspaper feel */
     margin: auto; 
-    padding: 20px; 
+    padding: 20px;
+    background-color: #f4f4f4; /* Light grey background to make cards pop */
 }
 
-/* Styling for the brief town summaries */
+/* --- Newspaper Summary Boxes --- */
 .summary-box { 
-    border-left: 4px solid #007bff; 
-    padding: 10px; 
-    margin-bottom: 20px; 
-    background: #f9f9f9; 
+    /* Uses the color variable set in java.script */
+    border-top: 5px solid var(--town-color, #333); 
+    background: #fdfdfb; /* Newsprint paper color */
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 2px 4px 12px rgba(0,0,0,0.08);
+    font-family: "Georgia", "Times New Roman", serif;
 }
 
-/* Layout for the detailed full stories */
-.full-story { 
-    border-top: 2px solid #eee; 
-    margin-top: 50px; 
-    padding-top: 20px; 
+.summary-box h3 {
+    text-transform: uppercase;
+    font-weight: 900;
+    font-size: 1.5rem;
+    margin-top: 0;
+    color: #111;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-/* Tag labels (e.g., location or category) */
+.summary-box p {
+    font-size: 1.15rem;
+    color: #333;
+    line-height: 1.5;
+    margin: 15px 0;
+}
+
+/* --- Tags & Links --- */
 .tag { 
-    background: #eee; 
-    padding: 2px 8px; 
-    border-radius: 4px; 
-    font-size: 0.8em; 
+    background: var(--town-color, #666);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 3px;
+    font-size: 0.65em;
+    font-family: sans-serif; /* Keeps tags clean and modern */
+    text-transform: none;
+    letter-spacing: 1px;
 }
 
-/* Anchor links for jumping to full stories */
 .bookmark-link { 
-    color: #007bff; 
-    text-decoration: none; 
-    font-weight: bold; 
+    color: var(--town-color, #007bff);
+    text-decoration: underline;
+    font-weight: bold;
+    font-size: 0.95rem;
+    font-family: sans-serif;
+}
+
+/* --- Full Article Section --- */
+.full-story { 
+    background: #fff;
+    padding: 30px;
+    margin-top: 60px;
+    border-radius: 8px;
+    border-top: 1px solid #ddd;
+    scroll-margin-top: 20px; /* Prevents title from hitting the very top of the screen */
+}
+
+.full-story h2 {
+    font-family: "Georgia", serif;
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.story-body {
+    font-family: "Georgia", serif;
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: #222;
+}
+
+.back-to-top {
+    display: inline-block;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #666;
+    text-decoration: none;
 }
