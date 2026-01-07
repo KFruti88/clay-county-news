@@ -1,74 +1,32 @@
-<div class="news-system-wrapper">
-    
-    <section id="summaries-section">
-        <h2 class="hub-title">Latest Local Updates</h2>
-        <div id="town-summaries">
-            </div>
-    </section>
-
-    <section id="articles-section" style="display:none;">
-        <div class="glossy-nav">
-            <a href="javascript:void(0)" onclick="window.location.href=window.location.pathname">← Back to News Feed</a>
-        </div>
-        <div id="full-news-feed">
-            </div>
-    </section>
-
-</div>
-
-<style>
-    /* Glossy & Ultra-Wide Styles for Divi */
-    .news-system-wrapper {
-        width: 100%;
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 20px;
-        font-family: 'Segoe UI', Roboto, sans-serif;
-    }
-
-    .hub-title {
-        font-family: serif;
-        text-transform: uppercase;
-        border-left: 10px solid #333;
-        padding-left: 20px;
-        margin-bottom: 30px;
-    }
-
-    /* Glassmorphism for the Full Article */
-    #full-news-feed {
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(15px);
-        border-radius: 20px;
-        padding: 40px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        border: 1px solid rgba(255,255,255,0.3);
-    }
-
-    .glossy-nav {
-        margin-bottom: 20px;
-    }
-
-    .glossy-nav a {
-        background: #333;
-        color: #fff !important;
-        padding: 10px 20px;
-        border-radius: 50px;
-        text-decoration: none;
-        font-weight: bold;
-        font-size: 0.9rem;
-    }
-</style>
-
-<script src="https://kfruti88.github.io/clay-county-news/news-engine.js"></script>
-
-<script>
-    // SMART REDIRECT LOGIC
-    // This part ensures that if ?id= is present, we hide the list and show the story
-    document.addEventListener('DOMContentLoaded', () => {
-        const params = new URLSearchParams(window.location.search);
-        if (params.has('id')) {
-            document.getElementById('summaries-section').style.display = 'none';
-            document.getElementById('articles-section').style.display = 'block';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Hub | Support My Local Community</title>
+    <link rel="stylesheet" href="https://kfruti88.github.io/clay-county-news/style.css">
+    <style>
+        body { background: #f0f2f5; margin: 0; padding: 0; }
+        .glass-container {
+            width: 95%; max-width: 1400px; margin: 40px auto;
+            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(15px);
+            border-radius: 20px; padding: 40px; box-shadow: 0 8px 32px rgba(0,0,0,0.1);
         }
-    });
-</script>
+        #summaries-section { display: block; } /* Show list by default */
+        #articles-section { display: none; } /* Hide article by default */
+    </style>
+</head>
+<body>
+    <div class="glass-container">
+        <section id="summaries-section">
+            <h2 style="font-family:serif; text-transform:uppercase;">Latest News Feed</h2>
+            <div id="town-summaries"></div>
+        </section>
+
+        <section id="articles-section">
+            <div id="full-news-feed"></div>
+        </section>
+    </div>
+    <script src="https://kfruti88.github.io/clay-county-news/news-engine.js"></script>
+</body>
+</html>
