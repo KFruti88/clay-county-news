@@ -2,60 +2,64 @@ document.addEventListener('DOMContentLoaded', () => {
     const summaryContainer = document.getElementById('town-summaries');
     const fullContainer = document.getElementById('full-news-feed');
 
-    // 1. Get the town from the URL (e.g., yourpage.com/index.html?town=OrangePark)
+    // 1. Get town from URL (e.g., ?town=Flora)
     const urlParams = new URLSearchParams(window.location.search);
     const currentTown = urlParams.get('town'); 
 
-    // 2. Fetch the news data
     fetch('news_data.json')
         .then(response => {
-            if (!response.ok) {
-                throw new Error('Could not find news_data.json file');
-            }
+            if (!response.ok) throw new Error('Could not find news_data.json');
             return response.json();
         })
         .then(data => {
-            // 3. Filter the data based on the town slug
+            // 2. Filter news based on town slug or General status
             const filteredNews = data.filter(item => {
-                // Logic: Show if no town is selected, OR if item is "General", 
-                // OR if the item tags include the current town.
                 if (!currentTown) return true; 
-                return item.tags.includes(currentTown) || 
-                       item.tags.includes("General") || 
-                       item.tags.length === 0;
+                const tags = item.tags || [];
+                return tags.includes(currentTown) || tags.includes("General") || tags.length === 0;
             });
 
-            // 4. Handle case where no news matches
+            // 3. Handle empty state
             if (filteredNews.length === 0) {
                 summaryContainer.innerHTML = '<p>No news available for this location.</p>';
                 return;
             }
 
-            // 5. Build the HTML for each story
+            // 4. Loop through and build the page
             filteredNews.forEach(item => {
-                // Create the Summary Card
-                const summaryHTML = `
-                    <div class="summary-box">
-                        <h3>${item.title} <span class="tag">${item.tags[0] || 'General'}</span></h3>
-                        <p>${item.summary}</p>
-                        <a class="bookmark-link" href="#${item.id}">Read Full Story ↓</a>
-                    </div>
-                `;
-                summaryContainer.innerHTML += summaryHTML;
+                // HIDE UNDEFINED: Assign defaults or empty strings
+                const title = item.title || "Untitled Report";
+                const summary = item.summary || ""; 
+                const tag = (item.tags && item.tags[0]) ? item.tags[0] : "General";
+                const source = item.source || "";
+                const date = item.date || "";
+                const story = item.full_story || "No content available.";
+                const link = item.link || "";
 
-                // Create the Full Article
-                const fullHTML = `
+                // 1. Create the Summary Card
+                // Only shows the <p> if a summary exists
+                summaryContainer.innerHTML += `
+                    <div class="summary-box">
+                        <h3>${title} <span class="tag">${tag}</span></h3>
+                        ${summary ? `<p>${summary}</p>` : ''}
+                        <a class="bookmark-link" href="#${item.id}">Read Full Story ↓</a>
+                    </div>`;
+
+                // 2. Create the Full Article
+                // Only shows Source/Date bar if at least one exists
+                fullContainer.innerHTML += `
                     <div class="full-story" id="${item.id}">
-                        <h2>${item.title}</h2>
-                        <p><strong>Source:</strong> ${item.source} | <strong>Date:</strong> ${item.date}</p>
-                        <div class="story-body">
-                            ${item.full_story}
-                        </div>
-                        <p><a href="${item.link}" target="_blank">View Original Source</a></p>
+                        <h2>${title}</h2>
+                        ${(source || date) ? `
+                            <p>
+                                ${source ? `<strong>Source:</strong> ${source}` : ''} 
+                                ${source && date ? ' | ' : ''} 
+                                ${date ? `<strong>Date:</strong> ${date}` : ''}
+                            </p>` : ''}
+                        <div class="story-body" style="white-space: pre-wrap; margin-bottom: 15px;">${story}</div>
+                        ${link ? `<p><a href="${link}" target="_blank">View Original Source</a></p>` : ''}
                         <a href="#">Back to top ↑</a>
-                    </div>
-                `;
-                fullContainer.innerHTML += fullHTML;
+                    </div>`;
             });
         })
         .catch(error => {
