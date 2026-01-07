@@ -3,29 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Source for Local News</title>
+    <title>Clay County Local News</title>
     
     <link rel="stylesheet" href="https://kfruti88.github.io/clay-county-news/style.css">
     
     <style>
-        /* Ensures the hub looks good on both OurFlora and SupportMyLocalCommunity */
         body {
             background-color: #f4f4f4;
             margin: 0;
             padding: 0;
         }
-        header {
-            background: #333;
-            color: white;
-            padding: 2rem;
-            text-align: center;
-            font-family: serif;
-            border-bottom: 5px solid #555;
-        }
-        .container {
+        /* This is the master wrapper that keeps everything centered */
+        .master-wrapper {
             max-width: 900px;
-            margin: 20px auto;
+            margin: 0 auto;
             padding: 20px;
+            /* This ensures the page grows with the news */
+            height: auto; 
+            min-height: 100vh; 
         }
         .section-title {
             font-family: serif;
@@ -34,13 +29,13 @@
             margin-bottom: 20px;
             color: #444;
         }
-        /* Safety: Hide the full article container if it's empty to keep the page clean */
+        /* Safety: Ensures no strange gaps if the hub is empty */
         #full-news-feed:empty { display: none; }
     </style>
 </head>
 <body>
 
-        <div class="container">
+    <div class="master-wrapper">
         <section id="summaries-section">
             <h2 class="section-title">Latest Local Updates</h2>
             <div id="town-summaries">
