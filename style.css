@@ -1,80 +1,134 @@
-/* --- Base Page Layout --- */
+/* --- Ultra-Wide Base & Glassy Background --- */
 html {
     scroll-behavior: smooth;
 }
 
 body { 
-    font-family: sans-serif; 
+    background: linear-gradient(135deg, #e0e0e0 0%, #f4f4f4 100%);
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     line-height: 1.6; 
-    max-width: 900px; 
-    margin: 0 auto; /* Centered */
-    padding: 20px;
-    background-color: #f4f4f4;
+    margin: 0; 
+    padding: 0;
+    min-height: 100vh;
+    width: 100%;
+    overflow-x: hidden; /* Prevents unwanted horizontal scrolling */
 }
 
-/* --- Container Fixes (Stops the "Stopping Midway" issue) --- */
+/* --- Responsive Layout Containers (No Max Width) --- */
 #town-summaries, #full-news-feed {
-    width: 100%;
+    width: 96%; /* Leaves a small 2% gutter on each side */
+    margin: 30px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    box-sizing: border-box; 
     height: auto; 
     min-height: 100px;
-    display: block;
-    overflow: visible; /* Prevents text from getting cut off */
-    clear: both;
+    overflow: visible;
 }
 
-/* --- Newspaper Summary Boxes --- */
+/* --- Ultra-Wide Glossy Cards (Glassmorphism) --- */
 .summary-box { 
-    border-top: 10px solid var(--town-color, #333);
-    background: #fdfdfb; 
-    padding: 25px;
-    margin-bottom: 30px;
-    box-shadow: 2px 4px 12px rgba(0,0,0,0.08);
-    font-family: "Georgia", serif;
+    width: 100% !important; /* Stretches to the full width of the container */
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.70) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    border-top: 12px solid var(--town-color, #333) !important; /* Thicker accent line */
+    border-radius: 24px;
+    padding: 40px; /* Deep padding for a luxury wide-screen look */
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.12);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     display: flex;
     flex-direction: column;
 }
 
+.summary-box:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.90) !important;
+    box-shadow: 0 20px 50px 0 rgba(31, 38, 135, 0.2);
+}
+
+/* --- Wide-Screen Typography --- */
 .summary-box h3 {
     text-transform: uppercase;
     font-weight: 900;
-    font-size: 1.5rem;
+    font-size: 2rem; /* Scaled up for wide screens */
     margin-top: 0;
-    color: #111;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
+    color: #1a1a1a;
+    letter-spacing: -0.5px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    padding-bottom: 15px;
 }
 
-/* --- Tags & Read More --- */
+.summary-box p {
+    font-size: 1.25rem;
+    color: #333;
+    margin: 20px 0;
+    max-width: 1200px; /* Keeps text readable on ultra-wide screens */
+}
+
+/* --- Pill Tags & Buttons --- */
 .tag { 
-    padding: 4px 12px;
-    border-radius: 3px;
-    font-size: 0.7em;
-    font-family: sans-serif;
-    font-weight: bold;
     display: inline-block;
-    margin-top: 5px;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    box-shadow: inset 0 0 8px rgba(255,255,255,0.3);
+    margin: 0 10px 10px 0;
 }
 
 .bookmark-link, .read-more-btn { 
-    color: #007bff;
-    text-decoration: underline;
-    font-weight: bold;
-    margin-top: 10px;
+    align-self: flex-start;
+    background: #111;
+    color: #fff !important;
+    padding: 14px 30px;
+    border-radius: 60px;
+    text-decoration: none !important;
+    font-weight: 700;
+    font-size: 1rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    margin-top: 15px;
 }
 
-/* --- Full Article Hub Styling --- */
+.bookmark-link:hover, .read-more-btn:hover {
+    background: #000;
+    transform: scale(1.05);
+}
+
+/* --- Full Article Hub Styling (Ultra-Wide) --- */
 .full-story-display { 
-    background: #fff;
-    padding: 40px;
-    margin-top: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    width: 100% !important;
+    box-sizing: border-box;
+    background: #ffffff;
+    padding: 60px; /* Extra deep padding for full articles */
+    border-radius: 30px;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.1);
+    border-left: 20px solid var(--town-color, #333);
 }
 
 .story-body {
     font-family: "Georgia", serif;
-    font-size: 1.25rem;
-    line-height: 1.8;
+    font-size: 1.4rem;
+    line-height: 2;
     color: #222;
-    white-space: pre-wrap; /* Essential for keeping line breaks from your JSON */
+    white-space: pre-wrap;
+    max-width: 1400px; /* Limits width for optimal reading comfort */
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 1200px) {
+    #town-summaries, #full-news-feed { width: 98%; }
+    .summary-box { padding: 30px; }
+}
+
+@media (max-width: 600px) {
+    .summary-box { padding: 20px; border-top-width: 8px; }
+    .summary-box h3 { font-size: 1.5rem; }
+    .full-story-display { padding: 30px; border-left-width: 12px; }
 }
