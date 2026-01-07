@@ -3,17 +3,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const fullContainer = document.getElementById('full-news-feed');
     const processedIds = new Set();
 
-    // The strictly allowed list of towns for Clay County
-    const allowedTowns = ["Clay City", "Xenia", "Louisville", "Flora", "Sailor Springs", "Clay County"];
+    // The official list of towns for Clay County
+    const allowedTowns = ["Clay City", "Xenia", "Louisville", "Flora", "Sailor Springs", "Clay County", "North Clay"];
 
-    // Mapping colors to your town-colors file
+    // 1. UPDATED COLOR LOCK MAPPING (Background + Font)
     const townColors = {
-        "Flora": "#0000FF",
-        "Clay City": "#FF0000",
-        "Louisville": "#008000",
-        "Xenia": "#FFA500",
-        "Sailor Springs": "#800080",
-        "Clay County": "#555555"
+        "Flora": { bg: "#0c0b82", text: "#fe4f00" },          // Deep Blue / Orange
+        "Louisville": { bg: "#010101", text: "#eb1c24" },     // Black / Cardinal Red
+        "North Clay": { bg: "#010101", text: "#eb1c24" },     // Black / Cardinal Red
+        "Clay City": { bg: "#0c30f0", text: "#8a8a88" },      // Blue / Grey
+        "Xenia": { bg: "#000000", text: "#fdb813" },          // Black / School Bus Yellow
+        "Sailor Springs": { bg: "#000000", text: "#a020f0" }, // Black / Purple
+        "Clay County": { bg: "#333333", text: "#ffffff" }     // Charcoal / White
     };
 
     fetch('news_data.json')
@@ -22,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return response.json();
         })
         .then(data => {
-            // STRICT FILTER: Only show stories belonging to the Clay County town list
             const filteredNews = data.filter(item => {
                 const tags = item.tags || [];
                 return tags.some(tag => allowedTowns.includes(tag));
@@ -34,51 +34,46 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             filteredNews.forEach(item => {
-                // 1. DE-DUPLICATION: Skip if we've already rendered this ID
                 if (processedIds.has(item.id)) return;
                 processedIds.add(item.id);
 
                 const title = item.title || "Untitled Report";
                 const allTags = item.tags || [];
-                
-                // Only use tags that are part of our official Clay County list for styling
                 const validTags = allTags.filter(t => allowedTowns.includes(t));
                 const isMultiTown = validTags.length > 1;
 
-                // COLOR LOGIC: If it's more than one town, the card is neutral Grey.
-                // If it's only one town, the whole card uses that town's color.
-                const mainAccentColor = isMultiTown ? "#555555" : (townColors[validTags[0]] || "#555555");
+                // 2. ACCENT LOGIC
+                // Uses the 'bg' property for the borders. Multi-town defaults to Charcoal.
+                const mainAccentColor = isMultiTown ? "#333333" : (townColors[validTags[0]]?.bg || "#333333");
 
-                // Generate HTML for individual tags
+                // 3. TAG GENERATION (Now using the 'text' property for font color)
                 const tagsHTML = validTags.map(t => {
-                    const tColor = townColors[t] || "#555555";
-                    return `<span class="tag" style="background: ${tColor}; color: white; padding: 2px 8px; border-radius: 4px; margin-right: 5px; font-size: 0.8em; display: inline-block; font-family: sans-serif;">${t}</span>`;
+                    const colors = townColors[t] || { bg: "#333333", text: "#ffffff" };
+                    return `<span class="tag" style="background: ${colors.bg}; color: ${colors.text}; border: 1px solid ${colors.text}; padding: 2px 8px; border-radius: 4px; margin-right: 5px; font-size: 0.8em; display: inline-block; font-family: sans-serif; font-weight: bold;">${t}</span>`;
                 }).join('');
 
-                // Create engagement snippet
                 let briefSnippet = item.summary || (item.full_story ? item.full_story.substring(0, 160).trim() + "..." : "Click below to read more.");
 
-                // 2. Inject Summary Newspaper Clip
+                // 4. INJECT SUMMARY
                 summaryContainer.innerHTML += `
-                    <div class="summary-box" style="border-top: 5px solid ${mainAccentColor}; background: #fdfdfb; padding: 20px; margin-bottom: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.1); font-family: serif;">
+                    <div class="summary-box" style="border-top: 10px solid ${mainAccentColor}; background: #fdfdfb; padding: 20px; margin-bottom: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.1); font-family: serif;">
                         <h3 style="text-transform: uppercase; margin-top: 0; font-size: 1.4rem;">${title}</h3>
                         <div style="margin-bottom: 12px;">${tagsHTML}</div>
                         <p style="font-size: 1.1rem; color: #444; line-height: 1.4;">${briefSnippet}</p>
                         <a class="bookmark-link" href="#${item.id}" style="color: ${mainAccentColor}; font-weight: bold; text-decoration: underline;">Read Full Story ↓</a>
                     </div>`;
 
-                // 3. Inject Full Article Section
+                // 5. INJECT FULL STORY
                 fullContainer.innerHTML += `
-                    <div class="full-story" id="${item.id}" style="border-left: 10px solid ${mainAccentColor}; padding-left: 20px; margin-top: 60px; scroll-margin-top: 50px;">
-                        <h2 style="color: ${mainAccentColor}; font-family: serif; font-size: 2rem; margin-bottom: 5px;">${title}</h2>
+                    <div class="full-story" id="${item.id}" style="border-left: 15px solid ${mainAccentColor}; padding-left: 20px; margin-top: 60px; scroll-margin-top: 50px;">
+                        <h2 style="color: ${mainAccentColor}; font-family: serif; font-size: 2rem; margin-bottom: 5px; text-transform: uppercase;">${title}</h2>
                         <div style="margin-bottom: 15px;">${tagsHTML}</div>
                         <p style="font-size: 0.9rem; color: #666;">
                             <strong>Source:</strong> ${item.source || 'Local News'} | <strong>Date:</strong> ${item.date || ''}
                         </p>
                         <div class="story-body" style="white-space: pre-wrap; font-family: serif; margin-bottom: 25px; font-size: 1.15rem; line-height: 1.7;">${item.full_story || ''}</div>
                         <div style="border-top: 1px solid #eee; padding-top: 15px;">
-                             ${item.link ? `<a href="${item.link}" target="_blank" style="margin-right: 20px; font-weight: bold; color: ${mainAccentColor};">Original Source</a>` : ''}
-                             <a href="#town-summaries" style="text-decoration: none; color: #666; font-size: 0.9rem;">↑ Back to Town Summaries</a>
+                             <a href="#town-summaries" style="text-decoration: none; color: #666; font-size: 0.9rem; font-weight: bold;">↑ Back to Town Summaries</a>
                         </div>
                     </div>`;
             });
