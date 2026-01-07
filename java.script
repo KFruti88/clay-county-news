@@ -2,63 +2,81 @@ document.addEventListener('DOMContentLoaded', () => {
     const summaryContainer = document.getElementById('town-summaries');
     const fullContainer = document.getElementById('full-news-feed');
 
-    // 1. Get town from URL (e.g., ?town=Flora)
+    // 1. Town Color Mapping
+    const townColors = {
+        "Flora": "#0000FF",
+        "Clay City": "#FF0000",
+        "Louisville": "#008000",
+        "Xenia": "#FFA500",
+        "Sailor Springs": "#800080",
+        "Clay County": "#555555",
+        "General": "#333333"
+    };
+
     const urlParams = new URLSearchParams(window.location.search);
     const currentTown = urlParams.get('town'); 
 
+    // 2. Fetch the news data
     fetch('news_data.json')
         .then(response => {
             if (!response.ok) throw new Error('Could not find news_data.json');
             return response.json();
         })
         .then(data => {
-            // 2. Filter news based on town slug or General status
+            // 3. Filter news based on town slug or General status
             const filteredNews = data.filter(item => {
                 if (!currentTown) return true; 
                 const tags = item.tags || [];
                 return tags.includes(currentTown) || tags.includes("General") || tags.length === 0;
             });
 
-            // 3. Handle empty state
             if (filteredNews.length === 0) {
                 summaryContainer.innerHTML = '<p>No news available for this location.</p>';
                 return;
             }
 
-            // 4. Loop through and build the page
+            // 4. Build the page
             filteredNews.forEach(item => {
-                // HIDE UNDEFINED: Assign defaults or empty strings
+                // Safety defaults to hide "undefined"
                 const title = item.title || "Untitled Report";
-                const summary = item.summary || ""; 
-                const tag = (item.tags && item.tags[0]) ? item.tags[0] : "General";
+                const mainTag = (item.tags && item.tags[0]) ? item.tags[0] : "General";
+                const accentColor = townColors[mainTag] || "#555555";
                 const source = item.source || "";
                 const date = item.date || "";
-                const story = item.full_story || "No content available.";
+                const story = item.full_story || "";
                 const link = item.link || "";
 
-                // 1. Create the Summary Card
-                // Only shows the <p> if a summary exists
+                // Logic: Create a snippet for the summary if one isn't provided
+                let briefSnippet = item.summary;
+                if (!briefSnippet && story) {
+                    briefSnippet = story.substring(0, 160).trim() + "...";
+                } else if (!briefSnippet) {
+                    briefSnippet = "Click below to read the full details of this report.";
+                }
+
+                // 5. Inject Summary Card (Newspaper Style)
                 summaryContainer.innerHTML += `
-                    <div class="summary-box">
-                        <h3>${title} <span class="tag">${tag}</span></h3>
-                        ${summary ? `<p>${summary}</p>` : ''}
+                    <div class="summary-box" style="--town-color: ${accentColor}">
+                        <h3>${title} <span class="tag">${mainTag}</span></h3>
+                        <p class="story-snippet">${briefSnippet}</p>
                         <a class="bookmark-link" href="#${item.id}">Read Full Story ↓</a>
                     </div>`;
 
-                // 2. Create the Full Article
-                // Only shows Source/Date bar if at least one exists
+                // 6. Inject Full Article Section
                 fullContainer.innerHTML += `
-                    <div class="full-story" id="${item.id}">
-                        <h2>${title}</h2>
+                    <div class="full-story" id="${item.id}" style="border-left: 10px solid ${accentColor}; padding-left: 20px;">
+                        <h2 style="color: ${accentColor}">${title}</h2>
                         ${(source || date) ? `
-                            <p>
+                            <p style="font-size: 0.9rem; color: #666;">
                                 ${source ? `<strong>Source:</strong> ${source}` : ''} 
                                 ${source && date ? ' | ' : ''} 
                                 ${date ? `<strong>Date:</strong> ${date}` : ''}
                             </p>` : ''}
-                        <div class="story-body" style="white-space: pre-wrap; margin-bottom: 15px;">${story}</div>
-                        ${link ? `<p><a href="${link}" target="_blank">View Original Source</a></p>` : ''}
-                        <a href="#">Back to top ↑</a>
+                        <div class="story-body" style="white-space: pre-wrap; font-family: serif; margin-bottom: 20px;">${story}</div>
+                        <div style="margin-top: 20px;">
+                             ${link ? `<a href="${link}" target="_blank" style="margin-right: 20px; font-weight: bold;">Original Source</a>` : ''}
+                             <a href="#summaries-section" style="text-decoration: none; color: #666;">↑ Back to Town Summaries</a>
+                        </div>
                     </div>`;
             });
         })
