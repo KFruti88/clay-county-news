@@ -4,8 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const processedIds = new Set();
 
     // 1. SET THE HUB URL
-    // This tells the town sites where the full stories live
-    const articleBaseUrl = "https://supportmylocalcommunity.com/local-news/";
+    // This MUST match the new file you created on supportmylocalcommunity.com
+    const articleBaseUrl = "https://supportmylocalcommunity.com/local-news.html";
 
     const allowedTowns = ["Clay City", "Xenia", "Louisville", "Flora", "Sailor Springs", "Clay County", "North Clay"];
 
@@ -19,7 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
         "Clay County": { bg: "#333333", text: "#ffffff" }
     };
 
-    fetch('news_data.json')
+    // Use absolute URL for the JSON so town sites can find it
+    fetch('https://kfruti88.github.io/clay-county-news/news_data.json')
         .then(response => {
             if (!response.ok) throw new Error('Could not find news_data.json');
             return response.json();
@@ -40,51 +41,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 processedIds.add(item.id);
 
                 const title = item.title || "Untitled Report";
-                const allTags = item.tags || [];
-                const validTags = allTags.filter(t => allowedTowns.includes(t));
-                const isMultiTown = validTags.length > 1;
-
-                const mainBG = isMultiTown ? "#333333" : (townColors[validTags[0]]?.bg || "#333333");
+                const validTags = (item.tags || []).filter(t => allowedTowns.includes(t));
+                const mainBG = validTags.length > 1 ? "#333333" : (townColors[validTags[0]]?.bg || "#333333");
 
                 const tagsHTML = validTags.map(t => {
                     const colors = townColors[t] || { bg: "#333333", text: "#ffffff" };
-                    return `<span class="tag" style="background: ${colors.bg}; color: ${colors.text}; border: 1px solid ${colors.text}; padding: 2px 8px; border-radius: 4px; margin-right: 5px; font-size: 0.8em; display: inline-block; font-family: sans-serif; font-weight: bold;">${t}</span>`;
+                    return `<span class="tag" style="background:${colors.bg}; color:${colors.text}; border:1px solid ${colors.text}; padding:2px 8px; border-radius:4px; margin-right:5px; font-size:0.8em; display:inline-block; font-family:sans-serif; font-weight:bold;">${t}</span>`;
                 }).join('');
 
                 let briefSnippet = item.summary || (item.full_story ? item.full_story.substring(0, 160).trim() + "..." : "Click below to read more.");
 
-                // 2. SUMMARY CARD (Updated with External Hub Link)
+                // 2. GLOSSY SUMMARY CARD
                 summaryContainer.innerHTML += `
                     <div class="summary-box" 
-                         style="border-top: 10px solid ${mainBG}; background: #fdfdfb; padding: 20px; margin-bottom: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.1); font-family: serif; transition: 0.3s;"
-                         onmouseover="this.style.boxShadow='0px 0px 15px ${mainBG}'; this.style.transform='scale(1.01)';"
-                         onmouseout="this.style.boxShadow='2px 2px 10px rgba(0,0,0,0.1)'; this.style.transform='scale(1)';"
+                         style="border-top: 10px solid ${mainBG}; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); padding: 30px; margin-bottom: 30px; border-radius: 15px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); font-family: serif; transition: 0.3s;"
+                         onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 40px rgba(0,0,0,0.15)';"
+                         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 32px rgba(0,0,0,0.1)';"
                     >
-                        <h3 style="text-transform: uppercase; margin-top: 0; font-size: 1.4rem; color: #111;">${title}</h3>
-                        <div style="margin-bottom: 12px;">${tagsHTML}</div>
-                        <p style="font-size: 1.1rem; color: #444; line-height: 1.4;">${briefSnippet}</p>
+                        <h3 style="text-transform: uppercase; margin-top: 0; font-size: 1.5rem; color: #111; font-weight: 900;">${title}</h3>
+                        <div style="margin-bottom: 15px;">${tagsHTML}</div>
+                        <p style="font-size: 1.15rem; color: #333; line-height: 1.6;">${briefSnippet}</p>
                         
-                        <a class="bookmark-link" 
-                           href="${articleBaseUrl}?id=${item.id}" 
-                           style="color: ${mainBG}; font-weight: bold; text-decoration: underline;">
+                        <a href="${articleBaseUrl}?id=${item.id}" 
+                           style="display: inline-block; background: #222; color: #fff; padding: 10px 25px; border-radius: 50px; text-decoration: none; font-weight: bold; font-family: sans-serif; font-size: 0.9rem;">
                            Read Full Story ↓
                         </a>
                     </div>`;
-
-                // 3. (Optional) LOCAL FULL STORY
-                // We keep this here just in case you want the full story to also load on the town site
-                // but the link above will now send users to the main hub page instead.
-                if (fullContainer) {
-                    fullContainer.innerHTML += `
-                        <div class="full-story" id="${item.id}" style="border-left: 15px solid ${mainBG}; padding-left: 20px; margin-top: 60px; display:none;">
-                            <h2 style="color: ${mainBG}; font-family: serif; text-transform: uppercase;">${title}</h2>
-                            <div class="story-body">${item.full_story || ''}</div>
-                        </div>`;
-                }
             });
         })
         .catch(error => {
             console.error('Error:', error);
-            summaryContainer.innerHTML = `<p style="color:red;">Error loading news: ${error.message}</p>`;
+            if(summaryContainer) summaryContainer.innerHTML = `<p style="color:red;">Error loading news.</p>`;
         });
 });
