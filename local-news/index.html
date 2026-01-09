@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clay County Hub | News & Events</title>
+    
+    <link rel="stylesheet" href="https://kfruti88.github.io/clay-county-news/style.css">
+    
+    <style>
+        html { scroll-behavior: smooth; }
+        body { background: #f4f4f4; margin: 0; padding: 0; font-family: sans-serif; }
+        .hub-header { background: #fff; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
+        .hub-tabs { padding: 10px 0 15px 0; display: flex; justify-content: center; gap: 5px; flex-wrap: wrap; }
+        .tab-btn { padding: 10px 20px; border: none; cursor: pointer; border-radius: 20px; font-weight: bold; background: #ddd; text-transform: uppercase; font-size: 0.8rem; }
+        .tab-btn.active { background: #0c0b82; color: white; }
+        .article-wrapper { width: 95%; max-width: 1000px; margin: 20px auto; }
+        .tab-content { display: none; padding: 10px; }
+        .tab-content.active { display: block; }
+        .full-story-display { background: white; padding: 30px; margin-bottom: 30px; border-radius: 12px; border-left: 12px solid var(--town-color, #333); scroll-margin-top: 160px; }
+        iframe { width: 100%; height: 850px; border: none; background: white; border-radius: 12px; }
+    </style>
+</head>
+<body>
+
+<header class="hub-header">
+    <h1 style="padding:15px 0 5px 0; margin:0; text-transform:uppercase;">Clay County News Center</h1>
+    <div class="hub-tabs">
+        <button class="tab-btn active" onclick="openTab('news-tab')">Full News Feed</button>
+        <button class="tab-btn" onclick="openTab('events-tab')">Schedule View</button>
+        <button class="tab-btn" onclick="openTab('calendar-tab')">Master Calendar</button>
+        <a href="https://supportmylocalcommunity.com" style="padding: 10px 15px; text-decoration:none; color:#666; font-weight:bold;">← HOME</a>
+    </div>
+</header>
+
+<div class="article-wrapper">
+    <div id="news-tab" class="tab-content active">
+        <div id="full-news-feed"><p style="text-align:center;">Syncing with JSON Data...</p></div>
+        <div id="ad-slot" style="display:none;"></div>
+    </div>
+
+    <div id="events-tab" class="tab-content">
+        <iframe src="https://kfruti88.github.io/Clay-County-All/Calendar/month-index.html"></iframe>
+    </div>
+
+    <div id="calendar-tab" class="tab-content">
+        <iframe src="https://kfruti88.github.io/Clay-County-All/Calendar/Index.html"></iframe>
+    </div>
+</div>
+
+<script src="https://kfruti88.github.io/clay-county-news/news-engine.js"></script>
+
+<script>
+    function openTab(id) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        event.currentTarget.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // HANDLES JUMP FROM TOWN SUMMARIES
+    window.addEventListener('load', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const storyId = urlParams.get('id');
+        if (storyId) {
+            setTimeout(() => {
+                const el = document.getElementById(storyId);
+                if (el) { el.scrollIntoView({ behavior: 'smooth' }); el.style.borderLeftWidth = "25px"; }
+            }, 800);
+        }
+    });
+
+    function rotateAds() { return; } 
+</script>
+</body>
+</html>
