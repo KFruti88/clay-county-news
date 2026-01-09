@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const processedIds = new Set();
 
     const jsonUrl = "https://kfruti88.github.io/clay-county-news/news_data.json";
-    const hubUrl = "https://supportmylocalcommunity.com/local-news/"; // Your Main Hub
+    const hubUrl = "https://supportmylocalcommunity.com/local-news/"; // Your Main Hub #lock
 
     const params = new URLSearchParams(window.location.search);
     const targetId = params.get('id');
