@@ -3,50 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Local News Center | Full Story Feed</title>
+    <title>Clay County News & Events Hub</title>
     <link rel="stylesheet" href="https://kfruti88.github.io/clay-county-news/style.css">
     <style>
         html { scroll-behavior: smooth; }
-        body { background: linear-gradient(135deg, #e0e0e0 0%, #f4f4f4 100%); margin: 0; padding: 0; font-family: sans-serif; }
-        .news-header { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); padding: 20px; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
-        .article-wrapper { width: 95%; margin: 40px auto; max-width: 900px; }
-        .full-story-display { scroll-margin-top: 120px; margin-bottom: 60px; background: #fff; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        body { background: #f4f4f4; margin: 0; padding: 0; font-family: sans-serif; }
+        
+        /* --- STICKY HUB HEADER --- */
+        .hub-header { 
+            background: #fff; 
+            position: sticky; 
+            top: 0; 
+            z-index: 1000; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+            text-align: center;
+        }
+        .hub-title { padding: 15px 0 5px 0; margin: 0; font-family: serif; text-transform: uppercase; letter-spacing: 2px; color: #333; font-size: 1.4rem; }
+        
+        /* --- NAVIGATION TABS --- */
+        .hub-tabs { padding: 10px 0 15px 0; display: flex; justify-content: center; flex-wrap: wrap; gap: 5px; }
+        .tab-btn { 
+            padding: 10px 20px; 
+            border: none; 
+            cursor: pointer; 
+            border-radius: 20px; 
+            font-weight: bold; 
+            background: #ddd; 
+            transition: 0.3s;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+        .tab-btn.active { background: #0c0b82; color: white; }
+        
+        /* --- CONTENT CONTAINERS --- */
+        .article-wrapper { width: 95%; max-width: 1000px; margin: 20px auto; }
+        .tab-content { display: none; padding: 10px; }
+        .tab-content.active { display: block; }
+        
+        /* Full Story Card Styling */
+        .full-story-display { 
+            background: white; 
+            padding: 30px; 
+            margin-bottom: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-left: 12px solid var(--town-color, #333); 
+            scroll-margin-top: 160px; 
+        }
+        .story-body { white-space: pre-wrap; line-height: 1.8; font-size: 1.15rem; color: #333; }
+        
+        /* Responsive Iframes */
+        .iframe-container { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        iframe { width: 100%; height: 850px; border: none; }
     </style>
 </head>
 <body>
-    <header class="news-header">
-        <h1>Clay County News Center</h1>
-        <nav>
-            <a href="https://supportmylocalcommunity.com" style="text-decoration: none; color: #666; font-weight: bold;">← Home</a> |
-            <a href="#top" style="text-decoration: none; color: #0c0b82; font-weight: bold;">↑ Top of Feed</a>
-        </nav>
-    </header>
 
-    <div class="article-wrapper">
+<header class="hub-header">
+    <h1 class="hub-title">Clay County News & Events</h1>
+    <div class="hub-tabs">
+        <button class="tab-btn active" onclick="openTab('news-tab')">Full News Feed</button>
+        <button class="tab-btn" onclick="openTab('events-tab')">Schedule View</button>
+        <button class="tab-btn" onclick="openTab('calendar-tab')">Master Calendar</button>
+        <a href="https://supportmylocalcommunity.com" style="padding: 10px 15px; text-decoration:none; color:#666; font-weight:bold; font-size:0.85rem;">← HOME</a>
+    </div>
+</header>
+
+<div class="article-wrapper">
+    <div id="news-tab" class="tab-content active">
         <div id="full-news-feed">
-            <p style="text-align:center;">Loading the latest news...</p>
+            <p style="text-align:center;">Syncing latest news stories...</p>
         </div>
         <div id="ad-slot" style="display:none;"></div>
     </div>
 
-    <script src="https://kfruti88.github.io/clay-county-news/news-engine.js"></script>
-    <script>
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                if (window.location.hash) {
-                    const id = window.location.hash.substring(1);
-                    const element = document.getElementById(id);
-                    if (element) { element.scrollIntoView({ behavior: 'smooth' }); }
-                }
-            }, 500);
-        });
+    <div id="events-tab" class="tab-content">
+        <div class="iframe-container">
+            <iframe src="https://kfruti88.github.io/Clay-County-All/Calendar/month-index.html"></iframe>
+        </div>
+    </div>
+
+    <div id="calendar-tab" class="tab-content">
+        <div class="iframe-container">
+            <iframe src="https://kfruti88.github.io/Clay-County-All/Calendar/Index.html"></iframe>
+        </div>
+    </div>
+</div>
+
+<script src="https://kfruti88.github.io/clay-county-news/news-engine.js"></script>
+<script>
+    // 1. Switch between News, Schedule, and Calendar
+    function openTab(id) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        event.currentTarget.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 2. Handle incoming links from town pages (e.g. ?id=flora-fire)
+    window.addEventListener('load', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const storyId = urlParams.get('id') || window.location.hash.substring(1);
         
-        // Safety fix for the rotateAds error
-        function rotateAds() {
-            const slot = document.getElementById('ad-slot');
-            if (!slot) return; // Exit if the ad box isn't there
-            // ... rest of your ad code ...
+        if (storyId) {
+            // Wait for news-engine.js to finish rendering
+            setTimeout(() => {
+                const el = document.getElementById(storyId);
+                if (el) { 
+                    el.scrollIntoView({ behavior: 'smooth' }); 
+                    el.style.borderLeftWidth = "25px"; 
+                    el.style.transition = "border-left-width 0.5s ease";
+                }
+            }, 800);
         }
-    </script>
+    });
+
+    // 3. Ad error safety check
+    function rotateAds() {
+        const slot = document.getElementById('ad-slot');
+        if (!slot) return;
+    }
+</script>
+
 </body>
 </html>
