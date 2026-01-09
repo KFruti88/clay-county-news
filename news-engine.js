@@ -5,13 +5,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const processedIds = new Set();
 
     const jsonUrl = "https://kfruti88.github.io/clay-county-news/news_data.json";
-    const hubUrl = "https://supportmylocalcommunity.com/local-news/"; // Your Main Hub #lock
+    const hubUrl = "https://supportmylocalcommunity.com/local-news/";
 
     const params = new URLSearchParams(window.location.search);
     const targetId = params.get('id');
     const path = window.location.href.toLowerCase();
     
-    // Detect if we are on the SupportMyLocalCommunity Hub
     const isHub = path.includes('supportmylocalcommunity.com/local-news');
 
     const townColors = {
@@ -26,11 +25,14 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch(jsonUrl)
         .then(res => res.json())
         .then(data => {
-            // FILTER: Strictly Clay County Towns Only
-            const clayTowns = ["Flora", "Louisville", "Clay City", "Xenia", "Sailor Springs", "Clay County"];
-            const filteredData = data.filter(item => 
-                item.tags.some(tag => clayTowns.includes(tag))
-            );
+            // 1. MASTER FILTER: Strictly Clay County Towns & Exclusion of Wayne County
+            const clayTownList = ["Flora", "Louisville", "Clay City", "Xenia", "Sailor Springs"];
+            
+            const filteredData = data.filter(item => {
+                const isClay = item.tags.some(tag => clayTownList.includes(tag) || tag === "Clay County");
+                const isNotWayne = !item.title.includes("Cisne") && !item.title.includes("Wayne County");
+                return isClay && isNotWayne;
+            });
 
             if (isHub) {
                 // --- HUB MODE: RENDER ALL FULL STORIES ---
@@ -38,13 +40,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     renderFullStoryInList(item);
                 });
 
-                // If a specific story was requested, scroll to it
                 if (targetId) {
                     setTimeout(() => {
                         const element = document.getElementById(targetId);
                         if (element) {
                             element.scrollIntoView({ behavior: 'smooth' });
-                            element.style.borderLeftWidth = "30px"; // Visual highlight
+                            element.style.borderLeftWidth = "30px"; 
                         }
                     }, 500);
                 }
@@ -63,7 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 townNews.forEach(item => renderSummary(item));
             }
-        });
+        })
+        .catch(err => console.error("News engine failed to load:", err));
 
     function renderSummary(item) {
         if (!summaryContainer) return;
