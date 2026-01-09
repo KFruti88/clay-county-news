@@ -3,30 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>News Hub | Support My Local Community</title>
+    <title>Local News Center | Full Story Feed</title>
     <link rel="stylesheet" href="https://kfruti88.github.io/clay-county-news/style.css">
     <style>
-        body { background: #f0f2f5; margin: 0; padding: 0; }
-        .glass-container {
-            width: 95%; max-width: 1400px; margin: 40px auto;
-            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(15px);
-            border-radius: 20px; padding: 40px; box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        }
-        #summaries-section { display: block; } /* Show list by default */
-        #articles-section { display: none; } /* Hide article by default */
+        html { scroll-behavior: smooth; }
+        body { background: linear-gradient(135deg, #e0e0e0 0%, #f4f4f4 100%); margin: 0; padding: 0; font-family: sans-serif; }
+        .news-header { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); padding: 20px; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
+        .article-wrapper { width: 95%; margin: 40px auto; max-width: 900px; }
+        .full-story-display { scroll-margin-top: 120px; margin-bottom: 60px; background: #fff; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
-    <div class="glass-container">
-        <section id="summaries-section">
-            <h2 style="font-family:serif; text-transform:uppercase;">Latest News Feed</h2>
-            <div id="town-summaries"></div>
-        </section>
+    <header class="news-header">
+        <h1>Clay County News Center</h1>
+        <nav>
+            <a href="https://supportmylocalcommunity.com" style="text-decoration: none; color: #666; font-weight: bold;">← Home</a> |
+            <a href="#top" style="text-decoration: none; color: #0c0b82; font-weight: bold;">↑ Top of Feed</a>
+        </nav>
+    </header>
 
-        <section id="articles-section">
-            <div id="full-news-feed"></div>
-        </section>
+    <div class="article-wrapper">
+        <div id="full-news-feed">
+            <p style="text-align:center;">Loading the latest news...</p>
+        </div>
+        <div id="ad-slot" style="display:none;"></div>
     </div>
+
     <script src="https://kfruti88.github.io/clay-county-news/news-engine.js"></script>
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                if (window.location.hash) {
+                    const id = window.location.hash.substring(1);
+                    const element = document.getElementById(id);
+                    if (element) { element.scrollIntoView({ behavior: 'smooth' }); }
+                }
+            }, 500);
+        });
+        
+        // Safety fix for the rotateAds error
+        function rotateAds() {
+            const slot = document.getElementById('ad-slot');
+            if (!slot) return; // Exit if the ad box isn't there
+            // ... rest of your ad code ...
+        }
+    </script>
 </body>
 </html>
