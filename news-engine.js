@@ -4,15 +4,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const summariesSection = document.getElementById('summaries-section');
     const processedIds = new Set();
 
-    // 1. SETTINGS - THE MASTER SOURCE
     const jsonUrl = "https://kfruti88.github.io/clay-county-news/news_data.json";
-    // This MUST match the folder on your website
-    const hubUrl = "https://supportmylocalcommunity.com/local-news/"; 
+    const hubUrl = "https://supportmylocalcommunity.com/local-news/"; // Your Main Hub
 
-    // 2. DETECTION
-    const urlParams = new URLSearchParams(window.location.search);
-    const targetArticleId = urlParams.get('id');
-    const path = window.location.pathname.toLowerCase();
+    const params = new URLSearchParams(window.location.search);
+    const targetId = params.get('id');
+    const path = window.location.href.toLowerCase();
+    
+    // Detect if we are on the SupportMyLocalCommunity Hub
+    const isHub = path.includes('supportmylocalcommunity.com/local-news');
 
     const townColors = {
         "Flora": { bg: "#0c0b82", text: "#fe4f00" },
@@ -24,64 +24,65 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     fetch(jsonUrl)
-        .then(response => response.json())
+        .then(res => res.json())
         .then(data => {
-            // 3. FULL ARTICLE LOGIC
-            if (targetArticleId) {
-                const item = data.find(s => s.id === targetArticleId);
-                if (item) {
-                    if (summariesSection) summariesSection.style.display = 'none';
-                    renderFullStory(item);
-                    
-                    // Auto-Scroll to top of article
+            // FILTER: Strictly Clay County Towns Only
+            const clayTowns = ["Flora", "Louisville", "Clay City", "Xenia", "Sailor Springs", "Clay County"];
+            const filteredData = data.filter(item => 
+                item.tags.some(tag => clayTowns.includes(tag))
+            );
+
+            if (isHub) {
+                // --- HUB MODE: RENDER ALL FULL STORIES ---
+                filteredData.forEach(item => {
+                    renderFullStoryInList(item);
+                });
+
+                // If a specific story was requested, scroll to it
+                if (targetId) {
                     setTimeout(() => {
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }, 100);
-                    return; 
+                        const element = document.getElementById(targetId);
+                        if (element) {
+                            element.scrollIntoView({ behavior: 'smooth' });
+                            element.style.borderLeftWidth = "30px"; // Visual highlight
+                        }
+                    }, 500);
                 }
+            } else {
+                // --- TOWN MODE: RENDER SUMMARIES ONLY ---
+                let currentTown = "";
+                if (path.includes('flora')) currentTown = "Flora";
+                else if (path.includes('louisville')) currentTown = "Louisville";
+                else if (path.includes('clay-city')) currentTown = "Clay City";
+                else if (path.includes('xenia')) currentTown = "Xenia";
+                else if (path.includes('sailor-springs')) currentTown = "Sailor Springs";
+
+                const townNews = filteredData.filter(item => 
+                    !currentTown || item.tags.includes(currentTown) || item.tags.includes("Clay County")
+                );
+
+                townNews.forEach(item => renderSummary(item));
             }
-
-            // 4. SUMMARY LIST LOGIC
-            let townFilter = "";
-            if (path.includes('flora')) townFilter = "Flora";
-            else if (path.includes('clay-city')) townFilter = "Clay City";
-
-            const filteredNews = data.filter(item => {
-                if (!townFilter) return true; 
-                return item.tags.includes(townFilter) || item.tags.includes("Clay County");
-            });
-
-            filteredNews.forEach(item => {
-                if (processedIds.has(item.id)) return;
-                processedIds.add(item.id);
-                renderSummary(item);
-            });
-        })
-        .catch(err => console.error("News Load Error:", err));
+        });
 
     function renderSummary(item) {
         if (!summaryContainer) return;
-        const mainColor = townColors[item.tags[0]]?.bg || "#333333";
-        const tagsHTML = item.tags.map(t => `<span class="tag" style="background:${townColors[t]?.bg || '#333'}; color:${townColors[t]?.text || '#fff'}; padding:2px 8px; border-radius:4px; margin-right:5px; font-size:0.7em; font-weight:bold; border:1px solid rgba(255,255,255,0.3);">${t}</span>`).join('');
-        
+        const mainBG = townColors[item.tags[0]]?.bg || "#333";
         summaryContainer.innerHTML += `
-            <div class="summary-box" style="border-top: 10px solid ${mainColor}; background:rgba(255,255,255,0.9); backdrop-filter:blur(10px); padding:30px; margin-bottom:30px; box-shadow:0 8px 32px rgba(0,0,0,0.1); border-radius:15px; transition:0.3s;">
-                <h3 style="margin-top:0; text-transform:uppercase; font-size:1.5rem; font-weight:900;">${item.title}</h3>
-                <div style="margin-bottom:15px;">${tagsHTML}</div>
-                <p style="color:#333; font-size:1.15rem; line-height:1.6;">${item.summary || (item.full_story.substring(0, 150) + '...')}</p>
-                <a href="${hubUrl}?id=${item.id}" style="display:inline-block; background:${mainColor}; color:white; padding:12px 25px; border-radius:50px; text-decoration:none; font-weight:bold; font-size:0.9rem; font-family:sans-serif;">Read Full Story ↓</a>
+            <div class="summary-box" style="--town-color: ${mainBG}">
+                <h3>${item.title}</h3>
+                <p>${item.full_story.substring(0, 180)}...</p>
+                <a href="${hubUrl}?id=${item.id}" class="read-more-btn">Read Full Story ↓</a>
             </div>`;
     }
 
-    function renderFullStory(item) {
+    function renderFullStoryInList(item) {
         if (!fullContainer) return;
-        const mainColor = townColors[item.tags[0]]?.bg || "#333333";
-        fullContainer.innerHTML = `
-            <div class="full-story-display" style="border-left:15px solid ${mainColor}; padding:40px; background:#fff; border-radius:20px; box-shadow:0 20px 50px rgba(0,0,0,0.1);">
-                <h1 style="color:${mainColor}; font-size:2.8rem; text-transform:uppercase; margin-top:0; font-weight:900;">${item.title}</h1>
-                <div class="story-body" style="white-space:pre-wrap; font-size:1.35rem; line-height:2; font-family:serif; color:#222;">${item.full_story}</div>
-                <hr style="margin:40px 0; opacity:0.1;">
-                <a href="${hubUrl}" style="display:inline-block; color:#444; font-weight:bold; text-decoration:none; border:2px solid #444; padding:10px 25px; border-radius:50px; transition:0.3s;">← Back to News Feed</a>
+        const mainBG = townColors[item.tags[0]]?.bg || "#333";
+        fullContainer.innerHTML += `
+            <div id="${item.id}" class="full-story-display" style="--town-color: ${mainBG}">
+                <h1>${item.title}</h1>
+                <div class="story-body">${item.full_story}</div>
             </div>`;
     }
 });
