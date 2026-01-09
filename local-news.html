@@ -3,55 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Local News Center | Full Story</title>
+    <title>Local News Center | Full Story Feed</title>
     
     <link rel="stylesheet" href="https://kfruti88.github.io/clay-county-news/style.css">
     
     <style>
+        html {
+            /* This makes the jump to the article look like a smooth slide */
+            scroll-behavior: smooth;
+        }
+
         body {
             background: linear-gradient(135deg, #e0e0e0 0%, #f4f4f4 100%);
             margin: 0;
             padding: 0;
+            font-family: sans-serif;
         }
-        /* Header for the News Hub */
+
         .news-header {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(10px);
             padding: 20px;
             text-align: center;
             border-bottom: 1px solid rgba(0,0,0,0.1);
-            margin-bottom: 30px;
+            position: sticky; /* Keeps the header at the top while scrolling */
+            top: 0;
+            z-index: 1000;
         }
+
         .news-header h1 {
             margin: 0;
             font-family: serif;
             letter-spacing: 2px;
             text-transform: uppercase;
         }
-        /* The container for the full article */
+
         .article-wrapper {
             width: 95%;
-            margin: 0 auto;
-            max-width: 1400px; /* Ultra-wide reading comfort */
+            margin: 40px auto;
+            max-width: 900px; /* Better for reading text lines */
         }
-        /* Hide the summary section on this page because we only want the full story */
-        #summaries-section { display: none; }
+
+        /* This is the secret for the autoscroll landing zone */
+        .full-story-display {
+            scroll-margin-top: 120px; /* Prevents title from being hidden under sticky header */
+            margin-bottom: 60px;
+            background: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .story-body {
+            white-space: pre-wrap;
+            line-height: 1.8;
+            font-size: 1.2rem;
+            color: #333;
+        }
     </style>
 </head>
 <body>
 
     <header class="news-header">
-        <h1>Local Community News Hub</h1>
-        <a href="https://supportmylocalcommunity.com" style="text-decoration: none; color: #666; font-weight: bold;">← Back to Home</a>
+        <h1>Clay County News Center</h1>
+        <nav>
+            <a href="https://supportmylocalcommunity.com" style="text-decoration: none; color: #666; font-weight: bold;">← Home</a> |
+            <a href="#top" style="text-decoration: none; color: #0c0b82; font-weight: bold;">↑ Top of Feed</a>
+        </nav>
     </header>
 
     <div class="article-wrapper">
-        <section id="articles-section">
-            <div id="full-news-feed"></div>
-        </section>
+        <div id="full-news-feed">
+            <p style="text-align:center;">Loading the latest news...</p>
+        </div>
     </div>
 
     <script src="https://kfruti88.github.io/clay-county-news/news-engine.js"></script>
+
+    <script>
+        // Extra bit of logic to handle the "Jump" after the news-engine finishes loading data
+        window.addEventListener('load', () => {
+            // Give the news-engine a split second to render the HTML
+            setTimeout(() => {
+                if (window.location.hash) {
+                    const id = window.location.hash.substring(1);
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            }, 500); // 500ms delay to ensure data is visible
+        });
+    </script>
 
 </body>
 </html>
