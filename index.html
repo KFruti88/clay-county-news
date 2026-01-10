@@ -3,94 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clay County Master Portal</title>
-    
+    <title>Clay County News Center | Full Stories</title>
     <link rel="stylesheet" href="https://kfruti88.github.io/clay-county-news/style.css">
-    
     <style>
-        /* Portal Theme: High-Contrast Dark */
-        body { margin: 0; padding: 0; background: #0b0b0b; color: #fff; font-family: sans-serif; }
-        header { background: #000; padding: 30px; text-align: center; border-bottom: 4px solid #ff6600; }
-        header h1 { color: #ff6600; margin: 0; text-transform: uppercase; letter-spacing: 3px; font-size: 2rem; }
-
-        /* News Highlights Grid */
-        #town-summaries { 
-            padding: 30px; 
-            max-width: 1200px; 
-            margin: 0 auto; 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
-            gap: 25px; 
-        }
+        html { scroll-behavior: smooth; }
+        body { background: #f4f4f4; margin: 0; padding: 0; font-family: sans-serif; }
+        .hub-header { background: #fff; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; padding: 20px 0; }
+        .hub-title { margin: 0; font-family: serif; text-transform: uppercase; letter-spacing: 2px; color: #333; font-size: 1.5rem; }
+        .article-wrapper { width: 95%; max-width: 900px; margin: 40px auto; }
         
-        .summary-box { 
-            background: #1a1a1a; 
-            padding: 25px; 
-            border-radius: 12px; 
-            border-top: 5px solid var(--town-color, #ff6600); 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            transition: transform 0.3s ease;
+        .full-story-display { 
+            background: white; padding: 40px; margin-bottom: 30px; border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 15px solid var(--town-color, #0c0b82); 
+            scroll-margin-top: 140px; 
         }
-        .summary-box:hover { transform: translateY(-8px); background: #222; }
-        .summary-box h3 { margin-top: 0; color: #ff6600; font-size: 1.4rem; }
-        .summary-excerpt { line-height: 1.6; color: #ccc; margin-bottom: 20px; }
-        
-        .read-more-btn { 
-            display: inline-block; 
-            color: #fff; 
-            text-decoration: none; 
-            font-weight: bold; 
-            background: #ff6600; 
-            padding: 8px 20px; 
-            border-radius: 5px;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-        }
-
-        /* Status Bar */
-        .status-bar { display: flex; justify-content: space-between; padding: 12px 30px; background: #111; border-bottom: 1px solid #333; font-size: 0.85rem; color: #888; }
-        #live-clock { color: #ff6600; font-weight: bold; }
+        .story-body { white-space: pre-wrap; line-height: 1.8; font-size: 1.2rem; color: #333; }
+        .status-msg { text-align: center; color: #666; font-style: italic; margin-top: 50px; }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>Clay County Community Portal</h1>
+<header class="hub-header">
+    <h1 class="hub-title">Clay County News Center</h1>
 </header>
 
-<div class="status-bar">
-    <div id="live-clock">--:--:--</div>
-    <div>System Status: <span style="color: #fdd663;">Active</span></div>
+<div class="article-wrapper">
+    <div id="full-news-feed">
+        <p class="status-msg">Fetching articles from the database...</p>
+    </div>
+    <div id="ad-slot" style="display:none;"></div>
 </div>
-
-<section id="town-summaries">
-    <p style="grid-column: 1/-1; text-align: center; color: #666;">Connecting to local data repositories...</p>
-</section>
 
 <script src="https://kfruti88.github.io/clay-county-news/news-engine.js"></script>
 
 <script>
-    // 1. Clock logic
-    function startClock() {
-        const clock = document.getElementById('live-clock');
-        setInterval(() => {
-            const now = new Date();
-            clock.innerText = now.toLocaleTimeString();
-        }, 1000);
-    }
-    startClock();
-
-    // 2. Error Suppression for Widgets (Hides the widget view-limit errors)
-    window.addEventListener('error', function(e) {
-        if (e.message.indexOf('elfsight') !== -1 || e.message.indexOf('Platform') !== -1) {
-            e.stopImmediatePropagation();
-        }
-    }, true);
-
-    // 3. News Engine Configuration
     window.gData = { config: "production" };
     function rotateAds() { return; } 
-</script>
 
+    window.addEventListener('load', () => {
+        // Handle jump logic
+        const urlParams = new URLSearchParams(window.location.search);
+        const storyId = urlParams.get('id');
+        
+        if (storyId) {
+            // Increased delay to ensure the database content is fully rendered
+            setTimeout(() => {
+                const el = document.getElementById(storyId);
+                if (el) { 
+                    el.scrollIntoView({ behavior: 'smooth' }); 
+                    el.style.borderLeftWidth = "35px"; 
+                }
+            }, 1200); 
+        }
+    });
+</script>
 </body>
 </html>
