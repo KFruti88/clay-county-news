@@ -4,106 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clay County News Center | Full Stories</title>
-    
     <link rel="stylesheet" href="https://kfruti88.github.io/clay-county-news/style.css">
-    
     <style>
         html { scroll-behavior: smooth; }
-        body { background: #f4f4f4; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        
-        /* Header Styling */
-        .hub-header { 
-            background: #fff; 
-            position: sticky; 
-            top: 0; 
-            z-index: 1000; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
-            text-align: center;
-            padding: 20px 0;
-        }
-        .hub-title { 
-            margin: 0; 
-            font-family: serif; 
-            text-transform: uppercase; 
-            letter-spacing: 2px; 
-            color: #333; 
-            font-size: 1.5rem; 
-        }
-        .home-link {
-            display: inline-block;
-            margin-top: 10px;
-            text-decoration: none;
-            color: #0c0b82;
-            font-weight: bold;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-        }
-
-        /* Content Area */
-        .article-wrapper { 
-            width: 95%; 
-            max-width: 900px; 
-            margin: 40px auto; 
-        }
-        
-        /* Full Story Card Styling */
-        .full-story-display { 
-            background: white; 
-            padding: 40px; 
-            margin-bottom: 30px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border-left: 15px solid var(--town-color, #333); 
-            scroll-margin-top: 120px; 
-        }
-        .story-body { 
-            white-space: pre-wrap; 
-            line-height: 1.8; 
-            font-size: 1.2rem; 
-            color: #333; 
-        }
-        .status-msg { text-align: center; color: #666; font-style: italic; margin-top: 50px; }
+        body { background: #f4f4f4; margin: 0; padding: 0; font-family: sans-serif; }
+        .hub-header { background: #fff; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; padding: 20px 0; }
+        .hub-title { margin: 0; font-family: serif; text-transform: uppercase; letter-spacing: 2px; color: #333; font-size: 1.5rem; }
+        .article-wrapper { width: 95%; max-width: 900px; margin: 40px auto; }
+        .full-story-display { background: white; padding: 40px; margin-bottom: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); scroll-margin-top: 140px; border-left: 15px solid var(--town-color, #0c0b82); }
+        .story-body { white-space: pre-wrap; line-height: 1.8; font-size: 1.2rem; color: #333; }
     </style>
 </head>
 <body>
-
 <header class="hub-header">
     <h1 class="hub-title">Clay County News Center</h1>
-    <a href="https://supportmylocalcommunity.com" class="home-link">← Return to Homepage</a>
+    <a href="https://supportmylocalcommunity.com" style="text-decoration:none; color:#0c0b82; font-weight:bold; font-size:0.8rem; text-transform:uppercase;">← Back to Home</a>
 </header>
 
 <div class="article-wrapper">
     <div id="full-news-feed">
-        <p class="status-msg">Syncing latest local stories...</p>
+        <p style="text-align:center;">Loading full stories...</p>
     </div>
-    
     <div id="ad-slot" style="display:none;"></div>
 </div>
 
 <script src="https://kfruti88.github.io/clay-county-news/news-engine.js"></script>
-
 <script>
-    // Jump logic for Read More buttons
+    window.gData = { config: "production" };
+    function rotateAds() { return; } 
+
     window.addEventListener('load', () => {
         const urlParams = new URLSearchParams(window.location.search);
-        const storyId = urlParams.get('id') || window.location.hash.substring(1);
-        
+        const storyId = urlParams.get('id');
         if (storyId) {
             setTimeout(() => {
                 const el = document.getElementById(storyId);
                 if (el) { 
                     el.scrollIntoView({ behavior: 'smooth' }); 
-                    el.style.borderLeftWidth = "30px"; 
-                    el.style.transition = "border-left-width 0.5s ease";
+                    el.style.borderLeftWidth = "35px";
                 }
-            }, 800);
+            }, 1000); 
         }
     });
-
-    // Dummy functions to stop console errors from blocking execution
-    function rotateAds() { return; }
-    window.gData = window.gData || { config: "production" };
 </script>
-
 </body>
 </html>
