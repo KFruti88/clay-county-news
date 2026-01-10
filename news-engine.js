@@ -1,9 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const summaryContainer = document.getElementById('town-summaries');
     const fullContainer = document.getElementById('full-news-feed');
-    const summariesSection = document.getElementById('summaries-section');
-    const processedIds = new Set();
-
+    
     const jsonUrl = "https://kfruti88.github.io/clay-county-news/news_data.json";
     const hubUrl = "https://supportmylocalcommunity.com/local-news/";
 
@@ -11,7 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const targetId = params.get('id');
     const path = window.location.href.toLowerCase();
     
-    const isHub = path.includes('supportmylocalcommunity.com/local-news');
+    // Improved detection: Check if we are in the local-news folder or on the hub page
+    const isHub = path.includes('/local-news') || !!fullContainer;
 
     const townColors = {
         "Flora": { bg: "#0c0b82", text: "#fe4f00" },
@@ -25,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch(jsonUrl)
         .then(res => res.json())
         .then(data => {
-            // 1. MASTER FILTER: Strictly Clay County Towns & Exclusion of Wayne County
+            // 1. MASTER FILTER: Strictly Clay County Towns
             const clayTownList = ["Flora", "Louisville", "Clay City", "Xenia", "Sailor Springs"];
             
             const filteredData = data.filter(item => {
@@ -36,10 +35,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (isHub) {
                 // --- HUB MODE: RENDER ALL FULL STORIES ---
+                if (fullContainer) fullContainer.innerHTML = ''; // Clear "Syncing" message
+                
                 filteredData.forEach(item => {
                     renderFullStoryInList(item);
                 });
 
+                // Handle the jump to the specific article
                 if (targetId) {
                     setTimeout(() => {
                         const element = document.getElementById(targetId);
@@ -47,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             element.scrollIntoView({ behavior: 'smooth' });
                             element.style.borderLeftWidth = "30px"; 
                         }
-                    }, 500);
+                    }, 800);
                 }
             } else {
                 // --- TOWN MODE: RENDER SUMMARIES ONLY ---
@@ -62,7 +64,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     !currentTown || item.tags.includes(currentTown) || item.tags.includes("Clay County")
                 );
 
-                townNews.forEach(item => renderSummary(item));
+                if (summaryContainer) {
+                    summaryContainer.innerHTML = ''; // Clear "Connecting" message
+                    townNews.forEach(item => renderSummary(item));
+                }
             }
         })
         .catch(err => console.error("News engine failed to load:", err));
@@ -70,11 +75,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderSummary(item) {
         if (!summaryContainer) return;
         const mainBG = townColors[item.tags[0]]?.bg || "#333";
+        
+        // ADDED target="_blank" to the button below
         summaryContainer.innerHTML += `
             <div class="summary-box" style="--town-color: ${mainBG}">
                 <h3>${item.title}</h3>
                 <p>${item.full_story.substring(0, 180)}...</p>
-                <a href="${hubUrl}?id=${item.id}" class="read-more-btn">Read Full Story ↓</a>
+                <a href="${hubUrl}?id=${item.id}" target="_blank" class="read-more-btn">Read Full Story ↓</a>
             </div>`;
     }
 
