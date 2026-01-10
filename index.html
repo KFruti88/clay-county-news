@@ -8,68 +8,88 @@
     <link rel="stylesheet" href="https://kfruti88.github.io/clay-county-news/style.css">
     
     <style>
-        /* Portal specific dark theme */
-        body { margin: 0; padding: 0; background: #000; color: #fff; font-family: 'Inter', sans-serif; }
-        header { background: #000; padding: 20px; text-align: center; border-bottom: 3px solid #00ff00; }
-        header h1 { color: #00ff00; margin: 0; text-transform: uppercase; letter-spacing: 2px; }
+        /* Portal Theme: High-Contrast Dark */
+        body { margin: 0; padding: 0; background: #0b0b0b; color: #fff; font-family: sans-serif; }
+        header { background: #000; padding: 30px; text-align: center; border-bottom: 4px solid #ff6600; }
+        header h1 { color: #ff6600; margin: 0; text-transform: uppercase; letter-spacing: 3px; font-size: 2rem; }
 
-        /* Summary Box Styling */
-        #town-summaries { padding: 25px; max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        /* News Highlights Grid */
+        #town-summaries { 
+            padding: 30px; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
+            gap: 25px; 
+        }
         
         .summary-box { 
-            background: #111; 
-            padding: 20px; 
-            border-radius: 8px; 
-            border-left: 8px solid var(--town-color, #00ff00); 
-            transition: 0.3s;
+            background: #1a1a1a; 
+            padding: 25px; 
+            border-radius: 12px; 
+            border-top: 5px solid var(--town-color, #ff6600); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease;
         }
-        .summary-box:hover { background: #222; transform: translateY(-5px); }
-        .summary-box h3 { margin-top: 0; color: #00ff00; }
+        .summary-box:hover { transform: translateY(-8px); background: #222; }
+        .summary-box h3 { margin-top: 0; color: #ff6600; font-size: 1.4rem; }
+        .summary-excerpt { line-height: 1.6; color: #ccc; margin-bottom: 20px; }
         
         .read-more-btn { 
             display: inline-block; 
-            margin-top: 15px; 
-            color: #00ff00; 
+            color: #fff; 
             text-decoration: none; 
             font-weight: bold; 
-            border: 1px solid #00ff00; 
-            padding: 5px 15px; 
-            border-radius: 4px;
+            background: #ff6600; 
+            padding: 8px 20px; 
+            border-radius: 5px;
+            text-transform: uppercase;
+            font-size: 0.85rem;
         }
-        .read-more-btn:hover { background: #00ff00; color: #000; }
 
-        /* Widget Bar */
-        .widget-bar { display: flex; justify-content: space-between; padding: 10px 25px; background: #111; font-size: 0.9rem; border-bottom: 1px solid #333; }
-        #live-clock { color: #00ff00; font-family: monospace; }
+        /* Status Bar */
+        .status-bar { display: flex; justify-content: space-between; padding: 12px 30px; background: #111; border-bottom: 1px solid #333; font-size: 0.85rem; color: #888; }
+        #live-clock { color: #ff6600; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>Support My Local Community</h1>
+    <h1>Clay County Community Portal</h1>
 </header>
 
-<div class="widget-bar">
-    <div id="live-clock">00:00:00 AM</div>
-    <div id="weather-widget">Flora, IL: Loading...</div>
+<div class="status-bar">
+    <div id="live-clock">--:--:--</div>
+    <div>System Status: <span style="color: #00ff00;">Active</span></div>
 </div>
 
-<section id="town-summaries"></section>
+<section id="town-summaries">
+    <p style="grid-column: 1/-1; text-align: center; color: #666;">Connecting to local data repositories...</p>
+</section>
 
 <script src="https://kfruti88.github.io/clay-county-news/news-engine.js"></script>
 
 <script>
-    // 1. Live Clock logic
-    function updateClock() {
-        const now = new Date();
-        document.getElementById('live-clock').innerText = now.toLocaleTimeString();
+    // 1. Clock logic
+    function startClock() {
+        const clock = document.getElementById('live-clock');
+        setInterval(() => {
+            const now = new Date();
+            clock.innerText = now.toLocaleTimeString();
+        }, 1000);
     }
-    setInterval(updateClock, 1000);
-    updateClock();
+    startClock();
 
-    // 2. Ad and Sync safety
-    function rotateAds() { return; }
+    // 2. Error Suppression for Widgets (Hides the widget view-limit errors)
+    window.addEventListener('error', function(e) {
+        if (e.message.indexOf('elfsight') !== -1 || e.message.indexOf('Platform') !== -1) {
+            e.stopImmediatePropagation();
+        }
+    }, true);
+
+    // 3. News Engine Configuration
     window.gData = { config: "production" };
+    function rotateAds() { return; } 
 </script>
 
 </body>
