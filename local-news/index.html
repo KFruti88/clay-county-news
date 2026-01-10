@@ -11,11 +11,24 @@
         .hub-header { background: #fff; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; padding: 20px 0; }
         .hub-title { margin: 0; font-family: serif; text-transform: uppercase; letter-spacing: 2px; color: #333; font-size: 1.5rem; }
         .article-wrapper { width: 95%; max-width: 900px; margin: 40px auto; }
-        .full-story-display { background: white; padding: 40px; margin-bottom: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); scroll-margin-top: 140px; border-left: 15px solid var(--town-color, #0c0b82); }
+        
+        /* Base Styling for Full Story Cards */
+        .full-story-display { 
+            background: white; 
+            padding: 40px; 
+            margin-bottom: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            scroll-margin-top: 140px; 
+            border-left: 15px solid #0c0b82; /* This color is updated by the JS engine */
+            transition: border-left-width 0.5s ease;
+        }
         .story-body { white-space: pre-wrap; line-height: 1.8; font-size: 1.2rem; color: #333; }
+        .status-msg { text-align: center; color: #666; font-style: italic; margin-top: 50px; }
     </style>
 </head>
 <body>
+
 <header class="hub-header">
     <h1 class="hub-title">Clay County News Center</h1>
     <a href="https://supportmylocalcommunity.com" style="text-decoration:none; color:#0c0b82; font-weight:bold; font-size:0.8rem; text-transform:uppercase;">← Back to Home</a>
@@ -23,29 +36,62 @@
 
 <div class="article-wrapper">
     <div id="full-news-feed">
-        <p style="text-align:center;">Loading full stories...</p>
+        <p class="status-msg">Loading full stories from database...</p>
     </div>
+    
     <div id="ad-slot" style="display:none;"></div>
 </div>
 
 <script src="https://kfruti88.github.io/clay-county-news/news-engine.js"></script>
+
 <script>
     window.gData = { config: "production" };
     function rotateAds() { return; } 
 
-    window.addEventListener('load', () => {
+    // --- SMART AUTO-SCROLL LOGIC ---
+    // This waits for the articles to actually exist before trying to move the screen.
+    function autoScrollToStory() {
         const urlParams = new URLSearchParams(window.location.search);
         const storyId = urlParams.get('id');
-        if (storyId) {
-            setTimeout(() => {
-                const el = document.getElementById(storyId);
-                if (el) { 
-                    el.scrollIntoView({ behavior: 'smooth' }); 
+        
+        if (!storyId) return;
+
+        const targetContainer = document.getElementById('full-news-feed');
+        
+        // 1. Create a "Watcher" to wait for the stories to be injected into the DOM
+        const observer = new MutationObserver((mutations, obs) => {
+            const el = document.getElementById(storyId);
+            
+            if (el) {
+                // 2. Once the story element is found, scroll to it immediately
+                setTimeout(() => {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    
+                    // 3. Apply visual highlight (The 35px border highlight)
                     el.style.borderLeftWidth = "35px";
-                }
-            }, 1000); 
+                }, 150); 
+                
+                obs.disconnect(); // Task complete: Stop watching
+            }
+        });
+
+        // 4. Start watching the container for new children (the articles)
+        observer.observe(targetContainer, { childList: true, subtree: true });
+
+        // 5. Fallback: If for some reason the element exists already
+        const existingEl = document.getElementById(storyId);
+        if (existingEl) {
+            existingEl.scrollIntoView({ behavior: 'smooth' });
+            existingEl.style.borderLeftWidth = "35px";
+            observer.disconnect();
         }
-    });
+        
+        // 6. Emergency Stop: If nothing loads in 5 seconds, stop the observer to save memory
+        setTimeout(() => observer.disconnect(), 5000);
+    }
+
+    // Initialize the scroll logic
+    autoScrollToStory();
 </script>
 </body>
 </html>
