@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
     // --- 1. HARLOCK SELECTION (HARD ENFORCEMENT) ---
+    // Rule: Town sites must have id="town-summaries". Hub must have id="full-news-feed".
     const summaryContainer = document.getElementById('town-summaries');
     const fullContainer = document.getElementById('full-news-feed');
     
