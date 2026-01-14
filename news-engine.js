@@ -2,34 +2,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     const summaryContainer = document.getElementById('town-summaries');
     const fullContainer = document.getElementById('full-news-feed');
     
-    // 1. ATOMIC CHICAGO TIME SYNC
+    // --- ATOMIC CHICAGO TIME SYNC ---
+    // Standardizes time across all devices to Chicago (Central)
     let trueTime = new Date();
     try {
         const timeRes = await fetch('https://worldtimeapi.org/api/timezone/America/Chicago');
         const timeData = await timeRes.json();
         trueTime = new Date(timeData.datetime);
+        console.log("Atomic Chicago Time Synced:", trueTime.toLocaleString());
     } catch (e) {
-        console.warn("Atomic sync failed, using device time.");
+        console.warn("Atomic sync failed, using device time as backup.");
     }
 
-    // Update Newspaper Info Bar (Date, Clock, Weather Preview)
+    // Refresh Newspaper Header Info
     updateNewspaperHeader(trueTime);
 
+    // Atomic timestamp for cache busting news data
     const jsonUrl = `https://kfruti88.github.io/clay-county-news/news_data.json?v=${trueTime.getTime()}`;
     const hubUrl = "https://supportmylocalcommunity.com/local-news/";
 
-    // 2. TOWN THEMES (Lowercase for URL matching)
     const townThemes = {
         "flora": { bg: "#0c0b82" },
         "louisville": { bg: "#010101" },
         "clay-city": { bg: "#0c30f0" },
         "xenia": { bg: "#000000" },
         "sailor-springs": { bg: "#000000" }, 
+        "obituary": { bg: "#333333" },
+        "fire dept": { bg: "#ff4500" },
+        "police/pd": { bg: "#00008b" },
         "default": { bg: "#0c71c3" }       
     };
 
     const currentURL = window.location.href.toLowerCase();
     let themeKey = "default";
+
     if (currentURL.includes('flora')) themeKey = "flora";
     else if (currentURL.includes('louisville')) themeKey = "louisville";
     else if (currentURL.includes('clay-city')) themeKey = "clay-city";
@@ -38,7 +44,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.body.style.backgroundColor = townThemes[themeKey].bg;
 
-    // 3. FETCH & RENDER NEWS
     fetch(jsonUrl)
         .then(res => res.json())
         .then(data => {
@@ -63,17 +68,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
-    // --- NEWSPAPER HEADER FUNCTIONS ---
     async function updateNewspaperHeader(t) {
-        // Date (Left)
+        // Sets Date
         const dOptions = { month: 'long', day: 'numeric', year: 'numeric' };
-        document.getElementById('current-date').innerText = t.toLocaleDateString('en-US', dOptions);
+        const dateEl = document.getElementById('current-date');
+        if (dateEl) dateEl.innerText = t.toLocaleDateString('en-US', dOptions);
 
-        // Chicago Clock (Middle)
+        // Sets Chicago Clock
         const tOptions = { hour: '2-digit', minute: '2-digit', hour12: true };
-        document.getElementById('atomic-chicago-time').innerText = t.toLocaleTimeString('en-US', tOptions);
+        const clockEl = document.getElementById('atomic-chicago-time');
+        if (clockEl) clockEl.innerText = t.toLocaleTimeString('en-US', tOptions);
 
-        // Flora Airport Weather Preview (Right)
+        // Sets Flora Airport Weather
         try {
             const wRes = await fetch('https://api.open-meteo.com/v1/forecast?latitude=38.6672&longitude=-88.4523&current_weather=true');
             const wData = await wRes.json();
@@ -90,23 +96,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const status = weatherMap[code] || weatherMap['default'];
             const weatherEl = document.getElementById('airport-weather');
-            weatherEl.className = `meta-item ${status.class}`;
-            document.getElementById('temp-val').innerText = `${temp}°F`;
-            document.getElementById('condition-val').innerText = status.text;
-        } catch (e) { console.error("Weather failed"); }
+            if (weatherEl) {
+                weatherEl.className = `meta-item ${status.class}`;
+                document.getElementById('temp-val').innerText = `${temp}°F`;
+                document.getElementById('condition-val').innerText = status.text;
+            }
+        } catch (e) { console.error("Weather sync failed"); }
     }
 
     function renderSummary(item) {
         if (!summaryContainer) return;
         const imgHTML = item.image ? `<img src="${item.image}" style="width:100%; height:auto; border-radius:12px; margin-bottom:15px; object-fit: cover;">` : '';
         
+        // LOCKED: target="_top" ensures links always breakout
         summaryContainer.innerHTML += `
-            <div class="summary-box" style="width: 90%; max-width: 1200px; margin: 0 auto 20px auto; background: white; padding: 20px; border-radius: 8px; box-sizing: border-box; overflow-wrap: break-word;">
-                <h3 style="margin-top: 0; color: #1a1a1a;">${formatMoney(item.title)}</h3>
+            <div class="summary-box">
+                <h3>${formatMoney(item.title)}</h3>
                 <p style="font-size: 0.9rem; color: #555;">${item.date}</p>
                 ${imgHTML}
-                <p style="line-height: 1.6; color: #333;">${formatMoney(item.full_story.substring(0, 180))}...</p>
-                <a href="${hubUrl}?id=${item.id}" target="_top" class="read-more-btn" style="display: inline-block; padding: 10px 20px; background: ${townThemes[themeKey].bg}; color: white; text-decoration: none; border-radius: 4px;">Read Full Story</a>
+                <p>${formatMoney(item.full_story.substring(0, 180))}...</p>
+                <a href="${hubUrl}?id=${item.id}" target="_top" class="read-more-btn">Read Full Story</a>
             </div>`;
     }
 
@@ -115,11 +124,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const imgHTML = item.image ? `<img src="${item.image}" style="width:100%; height:auto; border-radius:12px; margin-bottom:20px; object-fit: cover;">` : '';
 
         fullContainer.innerHTML += `
-            <article id="${item.id}" class="full-story-display" style="width: 100%; max-width: 800px; margin: 0 auto 30px auto; background: white; padding: 30px; border-radius: 12px; box-sizing: border-box; overflow-wrap: break-word;">
-                <h1 style="color: #1a1a1a; word-wrap: break-word;">${formatMoney(item.title)}</h1>
+            <article id="${item.id}" class="full-story-display">
+                <h1>${formatMoney(item.title)}</h1>
                 <p style="text-align: center; font-weight: bold; color: #666;">${item.date} | ${item.tags.join(' | ')}</p>
                 ${imgHTML}
-                <div class="story-body" style="white-space: pre-wrap; line-height: 1.8; color: #222;">${formatMoney(item.full_story)}</div>
+                <div class="story-body" style="white-space: pre-wrap;">${formatMoney(item.full_story)}</div>
             </article>`;
     }
 
@@ -144,7 +153,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// Weather Tab breakout
 function openWeatherTab() {
     window.open("https://www.accuweather.com/en/us/flora/62839/weather-forecast/332851", "_top");
 }
