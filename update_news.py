@@ -30,25 +30,34 @@ def is_strictly_local(text):
             return True
     return False
 
-async def get_full_content(url):
+async def get_full_content_and_image(url):
+    """ Fetches story body AND looks for a featured image on the page """
+    result = {"body": "", "image": ""}
     try:
         async with httpx.AsyncClient() as client:
             headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
             resp = await client.get(url, timeout=10, headers=headers, follow_redirects=True)
             if resp.status_code == 200:
                 soup = BeautifulSoup(resp.text, 'html.parser')
+                
+                # Grab the image (Open Graph image used by most news sites)
+                og_image = soup.find("meta", property="og:image")
+                if og_image:
+                    result["image"] = og_image["content"]
+                
+                # Grab the body text
                 content = soup.find('div', class_='entry-content') or \
                           soup.find('article') or \
                           soup.find('div', class_='post-content')
                 if content:
                     for noise in content(['script', 'style', 'a', 'div.sharedaddy', 'div.jp-relatedposts', 'div.wpcnt']):
                         noise.decompose()
-                    return content.get_text(separator='\n', strip=True)
+                    result["body"] = content.get_text(separator='\n', strip=True)
     except: pass
-    return ""
+    return result
 
 async def process_news():
-    # 1. Load EXISTING news from the file so we don't delete them
+    # 1. Load EXISTING news
     existing_news = []
     seen_ids = set()
     if os.path.exists(NEWS_DATA_FILE):
@@ -81,29 +90,38 @@ async def process_news():
                     link = item.find("link").text or ""
                     slug = create_slug(title)
 
-                    # --- NO DUPLICATES ---
-                    # If the ID is already in the file or already found this run, skip it
                     if slug in seen_ids: continue
 
+                    # Fetch the content and the image
+                    content_data = await get_full_content_and_image(link)
                     description = item.find("description").text if item.find("description") is not None else ""
-                    full_text = await get_full_content(link)
-                    body = full_text if len(full_text) > 150 else description
+                    body = content_data["body"] if len(content_data["body"]) > 150 else description
                     
                     search_blob = (title + " " + body)
                     
                     if is_primary or is_strictly_local(search_blob):
                         seen_ids.add(slug)
+                        
+                        # --- DYNAMIC TAGGING (Obit, Fire, Police) ---
                         tags = [t for t in TOWNS if re.search(rf"\b{re.escape(t.lower())}\b", search_blob.lower())]
+                        
+                        if any(word in search_blob.lower() for word in ["obituary", "funeral", "passed away", "memorial service"]):
+                            tags.append("Obituary")
+                        if any(word in search_blob.lower() for word in ["fire department", "firefighters", "blaze", "structure fire"]):
+                            tags.append("Fire Dept")
+                        if any(word in search_blob.lower() for word in ["police", "sheriff", "arrested", "deputy", "dispatch"]):
+                            tags.append("Police/PD")
+                            
                         read_more_url = f"https://supportmylocalcommunity.com/local-news/#{slug}"
 
-                        # Only append to the list
                         existing_news.append({
                             "id": slug,
                             "title": title,
+                            "image": content_data["image"],
                             "full_story": body,
                             "read_more_link": read_more_url,
                             "link": read_more_url,
-                            "tags": tags if tags else ["Clay County"],
+                            "tags": list(set(tags)) if tags else ["Clay County"],
                             "date": datetime.now().strftime("%Y-%m-%d"),
                             "is_primary": is_primary
                         })
@@ -111,10 +129,8 @@ async def process_news():
             except:
                 continue
 
-    # 2. Save the COMBINED list (Existing + New Only)
-    # Sort by date so newest is always at the top if your JS doesn't do it
+    # 2. Sort and Save
     existing_news.sort(key=lambda x: x['date'], reverse=True)
-
     with open(NEWS_DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(existing_news, f, indent=4, ensure_ascii=False)
     
