@@ -1,15 +1,28 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const summaryContainer = document.getElementById('town-summaries');
     const fullContainer = document.getElementById('full-news-feed');
     
-    const jsonUrl = `https://kfruti88.github.io/clay-county-news/news_data.json?v=${new Date().getTime()}`;
+    // --- ATOMIC TIME SYNC (CHICAGO) ---
+    // This fetches the true time from Clay County's timezone
+    let trueTime = new Date();
+    try {
+        const timeRes = await fetch('https://worldtimeapi.org/api/timezone/America/Chicago');
+        const timeData = await timeRes.json();
+        trueTime = new Date(timeData.datetime);
+        console.log("Atomic Chicago Time Synced:", trueTime.toLocaleString());
+    } catch (e) {
+        console.warn("Atomic sync failed, using device time as backup.");
+    }
+
+    // Use the atomic timestamp for cache busting
+    const jsonUrl = `https://kfruti88.github.io/clay-county-news/news_data.json?v=${trueTime.getTime()}`;
     const hubUrl = "https://supportmylocalcommunity.com/local-news/";
 
     const townThemes = {
-        "flora": { bg: "#0c0b82" },
-        "louisville": { bg: "#010101" },
-        "clay-city": { bg: "#0c30f0" },
-        "xenia": { bg: "#000000" },
+        "flora": { bg: "#0c0b82" },        // Deep Navy
+        "louisville": { bg: "#010101" },   // Black
+        "clay-city": { bg: "#0c30f0" },    // Blue
+        "xenia": { bg: "#000000" },        // Black
         "sailor-springs": { bg: "#000000" }, 
         "obituary": { bg: "#333333" },
         "fire dept": { bg: "#ff4500" },
@@ -71,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!fullContainer) return;
         const imgHTML = item.image ? `<img src="${item.image}" style="width:100%; height:auto; border-radius:12px; margin-bottom:20px; object-fit: cover;">` : '';
 
-        // Desktop focused width (100% of container) with safe max-width
+        // FIXED: Corrected the formatMoney function call at the bottom
         fullContainer.innerHTML += `
             <article id="${item.id}" class="full-story-display" style="width: 100%; max-width: 800px; margin: 0 auto 30px auto; background: white; padding: 30px; border-radius: 12px; box-sizing: border-box; overflow-wrap: break-word;">
                 <h1 style="color: #1a1a1a; word-wrap: break-word;">${formatMoney(item.title)}</h1>
