@@ -11,12 +11,30 @@ NEWS_DATA_FILE = 'news_data.json'
 SOURCES_FILE = 'sources.json' 
 # #keep full story goes to https://supportmylocalcommunity.com/local-news/
 TOWNS = ["Flora", "Louisville", "Clay City", "Xenia", "Sailor Springs"] #Keep Towns
-CLAY_COUNTY_LOCATIONS = ["clay county", "flora", "xenia", "sailor springs", "louisville", "clay city"] #Keep Clay_County_locations
+
+# Keywords for filtering - Added 'illinois' and ' il ' to lock it to your state
+CLAY_COUNTY_LOCATIONS = ["clay county", "flora", "xenia", "sailor springs", "louisville", "clay city", "illinois", " il "] #Keep Clay_County_locations
 
 def create_slug(text):
     slug = text.lower()
     slug = re.sub(r'[^a-z0-9\s-]', '', slug)
     return re.sub(r'\s+', '-', slug).strip('-')[:50]
+
+# --- THE NEW FILTER LOGIC ---
+def is_strictly_local(text):
+    """
+    Checks if the text mentions your specific towns as whole words
+    and ensures it's relevant to Clay County, IL.
+    """
+    text = text.lower()
+    
+    # Check for specific towns using word boundaries (\b) 
+    # This prevents "Flora" matching "Florissant"
+    for loc in ["flora", "xenia", "sailor springs", "louisville", "clay city", "clay county"]:
+        pattern = rf"\b{re.escape(loc)}\b"
+        if re.search(pattern, text):
+            return True
+    return False
 
 async def get_full_content(url):
     """ #keep full story goes to https://supportmylocalcommunity.com/local-news/ """
@@ -40,6 +58,7 @@ async def get_full_content(url):
 async def process_news():
     final_news = []
     seen_ids = set()
+    
     with open(SOURCES_FILE, 'r') as f:
         sources = json.load(f)
 
@@ -49,26 +68,41 @@ async def process_news():
                 resp = await client.get(source['url'], timeout=15)
                 root = ET.fromstring(resp.content)
                 for item in root.findall("./channel/item")[:15]:
-                    title = item.find("title").text
-                    link = item.find("link").text
+                    title = item.find("title").text or ""
+                    link = item.find("link").text or ""
+                    
                     slug = create_slug(title)
                     if slug in seen_ids: continue
                     seen_ids.add(slug)
 
                     full_text = await get_full_content(link)
                     # #keep full story goes to https://supportmylocalcommunity.com/local-news/
-                    body = full_text if len(full_text) > 150 else (item.find("description").text or "")
+                    description = item.find("description").text if item.find("description") is not None else ""
+                    body = full_text if len(full_text) > 150 else description
                     
-                    if any(loc in (title + body).lower() for loc in CLAY_COUNTY_LOCATIONS):
-                        tags = [t for t in TOWNS if t.lower() in (title + body).lower()]
+                    # combine title and body to search for local keywords
+                    search_blob = (title + " " + body).lower()
+                    
+                    # --- APPLY THE STRICT FILTER ---
+                    if is_strictly_local(search_blob):
+                        # Identify which specific town it is for the tags
+                        # Using the strict word boundary check for tags too
+                        tags = [t for t in TOWNS if re.search(rf"\b{re.escape(t.lower())}\b", search_blob)]
+                        
+                        # This creates the "bookmark" link for your website
+                        # It points to your domain + the article slug (ID) for autoscrolling
+                        read_more_url = f"https://supportmylocalcommunity.com/local-news/#{slug}"
+
                         final_news.append({
                             "id": slug,
                             "title": title,
                             "full_story": body, #keep full story goes to https://supportmylocalcommunity.com/local-news/
+                            "read_more_link": read_more_url, # The bookmark link
                             "tags": tags if tags else ["Clay County"],
                             "date": datetime.now().strftime("%Y-%m-%d")
                         })
-            except: pass
+            except Exception as e:
+                print(f"Error processing source {source.get('url')}: {e}")
 
     with open(NEWS_DATA_FILE, 'w', encoding='utf-8') as f:
         # #keep full story goes to https://supportmylocalcommunity.com/local-news/
