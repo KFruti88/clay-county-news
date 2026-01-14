@@ -2,33 +2,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const summaryContainer = document.getElementById('town-summaries');
     const fullContainer = document.getElementById('full-news-feed');
     
-    // Cache busting to ensure news is always fresh
+    // Cache busting to ensure news is always fresh across all domains
     const jsonUrl = `https://kfruti88.github.io/clay-county-news/news_data.json?v=${new Date().getTime()}`;
     const hubUrl = "https://supportmylocalcommunity.com/local-news/";
 
     const townThemes = {
-        "Flora": { bg: "#0c0b82" },
-        "Louisville": { bg: "#010101" },
-        "Clay City": { bg: "#0c30f0" },
-        "Xenia": { bg: "#000000" },
-        "Sailor Springs": { bg: "#000000" },
-        "Obituary": { bg: "#333333" },
-        "Fire Dept": { bg: "#ff4500" },
-        "Police/PD": { bg: "#00008b" },
-        "Default": { bg: "#0c71c3" } 
+        "Flora": { bg: "#0c0b82" },        // Deep Navy for ourflora.com
+        "Louisville": { bg: "#010101" },   // Black
+        "Clay City": { bg: "#0c30f0" },    // Clay City Blue
+        "Xenia": { bg: "#000000" },        // Black
+        "Sailor Springs": { bg: "#000000" }, // Black
+        "Obituary": { bg: "#333333" },     //
+        "Fire Dept": { bg: "#ff4500" },    //
+        "Police/PD": { bg: "#00008b" },    //
+        "Default": { bg: "#0c71c3" }       // Light Blue fallback
     };
 
-    // 1. Detect town from URL pathname to change the background BEHIND the articles
-    const path = window.location.pathname.toLowerCase();
+    // 1. CROSS-DOMAIN DETECTION: Checks the address bar for the town name
+    const currentURL = window.location.href.toLowerCase();
     let currentTown = "Default";
 
-    if (path.includes('flora')) currentTown = "Flora";
-    else if (path.includes('louisville')) currentTown = "Louisville";
-    else if (path.includes('clay-city')) currentTown = "Clay City";
-    else if (path.includes('xenia')) currentTown = "Xenia";
-    else if (path.includes('sailor-springs')) currentTown = "Sailor Springs";
+    if (currentURL.includes('flora')) currentTown = "Flora";
+    else if (currentURL.includes('louisville')) currentTown = "Louisville";
+    else if (currentURL.includes('clay-city')) currentTown = "Clay City";
+    else if (currentURL.includes('xenia')) currentTown = "Xenia";
+    else if (currentURL.includes('sailor-springs')) currentTown = "Sailor Springs";
 
-    // 2. CHANGE THE BACKGROUND COLOR BEHIND THE ARTICLE
+    // 2. APPLY TOWN COLOR TO THE PAGE BACKGROUND ONLY
     document.body.style.backgroundColor = townThemes[currentTown].bg;
 
     const isHubMode = !!fullContainer;
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!summaryContainer) return;
         const imgHTML = item.image ? `<img src="${item.image}" style="width:100%; border-radius:12px; margin-bottom:15px;">` : '';
         
-        // Keeping your original White/Black card style exactly as it was
+        // Keeps your preferred White background / Black text style for articles
         summaryContainer.innerHTML += `
             <div class="summary-box">
                 <h3>${item.title}</h3>
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!fullContainer) return;
         const imgHTML = item.image ? `<img src="${item.image}" style="width:100%; border-radius:12px; margin-bottom:20px;">` : '';
 
-        // Keeping your original White/Black article style exactly as it was
+        // Keeps your preferred White background / Black text style for full stories
         fullContainer.innerHTML += `
             <article id="${item.id}" class="full-story-display">
                 <h1>${item.title}</h1>
