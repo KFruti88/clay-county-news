@@ -1,33 +1,30 @@
-/* --- Ultra-Wide Base & Glassy Background --- */
-html {
+/* --- Ultra-Wide Base --- */
+html, body {
     scroll-behavior: smooth;
-}
-
-body { 
+    margin: 0;
+    padding: 0;
+    width: 100%; /* Stretch body to 100% of the browser width */
+    min-height: 100%; /* Use % instead of vh */
     background: linear-gradient(135deg, #e0e0e0 0%, #f4f4f4 100%);
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    line-height: 1.6; 
-    margin: 0; 
-    padding: 0;
-    min-height: 100vh;
-    width: 100%;
     overflow-x: hidden;
 }
 
-/* --- Layout Containers --- */
+/* --- Layout Containers (Full Width) --- */
 #town-summaries, #full-news-feed {
-    width: 96%; 
-    max-width: 1400px; /* Prevents text from becoming too stretched on massive monitors */
-    margin: 30px auto;
+    width: 100%;  /* Set to 100% to fill the entire screen width */
+    max-width: 100%; /* Removed the 1400px limit to allow true ultra-wide */
+    margin: 0; /* Removed auto margins to let it touch the edges */
     display: flex;
     flex-direction: column;
-    gap: 30px;
-    box-sizing: border-box; 
+    gap: 20px;
+    box-sizing: border-box;
+    padding: 20px; /* Internal padding so text doesn't hit the very edge */
 }
 
-/* --- Glossy Cards (Merged Logic) --- */
+/* --- Glossy Cards (100% Width) --- */
 .summary-box, .full-story-display { 
-    width: 100%;
+    width: 100%; /* Take up 100% of the container */
     box-sizing: border-box;
     background: rgba(255, 255, 255, 0.75) !important;
     backdrop-filter: blur(12px);
@@ -37,84 +34,38 @@ body {
     border-radius: 24px;
     padding: 40px; 
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.12);
-    transition: all 0.3s ease;
+    margin-bottom: 20px;
+    text-align: left;
 }
 
 /* Special styling for Full Articles */
 .full-story-display {
     border-top: none !important;
     border-left: 20px solid var(--town-color, #333) !important;
+    border-radius: 0; /* Square edges look better for 100% wide full stories */
 }
 
-.summary-box:hover {
-    transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.95) !important;
-    box-shadow: 0 20px 50px 0 rgba(31, 38, 135, 0.2);
-}
-
-/* --- Typography --- */
+/* --- Typography (Headlines) --- */
 .summary-box h3, .full-story-display h1 {
-    text-transform: uppercase;
-    font-weight: 900;
-    font-size: 2rem; 
-    margin-top: 0;
-    color: #1a1a1a;
-    letter-spacing: -0.5px;
-    border-bottom: 1px solid rgba(0,0,0,0.05);
-    padding-bottom: 15px;
+    font-size: 2.5rem; /* Scaled up for the 100% width look */
+    text-align: center;
+    width: 100%;
 }
 
 .story-body, .summary-box p {
-    font-size: 1.25rem;
-    color: #333;
-    margin: 20px 0;
-    white-space: pre-wrap; /* Keeps WNOI line breaks */
-    line-height: 1.8;
+    font-size: 1.3rem;
+    max-width: 90%; /* Keeps text lines from getting too long to read */
+    margin: 20px auto; /* Centers the text block within the 100% wide card */
 }
 
-/* --- Buttons --- */
-.read-more-btn { 
-    display: inline-block;
-    background: #111;
-    color: #fff !important;
-    padding: 14px 30px;
-    border-radius: 60px;
-    text-decoration: none !important;
-    font-weight: 700;
-    font-size: 1rem;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    transition: all 0.3s ease;
-}
-
-.read-more-btn:hover {
-    background: #000;
-    transform: scale(1.05);
-}
-
-/* --- MOBILE FIXES (The "Good" part of the 2nd code) --- */
+/* --- Mobile Fixes --- */
 @media (max-width: 768px) {
-    #town-summaries, #full-news-feed {
-        width: 98%;
-        margin: 15px auto;
-        gap: 20px;
-    }
-
     .summary-box, .full-story-display {
         padding: 20px;
-        border-radius: 16px;
+        border-radius: 0; /* Full edge-to-edge on mobile */
     }
-
+    
     .summary-box h3, .full-story-display h1 {
-        font-size: 1.4rem;
-    }
-
-    .story-body, .summary-box p {
-        font-size: 1.05rem;
-    }
-
-    .read-more-btn {
-        width: 100%;
-        text-align: center;
-        box-sizing: border-box;
+        font-size: 1.6rem;
     }
 }
