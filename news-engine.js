@@ -1,12 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
     const summaryContainer = document.getElementById('town-summaries');
     const fullContainer = document.getElementById('full-news-feed');
+    const newsContainer = document.getElementById('news-container'); // Support for your simpler container
     
     const jsonUrl = "https://kfruti88.github.io/clay-county-news/news_data.json";
     const hubUrl = "https://supportmylocalcommunity.com/local-news/";
 
-    // DETECTION: If 'full-news-feed' exists, we are in Hub Mode showing full articles.
-    const isHubMode = !!fullContainer;
+    // DETECTION: If 'full-news-feed' or 'news-container' exists, we show full stories.
+    const isHubMode = !!fullContainer || !!newsContainer;
+    const targetContainer = fullContainer || newsContainer;
 
     const townColors = {
         "Flora": { bg: "#0c0b82", text: "#fe4f00" },
@@ -20,37 +22,39 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch(jsonUrl)
         .then(res => res.json())
         .then(data => {
-            // MASTER FILTER: Strictly Clay County Towns & Exclusion of Wayne County keywords
+            // Updated Filter: Allows anything tagged with your towns OR anything marked as Primary (WNOI)
             const clayTownList = ["Flora", "Louisville", "Clay City", "Xenia", "Sailor Springs"];
             
             const filteredData = data.filter(item => {
                 const isClay = item.tags.some(tag => clayTownList.includes(tag) || tag === "Clay County");
+                const isPrimary = item.is_primary === true;
                 const isNotWayne = !item.title.includes("Cisne") && !item.title.includes("Wayne County");
-                return isClay && isNotWayne;
+                
+                return (isClay || isPrimary) && isNotWayne;
             });
 
-            if (isHubMode) {
+            if (isHubMode && targetContainer) {
                 // --- HUB MODE: RENDER ALL FULL STORIES ---
-                fullContainer.innerHTML = ''; // Clear loading message
-                filteredData.forEach(item => renderFullStory(item));
+                targetContainer.innerHTML = ''; 
+                filteredData.forEach(item => renderFullStory(item, targetContainer));
 
                 // Handle the auto-scroll "jump" to a specific story ID
                 const params = new URLSearchParams(window.location.search);
-                const targetId = params.get('id');
+                const targetId = params.get('id') || window.location.hash.substring(1);
+                
                 if (targetId) {
                     setTimeout(() => {
                         const element = document.getElementById(targetId);
                         if (element) {
                             element.scrollIntoView({ behavior: 'smooth' });
-                            element.style.borderLeftWidth = "35px"; // Visual highlight
+                            element.style.borderLeftWidth = "35px"; 
                         }
-                    }, 1000); // 1 second delay to ensure page is fully painted
+                    }, 1000);
                 }
             } else if (summaryContainer) {
                 // --- TOWN/PORTAL MODE: RENDER SUMMARIES ONLY ---
-                summaryContainer.innerHTML = ''; // Clear loading message
+                summaryContainer.innerHTML = ''; 
                 
-                // Detection for town-specific filtering based on URL path
                 const path = window.location.href.toLowerCase();
                 let currentTown = "";
                 if (path.includes('flora')) currentTown = "Flora";
@@ -79,13 +83,14 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>`;
     }
 
-    function renderFullStory(item) {
-        if (!fullContainer) return;
+    function renderFullStory(item, container) {
         const mainBG = townColors[item.tags[0]]?.bg || "#333";
-        fullContainer.innerHTML += `
-            <div id="${item.id}" class="full-story-display" style="--town-color: ${mainBG}; border-left: 15px solid ${mainBG}; margin-bottom: 30px; padding: 30px; background: #fff; border-radius: 12px; scroll-margin-top: 150px;">
+        container.innerHTML += `
+            <div id="${item.id}" class="full-story-display news-card" style="--town-color: ${mainBG}; border-left: 15px solid ${mainBG}; margin-bottom: 30px; padding: 30px; background: #fff; border-radius: 12px; scroll-margin-top: 150px;">
                 <h1 style="margin-top:0;">${item.title}</h1>
+                <p style="color: #666; font-weight: bold;">${item.date} | ${item.tags.join(', ')}</p>
                 <div class="story-body" style="white-space: pre-wrap; line-height: 1.8; font-size: 1.15rem;">${item.full_story}</div>
+                ${item.is_primary ? '<p style="font-style: italic; margin-top: 15px;">Source: Local News Primary</p>' : ''}
             </div>`;
     }
 });
