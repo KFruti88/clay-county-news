@@ -42,32 +42,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.body.style.backgroundColor = townThemes[themeKey].bg;
 
     // --- ZONE 3: FETCH & RENDER ---
-    fetch(jsonUrl).then(res => res.json()).then(data => {
-        const clayTownList = ["flora", "louisville", "clay-city", "xenia", "sailor-springs"];
+   // --- ZONE 3: DATA FETCH & CLAY COUNTY ONLY FILTER ---
+fetch(jsonUrl).then(res => res.json()).then(data => {
+    
+    const filteredData = data.filter(item => {
+        // 1. Check for specific Town Match
+        const isForThisTown = item.tags.some(t => t.toLowerCase() === themeKey);
         
-        const filteredData = data.filter(item => {
-            const hasTownTag = item.tags.some(tag => clayTownList.includes(tag.toLowerCase()));
-            const isForThisTown = item.tags.some(t => t.toLowerCase() === themeKey);
-            const isGeneralNews = !hasTownTag; 
-            const isCountyWide = item.tags.some(t => t.toLowerCase() === "clay county");
-            const isPrimary = item.is_primary === true;
-            const isNotWayne = !item.title.includes("Cisne") && !item.title.includes("Wayne County");
+        // 2. Check for "Clay County" tag (This is your ONLY General News trigger)
+        const isGeneralClayCounty = item.tags.some(t => t.toLowerCase() === "clay county");
+        
+        // 3. Primary/Urgent Check
+        const isPrimary = item.is_primary === true;
 
-            return (isForThisTown || isGeneralNews || isCountyWide || isPrimary) && isNotWayne;
-        });
+        // 4. THE FILTER: Must be for the town OR for Clay County
+        // This stops Fairfield (Wayne County) from appearing unless you tag it "Clay County"
+        const isClayContent = isForThisTown || isGeneralClayCounty || isPrimary;
 
-        // THE FINAL LOCK
-        if (isTownSite && summaryContainer) {
-            // FORCING SUMMARY VIEW ONLY
-            summaryContainer.innerHTML = ''; 
-            filteredData.forEach(item => renderSummary(item));
-        } else if (fullContainer) {
-            // FORCING FULL HUB VIEW ONLY
-            fullContainer.innerHTML = ''; 
-            filteredData.forEach(item => renderFullStory(item));
-            setTimeout(() => { handleScroll(); }, 500); 
-        }
+        // 5. Hard Block for Wayne County keywords
+        const isNotWayne = !item.title.includes("Cisne") && !item.title.includes("Wayne County");
+
+        return isClayContent && isNotWayne;
     });
+
+    // --- RENDER LOGIC (LOCKED) ---
+    if (isTownSite && summaryContainer) {
+        summaryContainer.innerHTML = ''; 
+        filteredData.forEach(item => renderSummary(item));
+    } else if (fullContainer) {
+        fullContainer.innerHTML = ''; 
+        filteredData.forEach(item => renderFullStory(item));
+        setTimeout(() => { handleScroll(); }, 500); 
+    }
+});
 
     function renderSummary(item) {
         if (!summaryContainer) return;
