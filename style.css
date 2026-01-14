@@ -5,7 +5,7 @@ html, body {
     padding: 0;
     width: 100%; /* Stretch body to 100% of the browser width */
     min-height: 100%; /* Use % instead of vh */
-    background: linear-gradient(135deg, #e0e0e0 0%, #f4f4f4 100%);
+    background: linear-gradient(135deg, #e0e0e0 0%, #0c71c3 100%);
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     overflow-x: hidden;
 }
