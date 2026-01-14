@@ -1,23 +1,22 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    // --- ZONE 1: THE CORE (LOCKED) ---
+    // --- ZONE 1: CORE SELECTION ---
     const summaryContainer = document.getElementById('town-summaries');
     const fullContainer = document.getElementById('full-news-feed');
     
-    // ATOMIC CHICAGO TIME: Standardizes time for everyone
+    // ATOMIC CHICAGO TIME
     let trueTime = new Date();
     try {
         const timeRes = await fetch('https://worldtimeapi.org/api/timezone/America/Chicago');
         const timeData = await timeRes.json();
         trueTime = new Date(timeData.datetime);
-    } catch (e) { console.warn("Atomic sync failed, using backup time."); }
+    } catch (e) { console.warn("Atomic sync failed"); }
 
-    // Run Header Plugins (Time/Weather)
     updateNewspaperHeader(trueTime);
 
     const jsonUrl = `https://kfruti88.github.io/clay-county-news/news_data.json?v=${trueTime.getTime()}`;
     const hubUrl = "https://supportmylocalcommunity.com/local-news/";
 
-    // --- ZONE 2: TOWN THEMES & SLUG LOCK (LOCKED) ---
+    // --- ZONE 2: THE HARD DOMAIN & SLUG LOCK ---
     const townThemes = {
         "flora": { bg: "#0c0b82" }, "louisville": { bg: "#010101" },
         "clay-city": { bg: "#0c30f0" }, "xenia": { bg: "#000000" },
@@ -25,21 +24,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const currentURL = window.location.href.toLowerCase();
+    const currentHost = window.location.hostname.toLowerCase();
     let themeKey = "default";
     let isTownSite = false;
 
-    // Detect Slugs to lock Town Summary behavior
-    const slugs = ["flora", "louisville", "clay-city", "xenia", "sailor-springs"];
-    slugs.forEach(slug => {
-        if (currentURL.includes(slug)) { 
-            themeKey = slug; 
-            isTownSite = true; 
-        }
-    });
+    // FORCED CHECK: If we are on ourflora.com OR the GitHub town preview
+    if (currentHost.includes('ourflora.com') || currentURL.includes('clay-county-news')) {
+        themeKey = "flora"; 
+        isTownSite = true;
+    }
+
+    // OVERRIDE: If the URL actually contains "local-news", it is NEVER a town site
+    if (currentURL.includes('local-news')) {
+        isTownSite = false;
+    }
 
     document.body.style.backgroundColor = townThemes[themeKey].bg;
 
-    // --- ZONE 3: FETCH & FORCE SUMMARY LOGIC ---
+    // --- ZONE 3: FETCH & RENDER ---
     fetch(jsonUrl).then(res => res.json()).then(data => {
         const clayTownList = ["flora", "louisville", "clay-city", "xenia", "sailor-springs"];
         
@@ -54,30 +56,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             return (isForThisTown || isGeneralNews || isCountyWide || isPrimary) && isNotWayne;
         });
 
-        // THE HARD LOCK: 
-        // If it's a town site, it is FORCED to use renderSummary.
-        if (isTownSite) {
-            if (summaryContainer) {
-                summaryContainer.innerHTML = ''; 
-                filteredData.forEach(item => renderSummary(item));
-            }
-        } 
-        // Only the HUB (local-news) ever gets the full stories.
-        else if (fullContainer) {
+        // THE FINAL LOCK
+        if (isTownSite && summaryContainer) {
+            // FORCING SUMMARY VIEW ONLY
+            summaryContainer.innerHTML = ''; 
+            filteredData.forEach(item => renderSummary(item));
+        } else if (fullContainer) {
+            // FORCING FULL HUB VIEW ONLY
             fullContainer.innerHTML = ''; 
             filteredData.forEach(item => renderFullStory(item));
-            
-            // FIXED SCROLL: Ensures articles are drawn before jumping to ID
-            setTimeout(() => { handleScroll(); }, 500);
+            setTimeout(() => { handleScroll(); }, 500); 
         }
     });
 
-    // --- ZONE 4: RENDERERS (LOCKED) ---
     function renderSummary(item) {
         if (!summaryContainer) return;
         const imgHTML = item.image ? `<img src="${item.image}" style="width:100%; height:auto; border-radius:12px; margin-bottom:15px; object-fit: cover;">` : '';
-        
-        // This is the ONLY thing town sites will see: Title, Image, Short Text, and Button.
+        // BREAKOUT LINK: Forces the user to the main hub
         summaryContainer.innerHTML += `
             <div class="summary-box">
                 <h3>${formatMoney(item.title)}</h3>
@@ -100,15 +95,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             </article>`;
     }
 
-    // --- ZONE 5: UTILITIES ---
     function handleScroll() {
         const params = new URLSearchParams(window.location.search);
         const targetId = params.get('id'); 
         if (targetId) {
             const element = document.getElementById(targetId);
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+            if (element) { element.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
         }
     }
 
