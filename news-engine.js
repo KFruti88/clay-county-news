@@ -1,14 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
     const summaryContainer = document.getElementById('town-summaries');
     const fullContainer = document.getElementById('full-news-feed');
-    const newsContainer = document.getElementById('news-container'); // Support for your simpler container
     
     const jsonUrl = "https://kfruti88.github.io/clay-county-news/news_data.json";
     const hubUrl = "https://supportmylocalcommunity.com/local-news/";
 
-    // DETECTION: If 'full-news-feed' or 'news-container' exists, we show full stories.
-    const isHubMode = !!fullContainer || !!newsContainer;
-    const targetContainer = fullContainer || newsContainer;
+    // DETECTION: If 'full-news-feed' exists, we are in Hub Mode showing full articles.
+    const isHubMode = !!fullContainer;
 
     const townColors = {
         "Flora": { bg: "#0c0b82", text: "#fe4f00" },
@@ -22,10 +20,11 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch(jsonUrl)
         .then(res => res.json())
         .then(data => {
-            // Updated Filter: Allows anything tagged with your towns OR anything marked as Primary (WNOI)
+            // MASTER FILTER: Clay County Towns
             const clayTownList = ["Flora", "Louisville", "Clay City", "Xenia", "Sailor Springs"];
             
             const filteredData = data.filter(item => {
+                // Keep it if it's one of our towns OR if it's a primary source (WNOI)
                 const isClay = item.tags.some(tag => clayTownList.includes(tag) || tag === "Clay County");
                 const isPrimary = item.is_primary === true;
                 const isNotWayne = !item.title.includes("Cisne") && !item.title.includes("Wayne County");
@@ -33,15 +32,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 return (isClay || isPrimary) && isNotWayne;
             });
 
-            if (isHubMode && targetContainer) {
+            if (isHubMode) {
                 // --- HUB MODE: RENDER ALL FULL STORIES ---
-                targetContainer.innerHTML = ''; 
-                filteredData.forEach(item => renderFullStory(item, targetContainer));
+                fullContainer.innerHTML = ''; 
+                // This 'forEach' makes sure EVERY filtered article shows up
+                filteredData.forEach(item => renderFullStory(item));
 
-                // Handle the auto-scroll "jump" to a specific story ID
+                // Handle auto-scroll logic
                 const params = new URLSearchParams(window.location.search);
                 const targetId = params.get('id') || window.location.hash.substring(1);
-                
                 if (targetId) {
                     setTimeout(() => {
                         const element = document.getElementById(targetId);
@@ -49,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             element.scrollIntoView({ behavior: 'smooth' });
                             element.style.borderLeftWidth = "35px"; 
                         }
-                    }, 1000);
+                    }, 800);
                 }
             } else if (summaryContainer) {
                 // --- TOWN/PORTAL MODE: RENDER SUMMARIES ONLY ---
@@ -63,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 else if (path.includes('xenia')) currentTown = "Xenia";
                 else if (path.includes('sailor-springs')) currentTown = "Sailor Springs";
 
+                // Filter for the specific town page we are on
                 const townNews = filteredData.filter(item => 
                     !currentTown || item.tags.includes(currentTown) || item.tags.includes("Clay County")
                 );
@@ -75,22 +75,24 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderSummary(item) {
         if (!summaryContainer) return;
         const mainBG = townColors[item.tags[0]]?.bg || "#333";
+        // Using innerHTML += ensures it appends the next story instead of replacing the last one
         summaryContainer.innerHTML += `
-            <div class="summary-box" style="--town-color: ${mainBG}">
-                <h3>${item.title}</h3>
+            <div class="summary-box" style="--town-color: ${mainBG}; border-left: 10px solid ${mainBG}; margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
+                <h3 style="margin-top:0;">${item.title}</h3>
+                <p style="font-size: 0.9rem; color: #555;">${item.date}</p>
                 <p>${item.full_story.substring(0, 160)}...</p>
-                <a href="${hubUrl}?id=${item.id}" target="_blank" class="read-more-btn">Read Full Story</a>
+                <a href="${hubUrl}?id=${item.id}" target="_blank" class="read-more-btn" style="color: ${mainBG}; font-weight: bold;">Read Full Story</a>
             </div>`;
     }
 
-    function renderFullStory(item, container) {
+    function renderFullStory(item) {
+        if (!fullContainer) return;
         const mainBG = townColors[item.tags[0]]?.bg || "#333";
-        container.innerHTML += `
-            <div id="${item.id}" class="full-story-display news-card" style="--town-color: ${mainBG}; border-left: 15px solid ${mainBG}; margin-bottom: 30px; padding: 30px; background: #fff; border-radius: 12px; scroll-margin-top: 150px;">
+        fullContainer.innerHTML += `
+            <div id="${item.id}" class="full-story-display" style="--town-color: ${mainBG}; border-left: 15px solid ${mainBG}; margin-bottom: 30px; padding: 30px; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); scroll-margin-top: 100px;">
                 <h1 style="margin-top:0;">${item.title}</h1>
-                <p style="color: #666; font-weight: bold;">${item.date} | ${item.tags.join(', ')}</p>
-                <div class="story-body" style="white-space: pre-wrap; line-height: 1.8; font-size: 1.15rem;">${item.full_story}</div>
-                ${item.is_primary ? '<p style="font-style: italic; margin-top: 15px;">Source: Local News Primary</p>' : ''}
+                <p style="color: #666; font-weight: bold;">${item.date} | Tags: ${item.tags.join(', ')}</p>
+                <div class="story-body" style="white-space: pre-wrap; line-height: 1.8; font-size: 1.1rem; color: #333;">${item.full_story}</div>
             </div>`;
     }
 });
