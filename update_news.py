@@ -40,12 +40,12 @@ async def get_full_content_and_image(url):
             if resp.status_code == 200:
                 soup = BeautifulSoup(resp.text, 'html.parser')
                 
-                # Grab the image (Open Graph image used by most news sites)
+                # 1. Grab image (og:image is the standard for news)
                 og_image = soup.find("meta", property="og:image")
                 if og_image:
                     result["image"] = og_image["content"]
                 
-                # Grab the body text
+                # 2. Grab body text
                 content = soup.find('div', class_='entry-content') or \
                           soup.find('article') or \
                           soup.find('div', class_='post-content')
@@ -65,8 +65,7 @@ async def process_news():
             with open(NEWS_DATA_FILE, 'r', encoding='utf-8') as f:
                 existing_news = json.load(f)
                 seen_ids = {article['id'] for article in existing_news}
-        except:
-            existing_news = []
+        except: existing_news = []
 
     new_articles_count = 0
     with open(SOURCES_FILE, 'r') as f:
@@ -92,32 +91,33 @@ async def process_news():
 
                     if slug in seen_ids: continue
 
-                    # Fetch the content and the image
-                    content_data = await get_full_content_and_image(link)
+                    # Fetch content and image
+                    data = await get_full_content_and_image(link)
                     description = item.find("description").text if item.find("description") is not None else ""
-                    body = content_data["body"] if len(content_data["body"]) > 150 else description
+                    body = data["body"] if len(data["body"]) > 150 else description
                     
                     search_blob = (title + " " + body)
                     
                     if is_primary or is_strictly_local(search_blob):
                         seen_ids.add(slug)
                         
-                        # --- DYNAMIC TAGGING (Obit, Fire, Police) ---
+                        # --- TAGGING (Obits, Fire, Police) ---
                         tags = [t for t in TOWNS if re.search(rf"\b{re.escape(t.lower())}\b", search_blob.lower())]
+                        blob_lower = search_blob.lower()
                         
-                        if any(word in search_blob.lower() for word in ["obituary", "funeral", "passed away", "memorial service"]):
+                        if any(w in blob_lower for w in ["obituary", "funeral", "passed away", "memorial"]):
                             tags.append("Obituary")
-                        if any(word in search_blob.lower() for word in ["fire department", "firefighters", "blaze", "structure fire"]):
+                        if any(w in blob_lower for w in ["fire department", "firefighters", "blaze", "fire call"]):
                             tags.append("Fire Dept")
-                        if any(word in search_blob.lower() for word in ["police", "sheriff", "arrested", "deputy", "dispatch"]):
+                        if any(w in blob_lower for w in ["police", "sheriff", "arrested", "deputy", "dispatch"]):
                             tags.append("Police/PD")
-                            
+
                         read_more_url = f"https://supportmylocalcommunity.com/local-news/#{slug}"
 
                         existing_news.append({
                             "id": slug,
                             "title": title,
-                            "image": content_data["image"],
+                            "image": data["image"],
                             "full_story": body,
                             "read_more_link": read_more_url,
                             "link": read_more_url,
@@ -126,15 +126,14 @@ async def process_news():
                             "is_primary": is_primary
                         })
                         new_articles_count += 1
-            except:
-                continue
+            except: continue
 
-    # 2. Sort and Save
+    # 2. Save Combined Data
     existing_news.sort(key=lambda x: x['date'], reverse=True)
     with open(NEWS_DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(existing_news, f, indent=4, ensure_ascii=False)
     
-    print(f"Update complete. Added {new_articles_count} new articles.")
+    print(f"Added {new_articles_count} new articles.")
 
 if __name__ == "__main__":
     asyncio.run(process_news())
