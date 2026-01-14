@@ -3,11 +3,19 @@ name: Frequent News Sync
 on:
   schedule:
     - cron: '22,44 * * * *' # Runs twice an hour
-  workflow_dispatch: # Allows you to run it manually
+  workflow_dispatch: # Allows manual runs
+
+# --- THE FIX: ALLOW ONLY ONE DEPLOYMENT AT A TIME ---
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Needed to push the json changes
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
