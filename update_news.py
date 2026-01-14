@@ -12,27 +12,33 @@ SOURCES_FILE = 'sources.json'
 # #keep full story goes to https://supportmylocalcommunity.com/local-news/
 TOWNS = ["Flora", "Louisville", "Clay City", "Xenia", "Sailor Springs"] #Keep Towns
 
-# Keywords for filtering - Added 'illinois' and ' il ' to lock it to your state
+# Keywords to KEEP - Added 'illinois' and ' il ' to lock it to your state
 CLAY_COUNTY_LOCATIONS = ["clay county", "flora", "xenia", "sailor springs", "louisville", "clay city", "illinois", " il "] #Keep Clay_County_locations
+
+# --- NEW: Keywords to REJECT (The Blacklist) ---
+# This stops statewide news that mentions Clay County only in a long list of counties
+BLACKLIST = ["IAAF CONVENTION", "FAIR QUEEN", "BUS TOUR", "STATEWIDE", "ILLINOIS ASSOCIATION OF AGRICULTURAL FAIRS"]
 
 def create_slug(text):
     slug = text.lower()
     slug = re.sub(r'[^a-z0-9\s-]', '', slug)
     return re.sub(r'\s+', '-', slug).strip('-')[:50]
 
-# --- THE NEW FILTER LOGIC ---
 def is_strictly_local(text):
     """
     Checks if the text mentions your specific towns as whole words
-    and ensures it's relevant to Clay County, IL.
+    and is not part of the statewide blacklist.
     """
-    text = text.lower()
-    
-    # Check for specific towns using word boundaries (\b) 
-    # This prevents "Flora" matching "Florissant"
+    text_upper = text.upper()
+    # 1. Immediate rejection if any Blacklist word is found
+    if any(bad_word in text_upper for bad_word in BLACKLIST):
+        return False
+
+    text_lower = text.lower()
+    # 2. Check for specific towns using word boundaries (\b)
     for loc in ["flora", "xenia", "sailor springs", "louisville", "clay city", "clay county"]:
         pattern = rf"\b{re.escape(loc)}\b"
-        if re.search(pattern, text):
+        if re.search(pattern, text_lower):
             return True
     return False
 
@@ -80,24 +86,21 @@ async def process_news():
                     description = item.find("description").text if item.find("description") is not None else ""
                     body = full_text if len(full_text) > 150 else description
                     
-                    # combine title and body to search for local keywords
-                    search_blob = (title + " " + body).lower()
+                    search_blob = (title + " " + body)
                     
-                    # --- APPLY THE STRICT FILTER ---
                     if is_strictly_local(search_blob):
                         # Identify which specific town it is for the tags
-                        # Using the strict word boundary check for tags too
-                        tags = [t for t in TOWNS if re.search(rf"\b{re.escape(t.lower())}\b", search_blob)]
+                        tags = [t for t in TOWNS if re.search(rf"\b{re.escape(t.lower())}\b", search_blob.lower())]
                         
-                        # This creates the "bookmark" link for your website
-                        # It points to your domain + the article slug (ID) for autoscrolling
+                        # IMPORTANT: This link is what creates the clickable 'Read Full Story' button
                         read_more_url = f"https://supportmylocalcommunity.com/local-news/#{slug}"
 
                         final_news.append({
                             "id": slug,
                             "title": title,
                             "full_story": body, #keep full story goes to https://supportmylocalcommunity.com/local-news/
-                            "read_more_link": read_more_url, # The bookmark link
+                            "read_more_link": read_more_url, # Key for the bookmark link
+                            "link": read_more_url, # Key for compatibility with the JS engine
                             "tags": tags if tags else ["Clay County"],
                             "date": datetime.now().strftime("%Y-%m-%d")
                         })
