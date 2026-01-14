@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!fullContainer) return;
         const imgHTML = item.image ? `<img src="${item.image}" style="width:100%; border-radius:12px; margin-bottom:20px;">` : '';
 
-        // Standard White/Black article styling
+        // FIXED: Added id="${item.id}" so the handleScroll function can find this specific article
         fullContainer.innerHTML += `
             <article id="${item.id}" class="full-story-display">
                 <h1>${item.title}</h1>
