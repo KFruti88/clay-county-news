@@ -84,3 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const imgHTML = item.image ? `<img src="${item.image}" style="width:100%; border-radius:12px; margin-bottom:20px;">` : '';
 
         fullContainer.innerHTML += `
+
+        // This adds a unique number based on the current time to the end of the URL
+// Example: news_data.json?v=1715634000
+const jsonUrl = `https://kfruti88.github.io/clay-county-news/news_data.json?v=${new Date().getTime()}`;
