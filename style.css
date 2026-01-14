@@ -3,69 +3,143 @@ html, body {
     scroll-behavior: smooth;
     margin: 0;
     padding: 0;
-    width: 100%; /* Stretch body to 100% of the browser width */
-    min-height: 100%; /* Use % instead of vh */
+    width: 100%;
+    min-height: 100%;
     background: linear-gradient(135deg, #e0e0e0 0%, #0c71c3 100%);
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     overflow-x: hidden;
 }
 
+/* --- Newspaper Header (Standardized Wide) --- */
+.newspaper-header {
+    background: linear-gradient(180deg, #ffffff 0%, #fdfdf8 100%); /* Glossy Paper Feel */
+    border: 3px solid #1a1a1a;
+    margin: 20px auto;
+    padding: 25px;
+    font-family: 'Playfair Display', serif;
+    width: 95%; /* Matches card structure */
+    max-width: 100%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15), inset 0 0 20px rgba(255,255,255,0.8);
+    position: relative;
+}
+
+.masthead-title h1 {
+    text-align: center;
+    font-size: clamp(2rem, 6vw, 4rem);
+    text-transform: uppercase;
+    border-bottom: 4px double #1a1a1a;
+    margin: 0 0 15px 0;
+    padding-bottom: 10px;
+    letter-spacing: -1px;
+}
+
+.masthead-meta-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    border-bottom: 2px solid #1a1a1a;
+    padding-bottom: 10px;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+/* Dynamic Weather Colors */
+.sunny { color: #fdb813; text-shadow: 0.5px 0.5px #000; }
+.cloudy { color: #8a8a88; }
+.rainy { color: #0c30f0; }
+
 /* --- Layout Containers (Full Width) --- */
 #town-summaries, #full-news-feed {
-    width: 100%;  /* Set to 100% to fill the entire screen width */
-    max-width: 100%; /* Removed the 1400px limit to allow true ultra-wide */
-    margin: 0; /* Removed auto margins to let it touch the edges */
+    width: 100%;
+    margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 30px;
     box-sizing: border-box;
-    padding: 20px; /* Internal padding so text doesn't hit the very edge */
+    padding: 20px;
 }
 
-/* --- Glossy Cards (100% Width) --- */
+/* --- Glossy High-Shine Cards --- */
 .summary-box, .full-story-display { 
-    width: 100%; /* Take up 100% of the container */
+    width: 100%;
+    position: relative;
     box-sizing: border-box;
-    background: rgba(255, 255, 255, 0.75) !important;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
-    border-top: 12px solid var(--town-color, #333) !important; 
+    /* High Gloss Glassmorphism */
+    background: rgba(255, 255, 255, 0.65) !important;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    border-top: 15px solid var(--town-color, #333) !important; 
     border-radius: 24px;
-    padding: 40px; 
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.12);
-    margin-bottom: 20px;
-    text-align: left;
+    padding: 50px; 
+    
+    /* Glossy Shadow & Reflection */
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 
+                inset 0 2px 0 rgba(255, 255, 255, 0.8);
+    margin-bottom: 30px;
+    overflow: hidden;
 }
 
-/* Special styling for Full Articles */
+/* The "Gloss" Shine Overlay */
+.summary-box::before, .full-story-display::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg, 
+        rgba(255,255,255,0) 0%, 
+        rgba(255,255,255,0.1) 45%, 
+        rgba(255,255,255,0.5) 50%, 
+        rgba(255,255,255,0.1) 55%, 
+        rgba(255,255,255,0) 100%
+    );
+    transform: rotate(30deg);
+    pointer-events: none;
+}
+
+/* Full Article Side-Bar Styling */
 .full-story-display {
     border-top: none !important;
-    border-left: 20px solid var(--town-color, #333) !important;
-    border-radius: 0; /* Square edges look better for 100% wide full stories */
+    border-left: 25px solid var(--town-color, #333) !important;
+    border-radius: 4px;
 }
 
-/* --- Typography (Headlines) --- */
+/* Typography Scale */
 .summary-box h3, .full-story-display h1 {
-    font-size: 2.5rem; /* Scaled up for the 100% width look */
+    font-size: 3rem;
     text-align: center;
-    width: 100%;
+    color: #1a1a1a;
 }
 
 .story-body, .summary-box p {
-    font-size: 1.3rem;
-    max-width: 90%; /* Keeps text lines from getting too long to read */
-    margin: 20px auto; /* Centers the text block within the 100% wide card */
+    font-size: 1.4rem;
+    line-height: 1.8;
+    max-width: 85%;
+    margin: 25px auto;
 }
 
-/* --- Mobile Fixes --- */
+/* --- Tabs Styling --- */
+.nav-tabs { margin-top: 15px; display: flex; gap: 12px; }
+.tab-link {
+    background: #e0e0d0;
+    border: 2px solid #1a1a1a;
+    padding: 10px 25px;
+    cursor: pointer;
+    font-weight: bold;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+.tab-link.active { background: white; border-bottom-color: transparent; transform: translateY(2px); }
+
+/* --- Mobile Edge-to-Edge --- */
 @media (max-width: 768px) {
     .summary-box, .full-story-display {
-        padding: 20px;
-        border-radius: 0; /* Full edge-to-edge on mobile */
+        padding: 25px;
+        border-radius: 0;
+        border-left-width: 10px !important;
     }
-    
-    .summary-box h3, .full-story-display h1 {
-        font-size: 1.6rem;
-    }
+    .masthead-meta-bar { grid-template-columns: 1fr; text-align: center; gap: 10px; }
 }
