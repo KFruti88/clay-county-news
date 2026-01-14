@@ -2,7 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const summaryContainer = document.getElementById('town-summaries');
     const fullContainer = document.getElementById('full-news-feed');
     
-    const jsonUrl = "https://kfruti88.github.io/clay-county-news/news_data.json";
+    // Cache busting: adds a unique timestamp to the end of the URL to fetch fresh data
+    const jsonUrl = `https://kfruti88.github.io/clay-county-news/news_data.json?v=${new Date().getTime()}`;
     const hubUrl = "https://supportmylocalcommunity.com/local-news/";
 
     // THEME MAP: Branded colors for each town
@@ -15,21 +16,23 @@ document.addEventListener('DOMContentLoaded', () => {
         "Obituary": { bg: "#333333", text: "#ffffff" },
         "Fire Dept": { bg: "#ff4500", text: "#ffffff" },
         "Police/PD": { bg: "#00008b", text: "#ffffff" },
-        "Default": { bg: "#0c71c3", text: "#1a1a1a" } 
+        "Default": { bg: "#0c71c3", text: "#ffffff" } 
     };
 
-    // 1. DETECT THE TOWN FROM THE URL TO SET PAGE BACKGROUND
-    const path = window.location.href.toLowerCase();
+    // 1. DETECT TOWN: Uses pathname to identify specific town pages
+    const path = window.location.pathname.toLowerCase();
     let currentTown = "Default";
+
     if (path.includes('flora')) currentTown = "Flora";
     else if (path.includes('louisville')) currentTown = "Louisville";
     else if (path.includes('clay-city')) currentTown = "Clay City";
     else if (path.includes('xenia')) currentTown = "Xenia";
     else if (path.includes('sailor-springs')) currentTown = "Sailor Springs";
 
-    // APPLY THEME COLOR TO BODY BACKGROUND
+    // 2. APPLY THEME: Changes the page background based on detected town
     const pageTheme = townThemes[currentTown] || townThemes["Default"];
     document.body.style.backgroundColor = pageTheme.bg;
+    document.body.style.color = pageTheme.text;
 
     const isHubMode = !!fullContainer;
 
@@ -46,12 +49,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (isHubMode) {
-                // --- FULL ARTICLE HUB MODE ---
                 fullContainer.innerHTML = ''; 
                 filteredData.forEach(item => renderFullStory(item));
                 handleScroll(); 
             } else if (summaryContainer) {
-                // --- TOWN SUMMARY MODE ---
                 summaryContainer.innerHTML = ''; 
                 const townNews = filteredData.filter(item => 
                     currentTown === "Default" || item.tags.includes(currentTown) || item.tags.includes("Clay County")
@@ -68,12 +69,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const imgHTML = item.image ? `<img src="${item.image}" style="width:100%; border-radius:12px; margin-bottom:15px;">` : '';
         
         summaryContainer.innerHTML += `
-            <div class="summary-box" style="border-top: 12px solid ${itemTheme.bg};">
-                <h3 style="color: ${itemTheme.bg};">${item.title}</h3>
+            <div class="summary-box" style="border-top: 12px solid ${itemTheme.bg}; background-color: white; color: #1a1a1a; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="color: ${itemTheme.bg}; margin-top: 0;">${item.title}</h3>
                 <p style="font-size: 0.9rem; color: #555;">${item.date}</p>
                 ${imgHTML}
                 <p>${item.full_story.substring(0, 180)}...</p>
-                <a href="${hubUrl}?id=${item.id}" class="read-more-btn" style="background-color: ${itemTheme.bg}; color: white;">Read Full Story</a>
+                <a href="${hubUrl}?id=${item.id}" class="read-more-btn" style="background-color: ${itemTheme.bg}; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; display: inline-block;">Read Full Story</a>
             </div>`;
     }
 
@@ -84,7 +85,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const imgHTML = item.image ? `<img src="${item.image}" style="width:100%; border-radius:12px; margin-bottom:20px;">` : '';
 
         fullContainer.innerHTML += `
+            <article id="${item.id}" class="full-story-display" style="border-left: 20px solid ${itemTheme.bg}; background-color: white; color: #1a1a1a; padding: 30px; border-radius: 12px; margin-bottom: 30px;">
+                <h1 style="color: ${itemTheme.bg};">${item.title}</h1>
+                <p style="text-align: center; font-weight: bold; color: #666;">
+                    ${item.date} | ${item.tags.join(' | ')}
+                </p>
+                ${imgHTML}
+                <div class="story-body" style="white-space: pre-wrap;">${item.full_story}</div>
+            </article>`;
+    }
 
-        // This adds a unique number based on the current time to the end of the URL
-// Example: news_data.json?v=1715634000
-const jsonUrl = `https://kfruti88.github.io/clay-county-news/news_data.json?v=${new Date().getTime()}`;
+    function handleScroll() {
+        const params = new URLSearchParams(window.location.search);
+        const targetId = params.get('id');
+        if (targetId) {
+            let attempts = 0;
+            const scrollInterval = setInterval(() => {
+                const element = document.getElementById(targetId);
+                if (element) {
+                    clearInterval(scrollInterval);
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    element.style.boxShadow = "0 0 40px #ffff00"; 
+                    setTimeout(() => { element.style.boxShadow = "none"; }, 3000);
+                } else if (attempts++ > 60) clearInterval(scrollInterval);
+            }, 100);
+        }
+    }
+});
