@@ -4,43 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Local News Highlights</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://kfruti88.github.io/clay-county-news/style.css">
-    <style>
-        body { background: #f4f4f4; font-family: sans-serif; margin: 0; padding: 0; }
-        .summary-wrapper { width: 95%; max-width: 800px; margin: 20px auto; }
-        
-        /* Summary specific box styling */
-        .summary-box { 
-            background: white; 
-            padding: 20px; 
-            margin-bottom: 20px; 
-            border-radius: 10px; 
-            border-left: 10px solid var(--town-color, #0c0b82); 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
-        }
-        .read-more-btn { 
-            display: inline-block; 
-            margin-top: 10px; 
-            color: #0c0b82; 
-            font-weight: bold; 
-            text-decoration: none;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-        }
-    </style>
 </head>
 <body>
 
-<div class="summary-wrapper">
-    <div id="town-summaries">
-        <p style="text-align:center;">Syncing latest news summaries...</p>
+<div class="newspaper-header">
+    <div class="masthead-title">
+        <h1>Your Source for Local News</h1>
+    </div>
+    
+    <div class="masthead-meta-bar">
+        <div class="meta-item" id="current-date">January 13, 2026</div>
+        <div class="meta-item" id="atomic-chicago-time" style="text-align: center;">--:-- --</div>
+        <div class="meta-item" id="airport-weather" style="text-align: right;">
+            <span id="temp-val">--°F</span> 
+            <span id="condition-val">Syncing...</span>
+        </div>
+    </div>
+
+    <div class="nav-tabs">
+        <button class="tab-link active" onclick="switchView('news')">Local News</button>
+        <button class="tab-link" onclick="openWeatherTab()">Weather Details</button>
     </div>
 </div>
+
+<div id="town-summaries">
+    <p style="text-align:center;">Syncing latest news summaries...</p>
+</div>
+<div id="full-news-feed"></div>
 
 <script src="https://kfruti88.github.io/clay-county-news/news-engine.js"></script>
 <script>
     function rotateAds() { return; }
     window.gData = { config: "production" };
+    
+    // Switch between news and full view if needed
+    function switchView(view) {
+        if(view === 'news') {
+            document.getElementById('town-summaries').style.display = 'flex';
+            document.getElementById('full-news-feed').style.display = 'none';
+        }
+    }
 </script>
 
 </body>
