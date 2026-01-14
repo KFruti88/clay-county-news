@@ -5,14 +5,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // --- 2. INSTANT PLUGINS (Weather & Time) ---
     let trueTime = new Date();
-    updateNewspaperHeader(trueTime); // Immediate local draw to prevent "Syncing..." hang
+    updateNewspaperHeader(trueTime); // Immediate draw to prevent "Syncing..." hang
 
     try {
         const timeRes = await fetch('https://worldtimeapi.org/api/timezone/America/Chicago');
         const timeData = await timeRes.json();
         trueTime = new Date(timeData.datetime);
         updateNewspaperHeader(trueTime); // Re-sync to Atomic Chicago Time
-    } catch (e) { console.warn("Atomic sync failed"); }
+    } catch (e) { 
+        console.warn("Atomic sync failed - Calculating Central Time from system clock."); 
+    }
 
     // --- 3. THEME LOCK ---
     const townThemes = {
@@ -43,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // --- HARD RENDER LOCK ---
         if (summaryContainer) {
-            // RULE: Town Site = Summary Mode
+            // RULE: Town Site = Summary Mode Only
             summaryContainer.innerHTML = ''; 
             filteredData.forEach(item => {
                 const imgHTML = item.image ? `<img src="${item.image}" style="width:100%; border-radius:12px; margin-bottom:15px; object-fit: cover;">` : '';
@@ -57,7 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>`;
             });
         } else if (fullContainer) {
-            // RULE: Hub Site = Full Story Mode
+            // RULE: Hub Site = Full Story Mode Only
             fullContainer.innerHTML = ''; 
             filteredData.forEach(item => {
                 const imgHTML = item.image ? `<img src="${item.image}" style="width:100%; border-radius:12px; margin-bottom:20px; object-fit: cover;">` : '';
@@ -69,7 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div class="story-body" style="white-space: pre-wrap;">${formatMoney(item.full_story)}</div>
                     </article>`;
             });
-            // RULE: 500ms Scroll Lock
+            // RULE: Auto-Scroll with 500ms Render Safety
             setTimeout(() => { handleScroll(); }, 500);
         }
     });
@@ -94,8 +96,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         const tEl = document.getElementById('temp-val');
         const wEl = document.getElementById('condition-val');
 
-        if (dEl) dEl.innerText = t.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-        if (cEl) cEl.innerText = t.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        // LOCK: Permanent Central Time Enforcement
+        const centralOptions = { 
+            timeZone: 'America/Chicago', 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            hour12: true 
+        };
+
+        if (dEl) dEl.innerText = t.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'America/Chicago' });
+        if (cEl) cEl.innerText = t.toLocaleTimeString('en-US', centralOptions);
         
         try {
             const wRes = await fetch('https://api.open-meteo.com/v1/forecast?latitude=38.6672&longitude=-88.4523&current_weather=true');
