@@ -13,6 +13,19 @@
         "is_primary": false
     },
     {
+        "id": "scores",
+        "title": "SCORES",
+        "image": "https://www.wnoi.com/wp-content/uploads/2025/10/defaultimage.jpg",
+        "full_story": "1/16/26\nJR High Boys Basketball\n6th Grade: St. Elmo 20, North Clay 18\n5th: North Clay 24, St. Elmo 16\n8th Grade: Woodlawn 56, Cisne 34\n7th Grade: Cisne 45, Woodlawn 42\nJR High Girls Basketball\nFlora Regional\nFlora 35, Olney 32\nMt. Carmel 40, Carmi 19",
+        "read_more_link": "https://supportmylocalcommunity.com/local-news/#scores",
+        "link": "https://supportmylocalcommunity.com/local-news/#scores",
+        "tags": [
+            "Flora"
+        ],
+        "date": "2026-01-16",
+        "is_primary": true
+    },
+    {
         "id": "oslad-grant-awarded",
         "title": "OSLAD GRANT AWARDED",
         "image": "https://www.wnoi.com/wp-content/uploads/2026/01/Grants-Awarded-1-resized.webp",
