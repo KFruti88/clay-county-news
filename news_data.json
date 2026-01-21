@@ -105,6 +105,19 @@
         "is_primary": true
     },
     {
+        "id": "the-revue",
+        "title": "The ReVue",
+        "image": "https://www.wnoi.com/wp-content/uploads/2026/01/Dr.-Brittani-resized.webp",
+        "full_story": "Today on the ReVue I talk with Amy Allen and Dr. Brittani Hosselton about Brittany’s move to the Louisville Clinic. &#160; CCH Louisville Clinic.wav",
+        "read_more_link": "https://supportmylocalcommunity.com/local-news/#the-revue",
+        "link": "https://supportmylocalcommunity.com/local-news/#the-revue",
+        "tags": [
+            "Louisville"
+        ],
+        "date": "2026-01-21",
+        "is_primary": true
+    },
+    {
         "id": "flora-city-council-meeting",
         "title": "FLORA CITY COUNCIL MEETING",
         "image": "https://www.wnoi.com/wp-content/uploads/2026/01/Flora-1-resized.webp",
