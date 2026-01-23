@@ -94,6 +94,19 @@
         "is_primary": true
     },
     {
+        "id": "extreme-cold-weather-advisory-energy-cost-reminder",
+        "title": "Extreme Cold Weather Advisory & Energy Cost Reminder",
+        "image": "https://www.wnoi.com/wp-content/uploads/2026/01/thermostat-resized.webp",
+        "full_story": "Our region is experiencing extremely cold temperatures, and they are predicted to remain dangerously low until at least Monday.\nFor safety, avoid prolonged exposure to extreme cold and remember to check on elderly neighbors or those who may need assistance.\nWe also wanted to let our residents know that during this prolonged cold spell, natural gas bills are likely to be higher than normal. This is due to two factors:\nHigher natural gas market prices during extreme cold (rates are set by the daily gas market and not controlled by the City)\nIncreased gas usage as homes and businesses work harder to stay warm.\nThere are steps residents can take to help reduce energy use where it is safe to do so:\nLower your thermostat by even one degree — small adjustments can make a noticeable difference on your bill\nClose blinds and curtains at night to reduce heat loss\nSeal drafts around doors and windows\nAvoid using space heaters unsafely (plug them directly into the outlet & give them space)\nMake sure vents and registers are not blocked\nDress in warm layers indoors when possible",
+        "read_more_link": "https://supportmylocalcommunity.com/local-news/#extreme-cold-weather-advisory-energy-cost-reminder",
+        "link": "https://supportmylocalcommunity.com/local-news/#extreme-cold-weather-advisory-energy-cost-reminder",
+        "tags": [
+            "Clay County"
+        ],
+        "date": "2026-01-23",
+        "is_primary": true
+    },
+    {
         "id": "winter-storm-watch",
         "title": "WINTER STORM WATCH",
         "image": "https://www.wnoi.com/wp-content/uploads/2026/01/WSW1-resized.webp",
