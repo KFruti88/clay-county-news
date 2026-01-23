@@ -65,6 +65,19 @@
         "is_primary": true
     },
     {
+        "id": "winter-storm",
+        "title": "WINTER STORM",
+        "image": "https://www.wnoi.com/wp-content/uploads/2026/01/Winter-Warning-1-resized.webp",
+        "full_story": "The National Weather Service has issued a Winter Storm Warning for portions of south east Illinois.  Heavy snow expected with total snow accumulations of between 5 and 9 inches.\nThe developing winter storm will impact portions of southern Illinois this weekend.  John Baranick is an ag meteorologist with DTN.\ncut 1:20 ‘…..lock in.’\nAny threat of freezing rain should say well south of the Ohio River.",
+        "read_more_link": "https://supportmylocalcommunity.com/local-news/#winter-storm",
+        "link": "https://supportmylocalcommunity.com/local-news/#winter-storm",
+        "tags": [
+            "Clay County"
+        ],
+        "date": "2026-01-23",
+        "is_primary": true
+    },
+    {
         "id": "winter-storm-watch",
         "title": "WINTER STORM WATCH",
         "image": "https://www.wnoi.com/wp-content/uploads/2026/01/WSW1-resized.webp",
