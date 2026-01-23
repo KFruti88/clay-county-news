@@ -78,6 +78,22 @@
         "is_primary": true
     },
     {
+        "id": "clay-county-warming-centers",
+        "title": "CLAY COUNTY WARMING CENTERS",
+        "image": "https://www.wnoi.com/wp-content/uploads/2026/01/Warming-Centers-2-resized.webp",
+        "full_story": "These are the Warming Centers in Clay County according to ESDA.\nFlora – Clay County Hospital\nLouisville – Head Start Building\nClay City – Christian Church\nXenia – Xenia Fire House\nResidents who do not have adequate access to heat are advised to seek respite at a warming center.",
+        "read_more_link": "https://supportmylocalcommunity.com/local-news/#clay-county-warming-centers",
+        "link": "https://supportmylocalcommunity.com/local-news/#clay-county-warming-centers",
+        "tags": [
+            "Xenia",
+            "Louisville",
+            "Flora",
+            "Clay City"
+        ],
+        "date": "2026-01-23",
+        "is_primary": true
+    },
+    {
         "id": "winter-storm-watch",
         "title": "WINTER STORM WATCH",
         "image": "https://www.wnoi.com/wp-content/uploads/2026/01/WSW1-resized.webp",
