@@ -1,5 +1,44 @@
 [
     {
+        "id": "jefferson-county-arrest",
+        "title": "JEFFERSON COUNTY ARREST",
+        "image": "https://www.wnoi.com/wp-content/uploads/2026/02/Jasmine-Farny-resized.jpg",
+        "full_story": "A Dahlgren woman was arrested in connection with a deadly shooting in rural Jefferson County.\nThe Jefferson County Sheriff’s Office says 31-year-old Jasmine Farny was taken into custody Monday night in the murder investigation of 47-year-old James Cross.\nDeputies were called early Sunday morning to a parking lot near Belle Rive, where Cross was found dead.  Investigators say he had been shot multiple times.\nAuthorities say Farny and Cross knew each other and had a prior dating relationship.  Farny is being held in the Jefferson County Jail pending a pretrial detention hearing on a charge of first-degree murder.\nThe investigation remains ongoing, and no additional information has been released.",
+        "read_more_link": "https://supportmylocalcommunity.com/local-news/#jefferson-county-arrest",
+        "link": "https://supportmylocalcommunity.com/local-news/#jefferson-county-arrest",
+        "tags": [
+            "Police/PD"
+        ],
+        "date": "2026-02-04",
+        "is_primary": true
+    },
+    {
+        "id": "student-loan-forgiveness-tax",
+        "title": "STUDENT LOAN FORGIVENESS TAX",
+        "image": "https://www.wnoi.com/wp-content/uploads/2026/02/SLF-Tax-1-resized.jpg",
+        "full_story": "For the first time in five years, certain forms of student loan forgiveness will be taxable following a change in federal tax policy this year.\nThis comes after a provision of the American Rescue Plan Act expired on December 31\nst\n.  That measure, signed into law in 2021 by former President Joe Biden, temporarily excluded student loan debt from federal income taxes.\nAnd those tax implications could extend to Illinois state taxes as well unless lawmakers act.\nPresident Donald Trump’s “One Big Beautiful Bill Act,” enacted last summer, did not make the student loan tax forgiveness provision permanent.  As a result, student loans that are canceled or partially forgiven in 2026 and beyond will see taxes owed on those forgiven amounts, advocates said.  These taxes could amount to as much as $10,000, depending on the borrower’s income.\nThis includes income-driven repayment plan-related forgiveness; some closed school discharges; where 100% of a student loan obligation is wiped out if a school closes; and private settlements.\nIn addition to federal taxes, some borrowers will also face a similar tax hike at the state level.  Illinois is one of 20 states whose tax codes automatically conform to the federal change.  This means that unless Illinois legislators decouple the conforming provision before taxes are due next year, student loan forgiveness amounts will also be taxed by the state.\nLawmakers passed a bill in their fall veto session to decouple the state and federal tax code as it pertained to certain corporate taxes to head off a budget shortfall for the upcoming year.  But it did not address student borrowing.\nMeanwhile, some forms of loan forgiveness remain tax-free, such as public service loan forgiveness, teacher loan forgiveness, and death and disability discharge programs.",
+        "read_more_link": "https://supportmylocalcommunity.com/local-news/#student-loan-forgiveness-tax",
+        "link": "https://supportmylocalcommunity.com/local-news/#student-loan-forgiveness-tax",
+        "tags": [
+            "Clay County"
+        ],
+        "date": "2026-02-04",
+        "is_primary": true
+    },
+    {
+        "id": "sports-for-today",
+        "title": "SPORTS FOR TODAY",
+        "image": "https://www.wnoi.com/wp-content/uploads/2026/02/Sports-VB-7-resized.jpg",
+        "full_story": "The Cisne Lady Bullets Volleyball Team will be at Fairfield, matches begin at 6 pm.",
+        "read_more_link": "https://supportmylocalcommunity.com/local-news/#sports-for-today",
+        "link": "https://supportmylocalcommunity.com/local-news/#sports-for-today",
+        "tags": [
+            "Clay County"
+        ],
+        "date": "2026-02-04",
+        "is_primary": true
+    },
+    {
         "id": "flora-city-council-meets",
         "title": "FLORA CITY COUNCIL MEETS",
         "image": "https://www.wnoi.com/wp-content/uploads/2026/01/Flora-1-resized.webp",
