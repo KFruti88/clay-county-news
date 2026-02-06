@@ -79,6 +79,19 @@
         "is_primary": false
     },
     {
+        "id": "flora-boil-order",
+        "title": "Flora Boil Order",
+        "image": "https://www.wnoi.com/wp-content/uploads/2025/10/Boil-Order-resized.webp",
+        "full_story": "Due to a water main repair, the following City of Flora Water customers on the 100 and 200 block of East 9th St are under a boil order until further notice. 115, 121, 127, 203, 214, 207, 217, 226, 233, 234. The following customers along Locust North Street are 820, and 918",
+        "read_more_link": "https://supportmylocalcommunity.com/local-news/#flora-boil-order",
+        "link": "https://supportmylocalcommunity.com/local-news/#flora-boil-order",
+        "tags": [
+            "Flora"
+        ],
+        "date": "2026-02-06",
+        "is_primary": true
+    },
+    {
         "id": "cch-mammogram-tuesdays",
         "title": "CCH MAMMOGRAM TUESDAYS",
         "image": "https://www.wnoi.com/wp-content/uploads/2026/02/CCH-Mammograms-1.jpg-resized.jpg",
