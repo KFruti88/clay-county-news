@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- 4. DATA ENGINE (CLAY COUNTY ONLY) ---
     const jsonUrl = `https://kfruti88.github.io/clay-county-news/news_data.json?v=${trueTime.getTime()}`;
-    const hubUrl = "https://supportmylocalcommunity.com/local-news/";
+    const hubUrl = "https://www.supportmylocalcommunity.com/local-news.html";
 
     fetch(jsonUrl).then(res => res.json()).then(data => {
         const filteredData = data.filter(item => {
