@@ -78,6 +78,19 @@
         "is_primary": true
     },
     {
+        "id": "boil-order-lifted",
+        "title": "Boil Order Lifted",
+        "image": "https://www.wnoi.com/wp-content/uploads/2025/12/Boil-O-1-resized.webp",
+        "full_story": "The Boil Order issued for Flora residents in the 100 and 200 block of East 9th Street and customers on Locust North Street has been lifted. All water samples taken from the water system have passed all inspections.",
+        "read_more_link": "https://supportmylocalcommunity.com/local-news/#boil-order-lifted",
+        "link": "https://supportmylocalcommunity.com/local-news/#boil-order-lifted",
+        "tags": [
+            "Flora"
+        ],
+        "date": "2026-02-11",
+        "is_primary": true
+    },
+    {
         "id": "i57-accident",
         "title": "I57 ACCIDENT",
         "image": "https://www.wnoi.com/wp-content/uploads/2025/12/Accident-4-resized.webp",
