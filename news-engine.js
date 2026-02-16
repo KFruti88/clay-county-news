@@ -67,10 +67,10 @@ function injectModalSystem() {
     `;
     document.body.insertAdjacentHTML('beforeend', modalHtml);
 
-    window.onclick = function(event) {
+    window.addEventListener('click', function(event) {
         const modal = document.getElementById('newsModal');
         if (event.target == modal) closeNewsModal();
-    }
+    });
 }
 
 // --- BACK TO TOP SYSTEM ---

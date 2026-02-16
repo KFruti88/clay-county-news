@@ -11,7 +11,6 @@ import os
 NEWS_DATA_FILE = 'news_data.json'
 SOURCES_FILE = 'sources.json' 
 TOWNS = ["Flora", "Louisville", "Clay City", "Xenia", "Iola", "Sailor Springs"] 
-CLAY_COUNTY_LOCATIONS = ["clay county", "flora", "xenia", "sailor springs", "louisville", "clay city", "iola", "illinois", " il "]
 BLACKLIST = ["IAAF CONVENTION", "FAIR QUEEN", "BUS TOUR", "STATEWIDE", "ILLINOIS ASSOCIATION OF AGRICULTURAL FAIRS"]
 
 def create_slug(text):
@@ -24,7 +23,7 @@ def is_strictly_local(text):
     if any(bad_word in text_upper for bad_word in BLACKLIST):
         return False
     text_lower = text.lower()
-    for loc in ["flora", "xenia", "sailor springs", "louisville", "clay city", "clay county"]:
+    for loc in ["flora", "xenia", "sailor springs", "louisville", "clay city", "clay county", "iola"]:
         pattern = rf"\b{re.escape(loc)}\b"
         if re.search(pattern, text_lower):
             return True
