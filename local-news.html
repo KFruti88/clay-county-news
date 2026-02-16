@@ -19,7 +19,7 @@
             margin: 20px auto;
             height: auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
         }
         /* Card styling for JS injected content */
@@ -29,6 +29,12 @@
             border-radius: 0; /* Sharp corners */
             border: 1px solid #ddd;
             box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+        }
+        @media (max-width: 600px) {
+            #full-news-feed {
+                width: 96%;
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>

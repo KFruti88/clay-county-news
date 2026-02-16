@@ -136,8 +136,12 @@ html, body {
 
 /* --- Mobile Edge-to-Edge --- */
 @media (max-width: 768px) {
+    .newspaper-header, #town-summaries, #full-news-feed {
+        width: 96%;
+        padding: 10px;
+    }
     .summary-box, .full-story-display {
-        padding: 25px;
+        padding: 20px;
         border-radius: 0;
         border-left-width: 10px !important;
     }
