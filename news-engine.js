@@ -47,8 +47,8 @@ function injectModalSystem() {
         .news-modal-title { margin-top: 0; color: #111; font-size: 2.2rem; font-family: 'Playfair Display', serif; font-weight: 900; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
         .news-modal-date { color: #444; font-style: italic; margin-bottom: 20px; font-family: 'Playfair Display', serif; font-size: 1rem; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
         .news-modal-body { line-height: 1.8; font-size: 1.15rem; color: #222; white-space: pre-wrap; text-align: justify; }
-        .read-more-btn { background-color: #333; color: white; border: none; padding: 10px 15px; border-radius: 0; cursor: pointer; font-weight: bold; margin-top: 10px; width: 100%; font-family: 'Playfair Display', serif; text-transform: uppercase; letter-spacing: 1px; }
-        .read-more-btn:hover { background-color: #000; }
+        .read-more-btn { background: var(--town-gradient, #333); color: white; border: none; padding: 10px 15px; border-radius: 0; cursor: pointer; font-weight: bold; margin-top: 10px; width: 100%; font-family: 'Playfair Display', serif; text-transform: uppercase; letter-spacing: 1px; transition: transform 0.2s; }
+        .read-more-btn:hover { transform: translateY(-2px); opacity: 0.9; }
         @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @media (max-width: 600px) { .news-modal-content { width: 95%; margin: 10% auto; padding: 20px; } .news-modal-title { font-size: 1.5rem; } }
     `;
@@ -88,7 +88,7 @@ function injectBackToTop() {
             font-size: 16px;
             border: none;
             outline: none;
-            background-color: var(--town-color, #333);
+            background: var(--town-gradient, #333);
             color: white;
             cursor: pointer;
             padding: 12px 18px;
@@ -147,14 +147,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- 3. THEME LOCK ---
     const townThemes = {
-        "flora": "#0c0b82", "louisville": "#010101", "clay-city": "#0c30f0",
-        "xenia": "#000000", "iola": "#000000", "sailor-springs": "#000000", "default": "#0c71c3"
+        "flora": { solid: "#0c0b82", gradient: "linear-gradient(135deg, #fe4f00, #0c0b82)" },
+        "louisville": { solid: "#eb1c24", gradient: "linear-gradient(135deg, #eb1c24, #101010)" },
+        "clay-city": { solid: "#0258a3", gradient: "linear-gradient(135deg, #0258a3, #8e8e8e)" },
+        "xenia": { solid: "#000000", gradient: "linear-gradient(135deg, #000000, #ffd700)" },
+        "iola": { solid: "#000000", gradient: "linear-gradient(135deg, #000000, #333333)" },
+        "sailor-springs": { solid: "#000000", gradient: "linear-gradient(135deg, #000000, #800080)" },
+        "default": { solid: "#0c71c3", gradient: "linear-gradient(135deg, #e0e0e0, #0c71c3)" }
     };
     const currentURL = window.location.href.toLowerCase();
     let themeKey = "default";
     const slugs = ["flora", "louisville", "clay-city", "xenia", "iola", "sailor-springs"];
     slugs.forEach(slug => { if (currentURL.includes(slug)) themeKey = slug; });
-    document.documentElement.style.setProperty('--town-color', townThemes[themeKey]);
+    
+    const theme = townThemes[themeKey] || townThemes["default"];
+    document.documentElement.style.setProperty('--town-color', theme.solid);
+    document.documentElement.style.setProperty('--town-gradient', theme.gradient);
 
     // --- 4. DATA ENGINE (CLAY COUNTY ONLY) ---
     const jsonUrl = `news_data.json?v=${trueTime.getTime()}`;
