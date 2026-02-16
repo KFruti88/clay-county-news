@@ -73,8 +73,59 @@ function injectModalSystem() {
     }
 }
 
+// --- BACK TO TOP SYSTEM ---
+function injectBackToTop() {
+    if (document.getElementById('backToTopBtn')) return;
+
+    const style = document.createElement('style');
+    style.innerHTML = `
+        #backToTopBtn {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 999;
+            font-size: 16px;
+            border: none;
+            outline: none;
+            background-color: var(--town-color, #333);
+            color: white;
+            cursor: pointer;
+            padding: 12px 18px;
+            border-radius: 0; /* Sharp corners for newspaper look */
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+            font-family: 'Playfair Display', serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: transform 0.2s;
+        }
+        #backToTopBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 5px 5px 0 rgba(0,0,0,0.3);
+        }
+    `;
+    document.head.appendChild(style);
+
+    const btn = document.createElement('button');
+    btn.id = "backToTopBtn";
+    btn.innerHTML = "&#8679; TOP";
+    btn.onclick = function() {
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    };
+    document.body.appendChild(btn);
+
+    window.addEventListener('scroll', function() {
+        if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+            btn.style.display = "block";
+        } else {
+            btn.style.display = "none";
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     injectModalSystem(); // Initialize Modal
+    injectBackToTop();   // Initialize Back to Top
 
     // --- 1. HARLOCK SELECTION (HARD ENFORCEMENT) ---
     // Rule: Town sites must have id="town-summaries". Hub must have id="full-news-feed".
