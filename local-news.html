@@ -11,21 +11,7 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
-        }
-        header {
-            background-color: #333;
-            color: white;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .header-section {
-            display: flex;
-            gap: 15px;
-            font-weight: bold;
+            background-color: #f4f1ea; /* Paper color */
         }
         /* MANDATORY: Master container layout rules */
         #full-news-feed {
@@ -40,17 +26,18 @@
         .full-story-display {
             background: white;
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 0; /* Sharp corners */
+            border: 1px solid #ddd;
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
         }
     </style>
 </head>
 <body>
     <header>
+        <div class="masthead-title">The Clay County News</div>
         <div class="header-section">
             <span id="current-date">Loading Date...</span> | <span id="atomic-chicago-time">Loading Time...</span>
-        </div>
-        <div class="header-section" onclick="openWeatherTab()" style="cursor: pointer;">
+            | 
             <span id="temp-val">--°F</span> <span id="condition-val">Loading Weather...</span>
         </div>
     </header>
