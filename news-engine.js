@@ -50,6 +50,7 @@ function injectModalSystem() {
         .read-more-btn { background-color: #333; color: white; border: none; padding: 10px 15px; border-radius: 0; cursor: pointer; font-weight: bold; margin-top: 10px; width: 100%; font-family: 'Playfair Display', serif; text-transform: uppercase; letter-spacing: 1px; }
         .read-more-btn:hover { background-color: #000; }
         @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @media (max-width: 600px) { .news-modal-content { width: 95%; margin: 10% auto; padding: 20px; } .news-modal-title { font-size: 1.5rem; } }
     `;
     document.head.appendChild(style);
 
