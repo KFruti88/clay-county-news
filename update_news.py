@@ -10,8 +10,8 @@ import os
 # --- CONFIGURATION ---
 NEWS_DATA_FILE = 'news_data.json'
 SOURCES_FILE = 'sources.json' 
-TOWNS = ["Flora", "Louisville", "Clay City", "Xenia", "Sailor Springs"] 
-CLAY_COUNTY_LOCATIONS = ["clay county", "flora", "xenia", "sailor springs", "louisville", "clay city", "illinois", " il "]
+TOWNS = ["Flora", "Louisville", "Clay City", "Xenia", "Iola", "Sailor Springs"] 
+CLAY_COUNTY_LOCATIONS = ["clay county", "flora", "xenia", "sailor springs", "louisville", "clay city", "iola", "illinois", " il "]
 BLACKLIST = ["IAAF CONVENTION", "FAIR QUEEN", "BUS TOUR", "STATEWIDE", "ILLINOIS ASSOCIATION OF AGRICULTURAL FAIRS"]
 
 def create_slug(text):

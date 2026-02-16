@@ -20,11 +20,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- 3. THEME LOCK ---
     const townThemes = {
         "flora": "#0c0b82", "louisville": "#010101", "clay-city": "#0c30f0",
-        "xenia": "#000000", "sailor-springs": "#000000", "default": "#0c71c3"
+        "xenia": "#000000", "iola": "#000000", "sailor-springs": "#000000", "default": "#0c71c3"
     };
     const currentURL = window.location.href.toLowerCase();
     let themeKey = "default";
-    const slugs = ["flora", "louisville", "clay-city", "xenia", "sailor-springs"];
+    const slugs = ["flora", "louisville", "clay-city", "xenia", "iola", "sailor-springs"];
     slugs.forEach(slug => { if (currentURL.includes(slug)) themeKey = slug; });
     document.body.style.backgroundColor = townThemes[themeKey];
 
@@ -34,14 +34,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     fetch(jsonUrl).then(res => res.json()).then(data => {
         const filteredData = data.filter(item => {
-            const isForThisTown = item.tags.some(t => t.toLowerCase() === themeKey);
-            const isClayCounty = item.tags.some(t => t.toLowerCase() === "clay county");
-            const isPrimary = item.is_primary === true;
-            
+            // STRICT FILTER: Only allow specific Clay County towns
+            const clayKeywords = ["flora", "clay city", "xenia", "louisville", "iola", "clay county", "sailor springs"];
+            const textBlob = (item.title + " " + item.tags.join(" ") + " " + item.full_story).toLowerCase();
+            const hasClayContent = clayKeywords.some(k => textBlob.includes(k));
+
             // HARD BLOCK: Fairfield/Wayne County Filter
             const isNotWayne = !item.title.includes("Fairfield") && !item.title.includes("Wayne County") && !item.title.includes("Cisne");
 
-            return (isForThisTown || isClayCounty || isPrimary) && isNotWayne;
+            return hasClayContent && isNotWayne;
         });
 
         // --- HARD RENDER LOCK ---
