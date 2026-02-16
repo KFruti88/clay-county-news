@@ -39,16 +39,16 @@ function injectModalSystem() {
 
     const style = document.createElement('style');
     style.innerHTML = `
-        .news-modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(5px); }
-        .news-modal-content { background-color: #fefefe; margin: 5% auto; padding: 25px; border: 1px solid #888; width: 90%; max-width: 800px; border-radius: 12px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: slideDown 0.3s ease-out; }
-        .news-close-btn { color: #555; float: right; font-size: 32px; font-weight: bold; cursor: pointer; line-height: 0.8; }
-        .news-close-btn:hover { color: #000; }
-        .news-modal-img { width: 100%; max-height: 400px; object-fit: contain; border-radius: 8px; margin: 15px 0; display: block; background: #f0f0f0; }
-        .news-modal-title { margin-top: 0; color: #222; font-size: 1.8rem; }
-        .news-modal-date { color: #666; font-style: italic; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        .news-modal-body { line-height: 1.6; font-size: 1.1rem; color: #333; white-space: pre-wrap; }
-        .read-more-btn { background-color: #0c71c3; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; width: 100%; }
-        .read-more-btn:hover { background-color: #084c8d; }
+        .news-modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7); }
+        .news-modal-content { background-color: #fdfbf7; margin: 5% auto; padding: 40px; border: 1px solid #333; width: 90%; max-width: 800px; border-radius: 0; position: relative; box-shadow: 10px 10px 0px rgba(0,0,0,0.3); animation: slideDown 0.3s ease-out; font-family: 'Merriweather', serif; }
+        .news-close-btn { color: #000; float: right; font-size: 40px; font-weight: bold; cursor: pointer; line-height: 0.6; }
+        .news-close-btn:hover { color: #555; }
+        .news-modal-img { width: 100%; max-height: 400px; object-fit: contain; border: 1px solid #ccc; margin: 20px 0; display: block; background: #eee; filter: sepia(15%); }
+        .news-modal-title { margin-top: 0; color: #111; font-size: 2.2rem; font-family: 'Playfair Display', serif; font-weight: 900; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+        .news-modal-date { color: #444; font-style: italic; margin-bottom: 20px; font-family: 'Playfair Display', serif; font-size: 1rem; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+        .news-modal-body { line-height: 1.8; font-size: 1.15rem; color: #222; white-space: pre-wrap; text-align: justify; }
+        .read-more-btn { background-color: #333; color: white; border: none; padding: 10px 15px; border-radius: 0; cursor: pointer; font-weight: bold; margin-top: 10px; width: 100%; font-family: 'Playfair Display', serif; text-transform: uppercase; letter-spacing: 1px; }
+        .read-more-btn:hover { background-color: #000; }
         @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     `;
     document.head.appendChild(style);
@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let themeKey = "default";
     const slugs = ["flora", "louisville", "clay-city", "xenia", "iola", "sailor-springs"];
     slugs.forEach(slug => { if (currentURL.includes(slug)) themeKey = slug; });
-    document.body.style.backgroundColor = townThemes[themeKey];
+    document.documentElement.style.setProperty('--town-color', townThemes[themeKey]);
 
     // --- 4. DATA ENGINE (CLAY COUNTY ONLY) ---
     const jsonUrl = `news_data.json?v=${trueTime.getTime()}`;
