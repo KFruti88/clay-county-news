@@ -68,8 +68,11 @@ async def process_news():
         except: existing_news = []
 
     new_articles_count = 0
-    with open(SOURCES_FILE, 'r') as f:
-        all_sources = json.load(f)
+    if os.path.exists(SOURCES_FILE):
+        with open(SOURCES_FILE, 'r') as f:
+            all_sources = json.load(f)
+    else:
+        all_sources = []
 
     # Priority: WNOI first
     primary_sources = [s for s in all_sources if "wnoi" in s['url'].lower()]
