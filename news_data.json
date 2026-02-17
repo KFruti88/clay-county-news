@@ -81,6 +81,19 @@
         "is_primary": true
     },
     {
+        "id": "boil-order",
+        "title": "BOIL ORDER",
+        "image": "https://www.wnoi.com/wp-content/uploads/2025/11/Boil-O-1-resized.webp",
+        "full_story": "A boil order has been issued for residents in the village of Clay City for those on South 1st SE starting at the ballpark and heading east, South Clark Avenue and South 4th Avenue SE, Blackberry Drive, Morning Glory Road, Big Four Road, Bluebell Road, Saddle Club Road, Vincennes Road SE and SW, South Main south of Highway 50, Tower Road, Teaberry Lane, Angling Road, Mead Street SW and Park Avenue SE and SW. People in these areas should boil any water to be used for human consumption. The boil order will remain in effect until further notice.",
+        "read_more_link": "https://supportmylocalcommunity.com/local-news/#boil-order",
+        "link": "https://supportmylocalcommunity.com/local-news/#boil-order",
+        "tags": [
+            "Clay City"
+        ],
+        "date": "2026-02-17",
+        "is_primary": true
+    },
+    {
         "id": "flora-woman-sentenced",
         "title": "FLORA WOMAN SENTENCED",
         "image": "https://www.wnoi.com/wp-content/uploads/2026/02/Sentencing-4-resized.jpg",
